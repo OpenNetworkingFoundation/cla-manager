@@ -1,8 +1,9 @@
 import React from 'react';
-import * as firebase from 'firebase';
+//import * as firebase from 'firebase';
 import Main from './Main';
 import Header from './Header';
 
+const firebase = window.firebase;
 
 /**
  * Top-level controller for this CLA Manager application.
