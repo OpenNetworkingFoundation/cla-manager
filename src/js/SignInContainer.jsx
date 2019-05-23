@@ -25,7 +25,7 @@ class SignInContainer extends React.Component {
             placeholder="Email"
           />
           &nbsp;&nbsp;&nbsp;
-          <Button variant="contained" id="sign-in" name="signin">Sign In</Button>
+          <Input type="submit" id="sign-in" name="signin">Sign In</Input>
         </form>
       </div>
     );

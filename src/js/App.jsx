@@ -169,7 +169,7 @@ class App extends React.Component {
     this.handleSignInLink();
 
     // Listening for auth state changes.
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged((user) => {
       console.log("statechange", user)
       if (user) {
         // User is signed in.
