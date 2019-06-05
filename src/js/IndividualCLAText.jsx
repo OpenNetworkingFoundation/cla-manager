@@ -1,6 +1,4 @@
 import React from 'react';
-import Main from './Main';
-import Header from './Header';
 
 /**
  * Component which displays an individual CLA.
@@ -8,9 +6,11 @@ import Header from './Header';
 class IndividualCLA extends React.Component {
   
   render() {
+
+    const userEmail = this.props.user && this.props.user.email;
     return (
-      <p style="text-align: center;"><b>Open Networking Foundation</b><br>
-        <b>Open Networking Individual Contributor License Agreement ("Agreement")</b></p>
+      <div>
+      <p style={{textAlign: 'center'}}><b>Open Networking Foundation</b><br></br><b>Open Networking Individual Contributor License Agreement ("Agreement")</b></p>
       <p>Thank you for your interest in the Open Networking Project being conducted by Open Networking Foundation (“<b><i>ONF</i></b>”). &nbsp;The “<b><i>Project</i></b>” consists of activities relating to the Open Network Operating System (“<b><i>ONOS</i></b>”), the Central Office Re-architected as a Datacenter (“<b><i>CORD</i></b>”), and other initiatives undertaken by ON.Lab and ONF which are synergistic with ONOS or CORD.&nbsp; The Project was previously conducted by Open Networking Laboratory (“<b><i>ON.Lab</i></b>”).</p>
       <p>In order to clarify the intellectual property license granted with Contributions from any person or entity to the Project, ONF must have a Contributor License Agreement (“<b><i>CLA”</i></b>) on file that has been signed by each Contributor, indicating agreement to the license terms below. This license is for your protection as a Contributor as well as the protection of ONF and its users; it does not change your rights to use your own Contributions for any other purpose.</p>
       <p>You accept and agree to the following terms and conditions for Your past Contributions submitted to ON.Lab and present and future Contributions submitted to ONF for the Project. Except for the license granted herein to ONF and recipients of software distributed by ONF, You reserve all right, title, and interest in and to Your Contributions.
@@ -25,24 +25,25 @@ class IndividualCLA extends React.Component {
       <p>6. <b>Support; Warranty Disclaimer.&nbsp; </b>You are not expected to provide support for Your Contributions, except to the extent You desire to provide support. You may provide support for free, for a fee, or not at all. Unless required by applicable law or agreed to in writing, You provide Your Contributions on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE.</p>
       <p>7. <b>Contributions That Are Not Your Original Creation.&nbsp; </b>Should You wish to submit work that is not Your original creation, You may submit it to ONF separately from any Contribution, identifying the complete details of its source and of any license or other restriction (including, but not limited to, related patents, trademarks, and license agreements) of which you are personally aware, and conspicuously marking the work as "Submitted on behalf of a third-party: [named here]".</p>
       <p>8. <b>Required Notifications. </b>You agree to notify ONF of any facts or circumstances of which you become aware that would make these representations inaccurate in any respect.</p>
-      <!-- End Individual CLA -->
-                  </div>
-                  <!-- TODO consider more interesting text fields: https://material-ui.com/demos/text-fields/ -->
-                  <div class="mdl-card__supporting-text">
-                    <form onsubmit="return false">
-                      <!-- TODO input validation -->
-                      <input class="mdl-textfield__input" type="text" id="individual-name" name="name" placeholder="Name"/>
-                      <p>Email: <span id="display-email"/></p>
-                      <button class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised"
-                              id="individual-cla-accept" name="accept">I AGREE</button>
-                    </form>
-                  </div>
-                </div>
+     
+      <div class="mdl-card__supporting-text">
+        <form onsubmit="return false">
+          <input class="mdl-textfield__input" type="text" id="individual-name" name="name" placeholder="Name"/>
+          <p>Email: <span id="display-email">{userEmail}</span></p>
+          <button 
+            className="mdl-button mdl-js-button mdl-button--colored mdl-button--raised"
+            id="individual-cla-accept"
+            name="accept"
+          >
+            I AGREE
+          </button>
+        </form>
+      </div>
       
-                <div id="institutional-cla">
-                  <div class="mdl-card__supporting-text">
-      <!-- Institutional CLA -->
-      <p style="text-align: center;"><b>Open Networking Foundation</b><br>
+      <div id="institutional-cla">
+      
+      <p style={{textAlign: 'center'}}><b>Open Networking Foundation</b>
+      <br/>
         <b>Institutional Contributor License Agreement ("Agreement")</b></p>
       
       <p>Thank you for your interest in the Open
@@ -145,9 +146,11 @@ class IndividualCLA extends React.Component {
         software projects established, owned, or managed by ONF, this Agreement shall
         supersede and replace all such prior agreements.</p>
       <p><b><u>Schedule A</u></b></p>
-      <p>&nbsp;&nbsp; <span style="background:yellow">[Initial list of
+      <p>&nbsp;&nbsp; <span style={{background:'yellow'}}>[Initial list of
       designated employees. NB: authorization is not tied to particular
       Contributions.]</span></p>
+      </div>
+      </div>
     );
   }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
-import Main from './Main';
-import Header from './Header';
+import PropTypes from 'prop-types';
+import IndividualCLAText from './IndividualCLAText';
+import InstitutionCLAForm from './InstitutionCLAForm';
 
 /**
  * Layout component for displaying a CLA plus an input form to sign the CLA.
@@ -11,8 +12,7 @@ class CLADisplayWidget extends React.Component {
     return (
       <div id="individual-cla">
         <div class="mdl-card__supporting-text">
-          <IndividualCLAText />
-          <!-- TODO add support for domain wildcard and blacklist -->
+          <IndividualCLAText user={this.props.user} />
           <div class="mdl-textfield mdl-js-textfield">
             <textarea class="mdl-textfield__input" type="text" rows= "3" id="institutional-whitelist" ></textarea>
             <label class="mdl-textfield__label" for="institutional-whitelist">Authorized contributor emails (one per line)...</label>

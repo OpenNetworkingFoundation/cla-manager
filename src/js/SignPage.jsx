@@ -1,8 +1,20 @@
 import React from 'react';
-import Main from './Main';
+import Card from '@material-ui/core/Card';
 import Header from './Header';
+import CLADisplayWidget from './CLADisplayWidget';
+
 
 const firebase = window.firebase;
+
+/**
+ * Handles Errors from various Promises.
+ */
+function handleError(error) {
+  // Display Error.
+  alert('Error: ' + error.message);
+  console.log(error);
+}
+
 
 /**
  * Top-level controller for the page to sign a CLA. 
@@ -12,42 +24,13 @@ class SignPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null,
-      loginAttemptInProgress: false,
-      individualCLATable: [],
-      institutionCLATable: [],
+      user: null
     };
 
-    this.signIn = this.handleSignIn.bind(this);
     this.signOut = this.handleSignOut.bind(this);
+    this.handleCLASignature = this.handleCLASignature.bind(this);
   }
 
-
-  /**
-   * Handles the sign in button press.
-   */
-  handleSignIn(email) {
-    // Disable the sign-in button during async sign-in tasks.
-    this.setState({ loginAttemptInProgress: true });
-
-    // Sending email with sign-in link.
-    var actionCodeSettings = {
-      'url': window.location.href,
-      'handleCodeInApp': true
-     };
-    firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings).then(() => {
-      // Save the email locally so you don’t need to ask the user for it again if they open
-      // the link on the same device.
-      window.localStorage.setItem('emailForSignIn', email);
-      // The link was successfully sent. Inform the user.
-      alert('An email was sent to ' + email + '. Please use the link in the email to sign-in.');
-      // Re-enable the sign-in button.
-      this.setState({ loginAttemptInProgress: false });
-    }).catch((error) => {
-      // Handle Errors here.
-      this.handleAuthError(error);
-    });
-  }
 
   /**
    * Handles the sign out button press.
@@ -106,63 +89,93 @@ class SignPage extends React.Component {
     }
   }
 
-  /**
-   * Update the page to show all CLAs associated to the inputted email.
-   */
-  loadClas(email) {
-    if (!email) {
-      // Clear all rows from the CLA tables.
-      this.setState({
-        individualCLATable: [],
-        institutionCLATable: []
-      });
-      return;
+  signIndividualCLA() {
+    let email = firebase.auth().currentUser.email;
+    let name = document.getElementById('individual-name').value;
+    console.log("individual", name, email)
+
+    if(!email || !name) {
+        alert("invalid email or name");
+        return;
     }
 
-    firebase.firestore().collection('clas')
-      .where('whitelist', 'array-contains', email)
-      .onSnapshot(this.renderClaTables.bind(this));
+    firebase.firestore().collection('clas').add({
+      signer: email,
+      signerDetails: { name, email },
+      whitelist: [ email ],
+      type: "individual",
+      dateSigned: new Date()
+    }).then(ref => {
+      console.log('Added document with ID: ', ref.id);
+      window.location.href = "/";
+    }).catch(function(error) {
+      handleError(error);
+    });
   }
 
-  /**
-   * Renders the CLAs in the appropriate tables.
-   */
-  renderClaTables(snapshot) {
+  signInstitutionalCLA() {
+    let email = firebase.auth().currentUser.email
+    let name = document.getElementById('signer-name').value
+    if(!email || !name) {
+        alert("invalid email or name");
+        return;
+    }
 
-      if (snapshot || snapshot.size) {
-          const options = { year: 'numeric', month: 'short', day: 'numeric',
-                            hour: 'numeric', minute: 'numeric', hour12: false, timeZoneName: 'short' };
-          const individualCLATable = [];
-          const institutionCLATable = [];
+    const signerDetails = {
+        name,
+        email,
+        title: document.getElementById('signer-title').value
+    }
+    const institution = {
+        name: document.getElementById('institution-name').value,
+        address: document.getElementById('institution-address').value
+    }
+    const adminDetails = [
+        {
+            name: document.getElementById('primary-name').value,
+            email: document.getElementById('primary-email').value.toLowerCase(),
+            phone: document.getElementById('primary-phone').value
+        },
+        {
+            name: document.getElementById('secondary-name').value,
+            email: document.getElementById('secondary-email').value.toLowerCase(),
+            phone: document.getElementById('secondary-phone').value
+        }
+    ]
 
-          snapshot.forEach(cla => {
-              console.log(cla.data())
-              const type = cla.data().type || 'individual';
-              const date = cla.data().dateSigned.toDate() || new Date();
+    const whitelist = document.getElementById('institutional-whitelist').value
+                              .toLowerCase()
+                              .split(/[\n,; ]+/)
+    console.log('whitelist', whitelist)
 
-              let name = cla.data().signer;
-              const displayDate = date.toLocaleDateString('default', options);
-              const link = `link ${cla.id}`;
-
-              if (type === 'individual') {
-                  if (cla.data().signerDetails && cla.data().signerDetails.name) {
-                      name = cla.data().signerDetails.name;
-                  }
-                  individualCLATable.push([name, displayDate, link]);
-              } else if (type === 'institutional') {
-                  institutionCLATable.push(['foo', displayDate, link]);
-              } else {
-                  console.log('unknown cla type: ', cla.data())
-                  return
-              }
-          });
-          this.setState({
-              individualCLATable,
-              institutionCLATable
-          });
-      }
+    firebase.firestore().collection('clas').add({
+      signer: signerDetails.email,
+      signerDetails,
+      institution,
+      admins: adminDetails.map(a => a.email),
+      adminDetails,
+      whitelist,
+      //blacklist FIXME
+      //domain FIXME
+      type: "institutional",
+      dateSigned: new Date()
+    }).then(ref => {
+      console.log('Added document with ID: ', ref.id);
+      //window.location.href = "/";
+    }).catch(function(error) {
+      handleError(error);
+    });
   }
 
+  handleCLASignature() {
+    const claType = new URLSearchParams(window.location.search).get('kind');
+    if (claType === 'institutional') {
+      this.signInstitutionalCLA();
+    }
+    else {
+      this.signIndividualCLA();
+    }
+  }
 
   componentDidMount() {
     this.handleSignInLink();
@@ -170,13 +183,7 @@ class SignPage extends React.Component {
     // Listening for auth state changes.
     firebase.auth().onAuthStateChanged((user) => {
       console.log("statechange", user)
-      if (user) {
-        // User is signed in.
-        this.loadClas(user.email);
-      } else {
-        // User is signed out.
-        this.loadClas(null);
-      }
+      this.setState({user});
     });
   }
 
@@ -191,7 +198,6 @@ class SignPage extends React.Component {
     <main class="mdl-layout__content mdl-color--grey-100">
       <div class="page-content mdl-grid">
 
-        <!-- Container for the demo -->
         <Card> 
           <div class="mdl-card__title mdl-color--light-blue-600 mdl-color-text--white">
             <h2 class="mdl-card__title-text">Contributor License Agreement</h2>
@@ -211,4 +217,4 @@ class SignPage extends React.Component {
   }
 }
 
-export default App;
+export default SignPage;
