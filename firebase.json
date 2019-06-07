@@ -8,30 +8,16 @@
       "npm --prefix \"$RESOURCE_DIR\" run lint"
     ]
   },
-  "hosting": [
-    {
-      "public": "build",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [ {
-        "source": "!/@(js|css)/**",
-        "destination": "/login.html"
-      } ]
-    },
-    {
-      "public": "build",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [ {
-        "source": "!/@(js|css)/**",
-        "destination": "/sign.html"
-      } ]
-    }
-  ]
+  "hosting": {
+    "public": "build",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [ {
+      "source": "!/@(js|css)/**",
+      "destination": "/login.html"
+    } ]
+  }
 }
