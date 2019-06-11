@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 
 /**
@@ -16,7 +17,7 @@ class SignInContainer extends React.Component {
           This will automatically create an account for you if you do not have one already.
           The email that you enter should match your Git email.
         </p>
-        <form onSubmit={(e) => this.props.onSignIn(e.target.querySelector('input').value)}>
+        <form ref={(n) => this.form = n} onSubmit={(e) => this.props.onSignIn(this.form.querySelector('input').value)}>
           <Input 
             style={{ display: 'inline', width: '70%' }} 
             type="text" id="email"
@@ -24,7 +25,13 @@ class SignInContainer extends React.Component {
             placeholder="Email"
           />
           &nbsp;&nbsp;&nbsp;
-          <Input type="submit" id="sign-in" name="signin">Sign In</Input>
+          <Button 
+            onClick={(e) => {
+              this.props.onSignIn(this.form.querySelector('input').value);
+            }}
+          >
+            {'Sign In'}
+          </Button>
         </form>
       </div>
     );
