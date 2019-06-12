@@ -3,7 +3,10 @@ import ReactDOM from 'react-dom';
 import SignPage from './js/SignPage';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<SignPage />, document.getElementById('root'));
+// todo: add auth
+const type = new URL(window.location.href).searchParams.get('type') || 'individual';
+
+ReactDOM.render(<SignPage type={type} />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -9,27 +9,25 @@ import InstitutionCLAForm from './InstitutionCLAForm';
  */
 class CLADisplayWidget extends React.Component {
   render() {
+
+    let cla;
+    if (this.props.type === 'individual') {
+      cla = <IndividualCLAText user={this.props.user} />;
+    }
+    else if (this.props.type === 'institution') {
+      cla = <InstitutionCLAForm user={this.props.user} onSubmit={this.props.onSubmit}/>;
+    }
+
     return (
-      <div id="individual-cla">
-        <div class="mdl-card__supporting-text">
-          <IndividualCLAText user={this.props.user} />
-          <div class="mdl-textfield mdl-js-textfield">
-            <textarea class="mdl-textfield__input" type="text" rows= "3" id="institutional-whitelist" ></textarea>
-            <label class="mdl-textfield__label" for="institutional-whitelist">Authorized contributor emails (one per line)...</label>
-          </div>
-
-        </div>
-
-        <InstitutionCLAForm
-          user={this.props.user}
-          onSubmit={this.props.onSubmit}
-        />
+      <div id="cla-widget">
+        {cla}
       </div>
     );
   }
 }
 
 CLADisplayWidget.propTypes = {
+  type: PropTypes.string.isRequired,
   user: PropTypes.object,
   onSubmit: PropTypes.func.isRequired
 };

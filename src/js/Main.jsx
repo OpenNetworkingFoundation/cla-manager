@@ -2,7 +2,6 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import AgreementsContainer from './AgreementsContainer';
 import NewAgreementContainer from './NewAgreementContainer';
-import SignInContainer from './SignInContainer';
 
 /**
  * Layout component for the page's main content.
@@ -10,7 +9,6 @@ import SignInContainer from './SignInContainer';
 class Main extends React.Component {
   render() {
 
-    let signInContainer;
     let newAgreementContainer;
 
     // Show a prompt to sign a new agreement if and only if we have a logged in user.

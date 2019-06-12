@@ -48,8 +48,6 @@ class SignPage extends React.Component {
     // Display Error.
     alert('Error: ' + error.message);
     console.log(error);
-    // Re-enable the sign-in button.
-    this.setState({ loginAttemptInProgress: false });
   }
 
 
@@ -204,6 +202,7 @@ class SignPage extends React.Component {
           </div>
 
           <CLADisplayWidget
+            type={this.props.type}
             user={this.state.user}
             onSubmit={this.handleCLASignature}
           />
