@@ -13,15 +13,8 @@ class Main extends React.Component {
     let signInContainer;
     let newAgreementContainer;
 
-    // Show a sign in prompt if and only if we don't have a logged in user.
-    if (!this.props.user) {
-      signInContainer = (
-        <SignInContainer onSignIn={this.props.onSignIn} />
-      );
-    }
-
     // Show a prompt to sign a new agreement if and only if we have a logged in user.
-    else {
+    if (this.props.user) {
       newAgreementContainer = (
         <NewAgreementContainer />
       );
@@ -31,7 +24,6 @@ class Main extends React.Component {
       <main className="mdl-layout__content mdl-color--grey-100">
         <Grid container>
           <Grid item>
-            {signInContainer}
             <AgreementsContainer
               header="Individual Agreements"
               description="Individual agreements we have on file for you:"
