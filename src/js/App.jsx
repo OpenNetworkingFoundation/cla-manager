@@ -95,6 +95,8 @@ class App extends React.Component {
               individualCLATable,
               institutionCLATable
           });
+      } else {
+          console.log("no clas :(")
       }
   }
 
@@ -110,6 +112,7 @@ class App extends React.Component {
           user={this.props.user}
           onSignOut={this.signOut}
         />
+        hello world
         <Main
           user={this.props.user}
           onSignIn={() => {}}

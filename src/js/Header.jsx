@@ -1,40 +1,42 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import SignOutContainer from './SignOutContainer';
+import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
 
 /**
  * Renders the standard header for pages within the CLA Manager application.
  */
-class Header extends React.Component {
-  render() {
-    const { user } = this.props;
 
-    let signOutContainer;
+const useStyles = makeStyles({
+  root: {
+    flexGrow: 1,
+  },
+  title: {
+    flexGrow: 1,
+  },
+});
 
-    // Only show a sign-out container if there is a currently logged in user.
-    if (user) {
-      signOutContainer = (
-        <SignOutContainer
-          user={this.props.user}
-          onSignOut={this.props.onSignOut}
-        />
-      );
-    }
+export default function Header(props) {
+  const classes = useStyles();
+  const user = props.user;
 
-    return (
-      <header className="mdl-layout__header">
-        <div className="mdl-layout__header-row">
-          <span className="mdl-layout-title">CLA Manager</span>
-          <div className="mdl-layout-spacer"></div>
-          {signOutContainer}
-        </div>
-      </header>
-    );
-  }
+  return (
+    <div className={classes.root}>
+      <AppBar position="static" /*color="default"*/>
+        <Toolbar>
+          <Typography variant="h6" className={classes.title}>
+            CLAM (Your friendly CLA Manager)
+          </Typography>
+          {user && (
+              <SignOutContainer
+                user={user}
+                onSignOut={props.onSignOut}
+              />
+          )}
+        </Toolbar>
+      </AppBar>
+    </div>
+  );
 }
-
-Header.propTypes = {
-  user: PropTypes.object
-};
-
-export default Header;

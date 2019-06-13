@@ -9,10 +9,9 @@ class SignOutContainer extends React.Component {
   render() {
     const { user } = this.props;
 
-    // todo: perhaps the outer container should be a <Card/>?
     return (
-      <div id="sign-out-container">
-        Logged in as <span id="display-email">{user.email}</span>
+      <div>
+        Logged in as {user.email}
         <Button
           id="sign-out"
           name="signout"
