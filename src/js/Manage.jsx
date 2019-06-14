@@ -34,7 +34,7 @@ class Manage extends React.Component {
       return;
     }
 
-    firebase.firestore().collection('clas')
+    this.claUnsubscribe = firebase.firestore().collection('clas')
       .where('whitelist', 'array-contains', email)
       .onSnapshot(this.renderClaTables.bind(this));
   }
@@ -83,6 +83,13 @@ class Manage extends React.Component {
 
   componentDidMount() {
     this.loadClas();
+  }
+
+  componentWillUnmount() {
+    if (this.claUnsubscribe) {
+      this.claUnsubscribe();
+      this.claUnsubscribe = null;
+    }
   }
 
   render() {
