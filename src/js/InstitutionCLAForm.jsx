@@ -1,6 +1,8 @@
 import React from 'react';
-import Main from './Main';
-import Header from './Header';
+import Card from '@material-ui/core/Card';
+import Input from '@material-ui/core/Input';
+import PropTypes from 'prop-types';
+
 
 /**
  * Form for signing a CLA on behalf of an institution.

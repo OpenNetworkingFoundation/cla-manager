@@ -1,15 +1,47 @@
 import React from 'react';
-import Main from './Main';
-import Header from './Header';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+
+
+const firebase = window.firebase;
 
 /**
  * Component which displays an individual CLA.
  */
 class IndividualCLA extends React.Component {
+
+    signIndividualCla(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const email = firebase.auth().currentUser.email
+        let name = document.getElementById('individual-name').value
+        console.log("individual", name, email)
+
+        if(!email || !name) {
+            alert("invalid email or name");
+            return;
+        }
+
+        firebase.firestore().collection('clas').add({
+            signer: email,
+            signerDetails: { name, email },
+            whitelist: [ email ],
+            type: "individual",
+            dateSigned: new Date()
+        }).then(ref => {
+            console.log('Added document with ID: ', ref.id);
+            window.location.href = "/";
+        }).catch(function(error) {
+            console.log(error);
+        });
+  }
   
   render() {
+    let userEmail = firebase.auth().currentUser.email;
     return (
-      <p style="text-align: center;"><b>Open Networking Foundation</b><br>
+      <div>
+      <p style={{textAlign: "center"}}><b>Open Networking Foundation</b><br />
         <b>Open Networking Individual Contributor License Agreement ("Agreement")</b></p>
       <p>Thank you for your interest in the Open Networking Project being conducted by Open Networking Foundation (“<b><i>ONF</i></b>”). &nbsp;The “<b><i>Project</i></b>” consists of activities relating to the Open Network Operating System (“<b><i>ONOS</i></b>”), the Central Office Re-architected as a Datacenter (“<b><i>CORD</i></b>”), and other initiatives undertaken by ON.Lab and ONF which are synergistic with ONOS or CORD.&nbsp; The Project was previously conducted by Open Networking Laboratory (“<b><i>ON.Lab</i></b>”).</p>
       <p>In order to clarify the intellectual property license granted with Contributions from any person or entity to the Project, ONF must have a Contributor License Agreement (“<b><i>CLA”</i></b>) on file that has been signed by each Contributor, indicating agreement to the license terms below. This license is for your protection as a Contributor as well as the protection of ONF and its users; it does not change your rights to use your own Contributions for any other purpose.</p>
@@ -27,19 +59,24 @@ class IndividualCLA extends React.Component {
       <p>8. <b>Required Notifications. </b>You agree to notify ONF of any facts or circumstances of which you become aware that would make these representations inaccurate in any respect.</p>
      
       <div class="mdl-card__supporting-text">
-        <form onsubmit="return false">
-          <input class="mdl-textfield__input" type="text" id="individual-name" name="name" placeholder="Name"/>
+        <form onSubmit={this.signIndividualCla}>
+          <TextField
+            id="individual-name"
+            label="Full Name"
+            // onChange={handleChange('name')}
+            margin="normal"
+            variant="outlined"
+          />
           <p>Email: <span id="display-email">{userEmail}</span></p>
-          <button 
-            className="mdl-button mdl-js-button mdl-button--colored mdl-button--raised"
-            id="individual-cla-accept"
-            name="accept"
+          <Button 
+            variant="contained"
+            color="primary"
+            onClick={this.signIndividualCla}
           >
             I AGREE
-          </button>
+          </Button>
         </form>
       </div>
-      
       </div>
     );
   }

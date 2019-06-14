@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './js/App';
+import App from './js/Manage';
+import AppRouter from './js/AppRouter';
 import SignIn from './js/SignIn';
 //import * as serviceWorker from './serviceWorker';
 
@@ -47,7 +48,7 @@ let user = firebase.auth().currentUser;
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     // User is signed in.
-    ReactDOM.render(<App user={user} />, document.getElementById('root'));
+    ReactDOM.render(<AppRouter user={user} />, document.getElementById('root'));
   } 
   else {
     // No user is signed in.

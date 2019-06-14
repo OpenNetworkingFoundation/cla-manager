@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 import Button from '@material-ui/core/Button';
 
 function signNewAgreement(type) {
@@ -18,25 +19,21 @@ class NewAgreementContainer extends React.Component {
         <h4>Sign a new agreement</h4>
         <p>Who will you be submitting contributions on behalf of?</p>
         <div class="mdl-grid">
-          <form method="get" action="/sign.html">
-            <input type="hidden" name="kind" value="individual"/>
+          <Link to="/sign/individual">
             <Button
-              onClick={() => signNewAgreement('individual')}
               variant="contained"
             >
-                {'Only Yourself'}
+              Only Yourself
             </Button>
-          </form>
+          </Link>
           &nbsp;&nbsp;
-          <form method="get" action="/sign.html">
-            <input type="hidden" name="kind" value="institutional"/>
+          <Link to="/sign/institution">
             <Button
-              onClick={() => signNewAgreement('institution')}
               variant="contained"
             >
-                {'Your employer'}
+              Your Employer
             </Button>
-          </form>
+          </Link>
         </div>
       </section>
     );

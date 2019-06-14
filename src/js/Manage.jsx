@@ -1,14 +1,15 @@
 import React from 'react';
-//import * as firebase from 'firebase';
-import Main from './Main';
-import Header from './Header';
+import Grid from '@material-ui/core/Grid';
+import AgreementsContainer from './AgreementsContainer';
+import NewAgreementContainer from './NewAgreementContainer';
+
 
 const firebase = window.firebase;
 
 /**
  * Top-level controller for this CLA Manager application.
  */
-class App extends React.Component {
+class Manage extends React.Component {
 
   constructor(props) {
     super(props);
@@ -16,35 +17,14 @@ class App extends React.Component {
       individualCLATable: [],
       institutionCLATable: [],
     };
-
-    this.signOut = this.handleSignOut.bind(this);
-  }
-
-  /**
-   * Handles the sign out button press.
-   */
-  handleSignOut() {
-    firebase.auth().signOut().catch((error) => {
-      this.handleAuthError(error);
-    });
-  }
-
-  /**
-   * Handles Errors from various Promises.
-   */
-  handleAuthError(error) {
-    // Display Error.
-    alert('Error: ' + error.message);
-    console.log(error);
-    // Re-enable the sign-in button.
-    this.setState({ loginAttemptInProgress: false });
   }
 
 
   /**
    * Update the page to show all CLAs associated to the inputted email.
    */
-  loadClas(email) {
+  loadClas() {
+    const email = firebase.auth().currentUser.email
     if (!email) {
       // Clear all rows from the CLA tables.
       this.setState({
@@ -102,26 +82,36 @@ class App extends React.Component {
 
 
   componentDidMount() {
-
+    this.loadClas();
   }
 
   render() {
     return (
-      <div>
-        <Header
-          user={this.props.user}
-          onSignOut={this.signOut}
-        />
-        hello world
-        <Main
-          user={this.props.user}
-          onSignIn={() => {}}
-          individualCLATable={this.state.individualCLATable}
-          institutionCLATable={this.state.institutionCLATable}
-        />
-      </div>
+      <main className="mdl-layout__content mdl-color--grey-100">
+        <Grid container>
+          <Grid item>
+            <AgreementsContainer
+              header="Individual Agreements"
+              description="Individual agreements we have on file for you:"
+              columnTitles={["Name", "Date Signed", "Manage"]}
+              data={this.state.individualCLATable}
+            />
+            <AgreementsContainer
+              header="Institutional Agreements"
+              description="Institutional agreements we have on file for you:"
+              columnTitles={["Institution", "Date Signed", "View / Manage"]}
+              data={this.state.institutionCLATable}
+            />
+          </Grid>
+        </Grid>
+        {this.props.user && (
+          <Grid container>
+            <NewAgreementContainer />
+         </Grid>
+        )}
+      </main>
     );
   }
 }
 
-export default App;
+export default Manage;

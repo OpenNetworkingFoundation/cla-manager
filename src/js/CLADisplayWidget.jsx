@@ -1,6 +1,7 @@
 import React from 'react';
-import Main from './Main';
-import Header from './Header';
+import IndividualCLAText from './IndividualCLAText';
+import InstitutionCLAForm from './InstitutionCLAForm';
+import PropTypes from 'prop-types';
 
 /**
  * Layout component for displaying a CLA plus an input form to sign the CLA.
@@ -27,7 +28,7 @@ class CLADisplayWidget extends React.Component {
 CLADisplayWidget.propTypes = {
   type: PropTypes.string.isRequired,
   user: PropTypes.object,
-  onSubmit: PropTypes.func.isRequired
+  onSubmit: PropTypes.func//.isRequired
 };
 
 export default CLADisplayWidget;

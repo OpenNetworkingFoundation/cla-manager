@@ -17,7 +17,7 @@
     ],
     "rewrites": [ {
       "source": "!/@(js|css)/**",
-      "destination": "/login.html"
+      "destination": "/index.html"
     } ]
   }
 }
