@@ -1,7 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import IndividualCLAText from './IndividualCLAText';
-import InstitutionCLAForm from './InstitutionCLAForm';
+import Main from './Main';
+import Header from './Header';
 
 /**
  * Layout component for displaying a CLA plus an input form to sign the CLA.
@@ -9,7 +8,6 @@ import InstitutionCLAForm from './InstitutionCLAForm';
  */
 class CLADisplayWidget extends React.Component {
   render() {
-
     let cla;
     if (this.props.type === 'individual') {
       cla = <IndividualCLAText user={this.props.user} />;

@@ -1,4 +1,6 @@
 import React from 'react';
+import Main from './Main';
+import Header from './Header';
 
 /**
  * Component which displays an individual CLA.
@@ -6,11 +8,9 @@ import React from 'react';
 class IndividualCLA extends React.Component {
   
   render() {
-
-    const userEmail = this.props.user && this.props.user.email;
     return (
-      <div>
-      <p style={{textAlign: 'center'}}><b>Open Networking Foundation</b><br></br><b>Open Networking Individual Contributor License Agreement ("Agreement")</b></p>
+      <p style="text-align: center;"><b>Open Networking Foundation</b><br>
+        <b>Open Networking Individual Contributor License Agreement ("Agreement")</b></p>
       <p>Thank you for your interest in the Open Networking Project being conducted by Open Networking Foundation (“<b><i>ONF</i></b>”). &nbsp;The “<b><i>Project</i></b>” consists of activities relating to the Open Network Operating System (“<b><i>ONOS</i></b>”), the Central Office Re-architected as a Datacenter (“<b><i>CORD</i></b>”), and other initiatives undertaken by ON.Lab and ONF which are synergistic with ONOS or CORD.&nbsp; The Project was previously conducted by Open Networking Laboratory (“<b><i>ON.Lab</i></b>”).</p>
       <p>In order to clarify the intellectual property license granted with Contributions from any person or entity to the Project, ONF must have a Contributor License Agreement (“<b><i>CLA”</i></b>) on file that has been signed by each Contributor, indicating agreement to the license terms below. This license is for your protection as a Contributor as well as the protection of ONF and its users; it does not change your rights to use your own Contributions for any other purpose.</p>
       <p>You accept and agree to the following terms and conditions for Your past Contributions submitted to ON.Lab and present and future Contributions submitted to ONF for the Project. Except for the license granted herein to ONF and recipients of software distributed by ONF, You reserve all right, title, and interest in and to Your Contributions.
