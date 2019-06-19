@@ -2,6 +2,7 @@ import React from 'react';
 import Card from '@material-ui/core/Card';
 import Input from '@material-ui/core/Input';
 import PropTypes from 'prop-types';
+import InstitutionSignFlow from './claPages/institution/InstitutionSignFlow';
 
 
 /**
@@ -127,30 +128,8 @@ class InstitutionCLAForm extends React.Component {
       Contributions.]</span></p>
       </div>
 
-        <div class="mdl-card__supporting-text">
-          <div class="mdl-textfield mdl-js-textfield">
-            <textarea class="mdl-textfield__input" type="text" rows= "3" id="institutional-whitelist" ></textarea>
-            <label class="mdl-textfield__label" for="institutional-whitelist">Authorized contributor emails (one per line)...</label>
-          </div>
+      <InstitutionSignFlow />
 
-        </div>
-
-      <Card>
-        <form onSubmit={this.props.onSubmit}>
-          <Input type="text" id="institution-name" placeholder="Institution Name"/>
-          <Input type="text" id="institution-address" placeholder="Institution Address"/>
-          <Input type="text" id="primary-name" placeholder="Primary Contact Name"/>
-          <Input type="text" id="primary-email" placeholder="Primary Contact Email"/>
-          <Input type="text" id="primary-phone" placeholder="Primary Contact Phone"/>
-          <Input type="text" id="secondary-name" placeholder="Secondary Contact Name (Optional)"/>
-          <Input type="text" id="secondary-email" placeholder="Secondary Contact Email"/>
-          <Input type="text" id="secondary-phone" placeholder="Secondary Contact Phone"/>
-          <Input type="text" id="signer-name" placeholder="Your Name"/>
-          <Input type="text" id="signer-title" placeholder="Your Title"/>
-          <p>Your Email: <span id="display-email2"/>{userEmail}</p>
-          <Input type="submit" id="institutional-cla-accept" name="accept">I ACCEPT</Input>
-        </form>
-      </Card>
       </div>
     );
   }
