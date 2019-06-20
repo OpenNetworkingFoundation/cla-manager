@@ -5,7 +5,8 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
-export default function InstitutionInfoForm() {
+export default function InstitutionInfoForm(props) {
+  const formInfo = props.formInfo;
   return (
     <React.Fragment>
       <Typography variant="h6" gutterBottom>
@@ -20,6 +21,7 @@ export default function InstitutionInfoForm() {
             label="Institution Name"
             fullWidth
             autoComplete="iname"
+            value={formInfo.institutionName}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -30,6 +32,7 @@ export default function InstitutionInfoForm() {
             label="Your Name"
             fullWidth
             autoComplete="yname"
+            value={formInfo.yourName}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -40,6 +43,7 @@ export default function InstitutionInfoForm() {
             label="Your Title"
             fullWidth
             autoComplete="ytitle"
+            value={formInfo.yourTitle}
           />
         </Grid>
         <Grid item xs={12}>
@@ -50,6 +54,7 @@ export default function InstitutionInfoForm() {
             label="Institution Address"
             fullWidth
             autoComplete="iaddress"
+            value={formInfo.institutionAddress}
           />
         </Grid>
         <Grid item xs={12}>
@@ -65,6 +70,7 @@ export default function InstitutionInfoForm() {
             label="Name"
             fullWidth
             autoComplete="pcontactname"
+            value={formInfo.primaryContactName}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -75,6 +81,7 @@ export default function InstitutionInfoForm() {
             label="Email"
             fullWidth
             autoComplete="pcontactemail"
+            value={formInfo.primaryContactEmail}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -85,6 +92,7 @@ export default function InstitutionInfoForm() {
             label="Phone"
             fullWidth
             autoComplete="pcontactphone"
+            value={formInfo.primaryContactPhone}
           />
         </Grid>
         <Grid item xs={12}>
@@ -99,6 +107,7 @@ export default function InstitutionInfoForm() {
             label="Name"
             fullWidth
             autoComplete="scontactname"
+            value={formInfo.secondaryContactName}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -108,6 +117,7 @@ export default function InstitutionInfoForm() {
             label="Email"
             fullWidth
             autoComplete="scontactemail"
+            value={formInfo.secondaryContactEmail}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -117,6 +127,7 @@ export default function InstitutionInfoForm() {
             label="Phone"
             fullWidth
             autoComplete="scontactphone"
+            value={formInfo.secondaryContactPhone}
           />
         </Grid>
       </Grid>

@@ -52,12 +52,12 @@ const useStyles = makeStyles(theme => ({
 
 const steps = ['Contributor emails', 'Institution Info', 'Review'];
 
-function getStepContent(step) {
+function getStepContent(step, institutionInfo) {
   switch (step) {
     case 0:
-      return <ContributorEmailForm />;
+      return <ContributorEmailForm formInfo={institutionInfo[step]} />;
     case 1:
-      return <InstitutionInfoForm />;
+      return <InstitutionInfoForm formInfo={institutionInfo[step]} />;
     case 2:
       return <div />;
     default:
@@ -65,15 +65,35 @@ function getStepContent(step) {
   }
 }
 
+function extractFormInfo(mainDOMNode) {
+  let formInfo = {};
+  [...mainDOMNode.querySelectorAll('input')].forEach(input => {
+    const name = input.name;
+    const value = input.value;
+
+    formInfo[name] = value;
+  });
+  return formInfo;
+}
+
 export default function InstitutionSignFlow() {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
+  const [institutionInfo, setInstitutionInfo] = React.useState([{}, {}, {}]);
 
   const handleNext = () => {
+    const mainDOMNode = document.querySelector('main');
+    let newInstitutionInfo = [...institutionInfo];
+    newInstitutionInfo[activeStep] = extractFormInfo(mainDOMNode);
+    setInstitutionInfo(newInstitutionInfo);
     setActiveStep(activeStep + 1);
   };
 
   const handleBack = () => {
+    const mainDOMNode = document.querySelector('main');
+    let newInstitutionInfo = [...institutionInfo];
+    newInstitutionInfo[activeStep] = extractFormInfo(mainDOMNode);
+    setInstitutionInfo(newInstitutionInfo);
     setActiveStep(activeStep - 1);
   };
 
@@ -111,7 +131,7 @@ export default function InstitutionSignFlow() {
               </React.Fragment>
             ) : (
               <React.Fragment>
-                {getStepContent(activeStep)}
+                {getStepContent(activeStep, institutionInfo)}
                 <div className={classes.buttons}>
                   {activeStep !== 0 && (
                     <Button onClick={handleBack} className={classes.button}>

@@ -16,7 +16,7 @@ export default class AddressForm extends React.Component {
 
   constructor(props) {
     super(props);
-    let initialEmails = props.initialEmails || [];
+    let initialEmails = Object.values(props.formInfo || {}) || [];
     this.state = {
       inputs: initialEmails.map((email, index) => {
         return {
@@ -57,11 +57,12 @@ export default class AddressForm extends React.Component {
         </Typography>
         <Grid container spacing={3}>
           {
-            this.state.inputs.map(inputInfo => {
+            this.state.inputs.map((inputInfo, index) => {
               return (
                 <Grid key={inputInfo.key} item xs={12}>
                   <TextField
                     required
+                    name={`contributorEmailAddress${index}`}
                     label="Contributor Email Address"
                     fullWidth
                     value={inputInfo.email}
