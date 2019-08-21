@@ -10,6 +10,7 @@ import TableCell from '@material-ui/core/TableCell';
  * Layout component which renders information about all signed agreements
  * associated to a given user.
  */
+
 class AgreementsContainer extends React.Component {
   render() {
     // If this table has no data, no need to show it.
@@ -18,28 +19,32 @@ class AgreementsContainer extends React.Component {
     }
 
     return (
-      <div
-        class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet"
-      >
+      <React.Fragment>
         <h4>{this.props.header}</h4>
         <p>{this.props.description}</p>
-        <Table
-          class="mdl-data-table mdl-js-data-table mdl-shadow--2dp"
-        >
+        <Table>
           <TableHead>
             <TableRow>
-              {this.props.columnTitles.map(t => <TableCell>{t}</TableCell>)}
+              {this.props.columnTitles.map(t => <TableCell key={t}>{t}</TableCell>)}
             </TableRow>
           </TableHead>
-          <TableBody>
-            {
-              this.props.data.map(r => (
-                <TableRow>{r.map(c => <TableCell>{c}</TableCell>)}</TableRow>
-              ))
-            }
-          </TableBody>
+          <TableBody>{
+            this.props.data.map(r => (
+              <TableRow key={r.id + '-row'}>
+                {this.props.columnIds.map((n, i) => {
+                  // Enable screen readers to identify a cell's value by it's row and column name
+                  const attrs = i !== 0 ? {} : {
+                    component: 'th',
+                    scope: 'row',
+                  }
+                  return <TableCell key={`${r.id}-${n}`} {...attrs}>{r[n]}</TableCell>
+                })
+                }
+              </TableRow>
+            ))
+          }</TableBody>
         </Table>
-      </div>
+      </React.Fragment>
     );
   }
 }
@@ -47,7 +52,8 @@ class AgreementsContainer extends React.Component {
 AgreementsContainer.propTypes = {
   header: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
-  columnTitles: PropTypes.arrayOf(PropTypes.string).isRequired
+  columnTitles: PropTypes.arrayOf(PropTypes.string).isRequired,
+  columnIds: PropTypes.arrayOf(PropTypes.string).isRequired
 };
 
 export default AgreementsContainer;

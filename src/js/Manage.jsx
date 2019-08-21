@@ -1,10 +1,18 @@
 import React from 'react';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+
 import Grid from '@material-ui/core/Grid';
+import Link from '@material-ui/core/Link';
+import Paper from '@material-ui/core/Paper';
+
 import AgreementsContainer from './AgreementsContainer';
 import NewAgreementContainer from './NewAgreementContainer';
 
-
-const firebase = window.firebase;
+const dateOptions = {
+  year: 'numeric', month: 'short', day: 'numeric',
+  hour: 'numeric', minute: 'numeric', hour12: false, timeZoneName: 'short'
+};
 
 /**
  * Top-level controller for this CLA Manager application.
@@ -18,7 +26,6 @@ class Manage extends React.Component {
       institutionCLATable: [],
     };
   }
-
 
   /**
    * Update the page to show all CLAs associated to the inputted email.
@@ -39,48 +46,6 @@ class Manage extends React.Component {
       .onSnapshot(this.renderClaTables.bind(this));
   }
 
-  /**
-   * Renders the CLAs in the appropriate tables.
-   */
-  renderClaTables(snapshot) {
-
-      if (snapshot || snapshot.size) {
-          const options = { year: 'numeric', month: 'short', day: 'numeric',
-                            hour: 'numeric', minute: 'numeric', hour12: false, timeZoneName: 'short' };
-          const individualCLATable = [];
-          const institutionCLATable = [];
-
-          snapshot.forEach(cla => {
-              console.log(cla.data())
-              const type = cla.data().type || 'individual';
-              const date = cla.data().dateSigned.toDate() || new Date();
-
-              let name = cla.data().signer;
-              const displayDate = date.toLocaleDateString('default', options);
-              const link = `link ${cla.id}`;
-
-              if (type === 'individual') {
-                  if (cla.data().signerDetails && cla.data().signerDetails.name) {
-                      name = cla.data().signerDetails.name;
-                  }
-                  individualCLATable.push([name, displayDate, link]);
-              } else if (type === 'institutional') {
-                  institutionCLATable.push(['foo', displayDate, link]);
-              } else {
-                  console.log('unknown cla type: ', cla.data())
-                  return
-              }
-          });
-          this.setState({
-              individualCLATable,
-              institutionCLATable
-          });
-      } else {
-          console.log("no clas :(")
-      }
-  }
-
-
   componentDidMount() {
     this.loadClas();
   }
@@ -92,21 +57,67 @@ class Manage extends React.Component {
     }
   }
 
+  /**
+   * Renders the CLAs in the appropriate tables.
+   */
+  renderClaTables(snapshot) {
+      if (snapshot || snapshot.size) {
+          const individualCLATable = [];
+          const institutionCLATable = [];
+
+          snapshot.forEach(cla => {
+              // console.log(cla.data())
+              const type = cla.data().type || 'individual';
+              const date = cla.data().dateSigned.toDate() || new Date();
+              const linkUrl = `/view/${cla.id}`;
+              const row = {
+                id: cla.id,
+                name: cla.data().signer,
+                date,
+                displayDate: date.toLocaleDateString('default', dateOptions),
+                link: <Link href={linkUrl}>View Agreement</Link>
+              }
+
+              if (type === 'individual') {
+                  if (cla.data().signerDetails && cla.data().signerDetails.name) {
+                      row.name = cla.data().signerDetails.name;
+                  }
+                  individualCLATable.push(row);
+              } else if (type === 'institutional') {
+                  institutionCLATable.push(row);
+              } else {
+                  console.log('unknown cla type: ', cla.data())
+                  return
+              }
+          });
+          this.setState({
+              individualCLATable: individualCLATable.sort((a,b) => a.date - b.date),
+              institutionCLATable: institutionCLATable.sort((a,b) => a.date - b.date)
+          });
+      } else {
+          console.log("no clas :(")
+      }
+  }
+
   render() {
+    //<main {/*className={classes.layout}*/}>
     return (
-      <main className="mdl-layout__content mdl-color--grey-100">
+      <main>
+        <Paper>
         <Grid container>
           <Grid item>
             <AgreementsContainer
-              header="Individual Agreements"
-              description="Individual agreements we have on file for you:"
-              columnTitles={["Name", "Date Signed", "Manage"]}
+              header='Individual Agreements'
+              description='Individual agreements we have on file for you:'
+              columnTitles={['Name', 'Date Signed', 'Manage']}
+              columnIds={['name', 'displayDate', 'link']}
               data={this.state.individualCLATable}
             />
             <AgreementsContainer
-              header="Institutional Agreements"
-              description="Institutional agreements we have on file for you:"
-              columnTitles={["Institution", "Date Signed", "View / Manage"]}
+              header='Institutional Agreements'
+              description='Institutional agreements we have on file for you:'
+              columnTitles={['Institution', 'Date Signed', 'View / Manage']}
+              columnIds={['name', 'displayDate', 'link']}
               data={this.state.institutionCLATable}
             />
           </Grid>
@@ -116,6 +127,7 @@ class Manage extends React.Component {
             <NewAgreementContainer />
          </Grid>
         )}
+        </Paper>
       </main>
     );
   }

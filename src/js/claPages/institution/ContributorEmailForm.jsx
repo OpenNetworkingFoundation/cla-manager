@@ -52,6 +52,9 @@ export default class AddressForm extends React.Component {
   render() {
     return (
       <React.Fragment>
+        <Typography variant="h5" gutterBottom>
+          Schedule A
+        </Typography>
         <Typography variant="h6" gutterBottom>
           Contributors
         </Typography>

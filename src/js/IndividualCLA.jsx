@@ -1,45 +1,77 @@
 import React from 'react';
-import TextField from '@material-ui/core/TextField';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+
 import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+
+// import { makeStyles } from '@material-ui/core/styles';
+
+// const useStyles = makeStyles(theme => ({
+//   root: {
+//     padding: theme.spacing(3, 2),
+//   },
+// }));
 
 
-const firebase = window.firebase;
 
 /**
  * Component which displays an individual CLA.
  */
 class IndividualCLA extends React.Component {
 
-    signIndividualCla(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const email = firebase.auth().currentUser.email
-        let name = document.getElementById('individual-name').value
-        console.log("individual", name, email)
-
-        if(!email || !name) {
-            alert("invalid email or name");
-            return;
-        }
-
-        firebase.firestore().collection('clas').add({
-            signer: email,
-            signerDetails: { name, email },
-            whitelist: [ email ],
-            type: "individual",
-            dateSigned: new Date()
-        }).then(ref => {
-            console.log('Added document with ID: ', ref.id);
-            window.location.href = "/";
-        }).catch(function(error) {
-            console.log(error);
-        });
+  state = {
+    name: '',
+    email: firebase.auth().currentUser.email,
+    formEnabled: true
   }
+
+  db = firebase.firestore()
   
+  handleSubmit = (event) => {
+    if(!this.state.formEnabled) {
+      console.log("submit blocked due to outstanding request")
+      return;
+    }
+    const email = this.state.email;
+    const name = this.state.name;
+    if(!email || !name) {
+      alert("invalid email or name");
+      return;
+    }
+    console.log("submit:", email, name)
+    this.setState({formEnabled: false})
+    //TODO consider moving this to a helper or library
+    this.db.collection('clas').add({
+        signer: email,
+        signerDetails: { name, email },
+        whitelist: [ email ],
+        type: "individual",
+        dateSigned: new Date()
+    }).then(ref => {
+        console.log('Added document with ID: ', ref.id);
+        // redirect to user homepage
+        window.location.href = "/";
+    }).catch(error => {
+        console.log("Error saving CLA");
+        console.log(error);
+        this.setState({formEnabled: true});
+    });
+  }
+
+  handleChange = (event) => {
+    // console.log(event.target.name);
+    const name = event.target.value;
+    this.setState({ name });
+  }
+
   render() {
-    let userEmail = firebase.auth().currentUser.email;
+    // const classes = useStyles();
+    const { name, email, formEnabled } = this.state;
+
     return (
+      <Paper>  
       <div>
       <p style={{textAlign: "center"}}><b>Open Networking Foundation</b><br />
         <b>Open Networking Individual Contributor License Agreement ("Agreement")</b></p>
@@ -58,26 +90,33 @@ class IndividualCLA extends React.Component {
       <p>7. <b>Contributions That Are Not Your Original Creation.&nbsp; </b>Should You wish to submit work that is not Your original creation, You may submit it to ONF separately from any Contribution, identifying the complete details of its source and of any license or other restriction (including, but not limited to, related patents, trademarks, and license agreements) of which you are personally aware, and conspicuously marking the work as "Submitted on behalf of a third-party: [named here]".</p>
       <p>8. <b>Required Notifications. </b>You agree to notify ONF of any facts or circumstances of which you become aware that would make these representations inaccurate in any respect.</p>
      
-      <div class="mdl-card__supporting-text">
-        <form onSubmit={this.signIndividualCla}>
-          <TextField
-            id="individual-name"
-            label="Full Name"
-            // onChange={handleChange('name')}
-            margin="normal"
-            variant="outlined"
-          />
-          <p>Email: <span id="display-email">{userEmail}</span></p>
-          <Button 
-            variant="contained"
-            color="primary"
-            onClick={this.signIndividualCla}
-          >
-            I AGREE
-          </Button>
-        </form>
+      <div className="mdl-card__supporting-text">
+        <ValidatorForm  
+            ref="form"
+            onSubmit={this.handleSubmit}
+            onError={errors => console.log(errors)}
+        >
+            <TextValidator
+                label="Full Name"
+                name="name"
+                value={name}
+                onChange={this.handleChange}
+                validators={['required']}
+                errorMessages={['You must enter your name']}
+                margin="normal"
+                variant="outlined"
+                disabled={!formEnabled}
+            />
+            <p>Email: <span id="display-email">{email}</span></p>
+            <Button type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={!formEnabled}
+            >I AGREE</Button>
+        </ValidatorForm>
       </div>
       </div>
+      </Paper>
     );
   }
 }

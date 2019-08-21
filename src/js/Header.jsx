@@ -2,6 +2,7 @@ import React from 'react';
 import SignOutContainer from './SignOutContainer';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
+import Link from '@material-ui/core/Link';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
@@ -27,7 +28,9 @@ export default function Header(props) {
       <AppBar position="static" /*color="default"*/>
         <Toolbar>
           <Typography variant="h6" className={classes.title}>
-            CLAM (Your friendly CLA Manager)
+            <Link href="/" color="inherit">
+              CLAM (Your friendly CLA Manager)
+            </Link>
           </Typography>
           {user && (
               <SignOutContainer

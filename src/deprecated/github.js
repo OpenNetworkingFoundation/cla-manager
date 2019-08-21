@@ -1,4 +1,4 @@
-const firebase = window.firebase;
+import firebase from 'firebase';
 
 const PENDING_CRED_KEY = 'PENDING_CRED';
 

@@ -4,21 +4,17 @@ import CLADisplayWidget from './CLADisplayWidget';
 /**
  * Top-level controller for the page to sign a CLA. 
  */
-class SignPage extends React.Component {
+class ViewPage extends React.Component {
     render() {
-        const type = this.props.match.params.type || 'individual';
+        const id = this.props.match.params.id;
         const user = this.props.user;
         return (
             <React.Fragment>
                 {console.log(this.props)}
-                <CLADisplayWidget
-                    type={type}
-                    user={user}
-                    onSubmit={this.handleCLASignature}
-                />
+                CLA: {id}
             </React.Fragment>
         );
     }
 }
 
-export default SignPage;
+export default ViewPage;

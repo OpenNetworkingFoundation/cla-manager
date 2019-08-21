@@ -7,9 +7,10 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
+import firebase from 'firebase/app';
+import 'firebase/auth';
 
 
-const firebase = window.firebase;
 
 const styles = theme => ({
     button: {
@@ -80,7 +81,7 @@ class SignIn extends React.Component {
         const classes = this.props.classes;
         return (
             <div>
-                {this.handleSignIn()}
+                {/* {this.handleSignIn()} */}
                 <Header />
                 Need to sign in
                 {/* TODO put an email field validator on this */}

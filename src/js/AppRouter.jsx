@@ -1,8 +1,13 @@
 import React from "react";
+import firebase from 'firebase/app';
+import 'firebase/auth';
+
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+
 import Header from './Header';
 import Manage from './Manage';
 import SignPage from './SignPage';
+import View from './View';
 
 
 function About() {
@@ -13,7 +18,6 @@ function Users() {
   return <h2>Users</h2>;
 }
 
-const firebase = window.firebase; 
 
 class AppRouter extends React.Component {
 
@@ -40,7 +44,7 @@ class AppRouter extends React.Component {
         console.log(error);
         // Re-enable the sign-in button.
         this.setState({ loginAttemptInProgress: false });
-      }
+    }
 
     render() {
         const user = this.props.user;
@@ -57,6 +61,9 @@ class AppRouter extends React.Component {
                 )}/>
                 <Route path="/sign/:type" render={props => (
                     <SignPage user={user} {...props} />
+                )}/>
+                <Route path="/view/:id" render={props => (
+                    <View user={user} {...props} />
                 )}/>
                 {/* <Route path="/users/" component={Users} /> */}
             </div>

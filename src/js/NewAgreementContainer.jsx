@@ -15,10 +15,10 @@ class NewAgreementContainer extends React.Component {
   render() {
     return (
       <section id="new-agreement-container"
-                       class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet">
+                       className="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet">
         <h4>Sign a new agreement</h4>
         <p>Who will you be submitting contributions on behalf of?</p>
-        <div class="mdl-grid">
+        <div className="mdl-grid">
           <Link to="/sign/individual">
             <Button
               variant="contained"

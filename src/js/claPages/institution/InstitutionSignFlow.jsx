@@ -10,6 +10,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
+import ReviewForm from './ReviewForm';
 import InstitutionInfoForm from './InstitutionInfoForm';
 import ContributorEmailForm from './ContributorEmailForm';
 
@@ -35,6 +36,8 @@ const useStyles = makeStyles(theme => ({
       marginTop: theme.spacing(6),
       marginBottom: theme.spacing(6),
       padding: theme.spacing(3),
+      marginLeft: theme.spacing(1),
+      marginRight: theme.spacing(1),
     },
   },
   stepper: {
@@ -50,15 +53,17 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const steps = ['Contributor emails', 'Institution Info', 'Review'];
+const steps = ['Review Agreement', 'Schedule A: Contributors', 'Institution Info', 'Review'];
 
 function getStepContent(step, institutionInfo) {
   switch (step) {
     case 0:
-      return <ContributorEmailForm formInfo={institutionInfo[step]} />;
+      return <ReviewForm formInfo={institutionInfo[step]} />;
     case 1:
-      return <InstitutionInfoForm formInfo={institutionInfo[step]} />;
+      return <ContributorEmailForm formInfo={institutionInfo[step]} />;
     case 2:
+      return <InstitutionInfoForm formInfo={institutionInfo[step]} />;
+    case 3:
       return <div />;
     default:
       throw new Error('Unknown step');
@@ -82,15 +87,16 @@ export default function InstitutionSignFlow() {
   const [institutionInfo, setInstitutionInfo] = React.useState([{}, {}, {}]);
 
   const handleNext = () => {
-    const mainDOMNode = document.querySelector('main');
+    const mainDOMNode = document.querySelector('div#cla-widget');
     let newInstitutionInfo = [...institutionInfo];
     newInstitutionInfo[activeStep] = extractFormInfo(mainDOMNode);
+    console.log(newInstitutionInfo)
     setInstitutionInfo(newInstitutionInfo);
     setActiveStep(activeStep + 1);
   };
 
   const handleBack = () => {
-    const mainDOMNode = document.querySelector('main');
+    const mainDOMNode = document.querySelector('div#cla-widget');
     let newInstitutionInfo = [...institutionInfo];
     newInstitutionInfo[activeStep] = extractFormInfo(mainDOMNode);
     setInstitutionInfo(newInstitutionInfo);
@@ -98,19 +104,9 @@ export default function InstitutionSignFlow() {
   };
 
   return (
-    <React.Fragment>
-      <CssBaseline />
-      <AppBar position="absolute" color="default" className={classes.appBar}>
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            Company name
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <main className={classes.layout}>
         <Paper className={classes.paper}>
           <Typography component="h1" variant="h4" align="center">
-            Checkout
+            CLA
           </Typography>
           <Stepper activeStep={activeStep} className={classes.stepper}>
             {steps.map(label => (
@@ -151,8 +147,6 @@ export default function InstitutionSignFlow() {
             )}
           </React.Fragment>
         </Paper>
-      </main>
-    </React.Fragment>
   );
 }
 
