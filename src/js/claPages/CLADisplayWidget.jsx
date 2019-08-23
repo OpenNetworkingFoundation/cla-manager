@@ -1,6 +1,6 @@
 import React from 'react';
 import IndividualCLA from './IndividualCLA';
-import InstitutionCLAForm from './InstitutionCLAForm';
+import InstitutionCLAForm from './institution/InstitutionCLAForm';
 import PropTypes from 'prop-types';
 
 /**

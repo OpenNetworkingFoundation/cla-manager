@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
 let COUNTER = 0;
 
@@ -38,6 +39,11 @@ export default class AddressForm extends React.Component {
       };
     });
   }
+
+  handleChange = (event) => {
+    console.log(event.target.name, event.target.value);
+    // this.setState({ name });
+  }
   
   componentDidMount() {
     this.setState({
@@ -58,6 +64,9 @@ export default class AddressForm extends React.Component {
         <Typography variant="h6" gutterBottom>
           Contributors
         </Typography>
+        <Typography variant="p">
+        <i>Initial list of designated employees.  NB: authorization is not tied to particular Contributions.</i>
+        </Typography>
         <Grid container spacing={3}>
           {
             this.state.inputs.map((inputInfo, index) => {
@@ -70,6 +79,16 @@ export default class AddressForm extends React.Component {
                     fullWidth
                     value={inputInfo.email}
                   />
+                  <ValidatorForm>
+                  <TextValidator
+                      label="Full Name"
+                      name="name"
+                      value={inputInfo.email}
+                      onChange={this.handleChange}
+                      validators={['required']}
+                      errorMessages={['You must enter your name']}
+                  />
+                  </ValidatorForm>
                 </Grid>
               );
             })

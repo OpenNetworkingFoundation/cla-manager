@@ -2,7 +2,7 @@ import React from 'react';
 import Card from '@material-ui/core/Card';
 import Input from '@material-ui/core/Input';
 import PropTypes from 'prop-types';
-import InstitutionSignFlow from './claPages/institution/InstitutionSignFlow';
+import InstitutionSignFlow from './InstitutionSignFlow';
 
 
 /**

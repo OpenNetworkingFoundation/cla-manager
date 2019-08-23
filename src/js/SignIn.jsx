@@ -1,33 +1,32 @@
+//TODO needs cleanup and comments
 import React from 'react';
-import Header from './Header';
-import { withStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import firebase from 'firebase/app';
+
+import Header from './helpers/Header';
+// import { withStyles } from '@material-ui/core/styles';
+// import AppBar from '@material-ui/core/AppBar';
+// import Toolbar from '@material-ui/core/Toolbar';
+// import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
-import firebase from 'firebase/app';
-import 'firebase/auth';
 
+// const styles = theme => ({
+//     button: {
+//       margin: theme.spacing(1),
+//     },
+//     leftIcon: {
+//       marginRight: theme.spacing(1),
+//     },
+//     rightIcon: {
+//       marginLeft: theme.spacing(1),
+//     },
+//     iconSmall: {
+//       fontSize: 20,
+//     },
+// });
 
-
-const styles = theme => ({
-    button: {
-      margin: theme.spacing(1),
-    },
-    leftIcon: {
-      marginRight: theme.spacing(1),
-    },
-    rightIcon: {
-      marginLeft: theme.spacing(1),
-    },
-    iconSmall: {
-      fontSize: 20,
-    },
-});
-
-class SignIn extends React.Component {
+export class SignIn extends React.Component {
 
     constructor(props) {
         super(props);
@@ -78,7 +77,7 @@ class SignIn extends React.Component {
 
 
     render() {
-        const classes = this.props.classes;
+        // const classes = this.props.classes;
         return (
             <div>
                 {/* {this.handleSignIn()} */}
@@ -99,12 +98,12 @@ class SignIn extends React.Component {
                     <Button 
                         variant="contained"
                         color="primary"
-                        className={classes.button}
+                        // className={classes.button}
                         onClick={this.signIn}
                     >
                         Send Sign In Link
                         {/* This Button uses a Font Icon, see the installation instructions in the docs. */}
-                        <Icon className={classes.rightIcon}>send</Icon>
+                        <Icon /*className={classes.rightIcon}*/>send</Icon>
                     </Button>
 
                 </form>
@@ -113,8 +112,52 @@ class SignIn extends React.Component {
     }
 }
   
-export default withStyles(styles)(SignIn);
+// export default withStyles(styles)(SignIn);
 
-
-
+/**
+ * Handles the Sign In by Email link URL parameters.
+ * 
+ * Returns true if user is logged in, false otherwise
+ */
+export async function HandleSignInLink(fn) {
+    if (firebase.auth().isSignInWithEmailLink(window.location.href)) {        
+        // You can also get the other parameters passed in the query string such as state=STATE.
+        // Get the email if available.
+        let email = window.localStorage.getItem('emailForSignIn');
+        if (!email) {
+            // User opened the link on a different device. To prevent session fixation attacks, ask the
+            // user to provide the associated email again. For example:
+            email = window.prompt('Please provide the email you\'d like to sign-in with for confirmation.');
+        }
+        if (email) {
+            try {
+              const result = await firebase.auth().signInWithEmailLink(email, window.location.href);
+              const history = window.history
+              // Clear the URL to remove the sign-in link parameters.
+              if (history && history.replaceState) {
+                  window.history.replaceState({}, document.title, window.location.href.split('?')[0]);
+              }
+              // Clear email from storage.
+              window.localStorage.removeItem('emailForSignIn');
+              // Signed-in user's information.
+              // const user = result.user;
+              const isNewUser = result.additionalUserInfo.isNewUser;
+              if (isNewUser) {
+                  //TODO welcome new users via banner or something
+                  console.log("New User!");
+              }
+              return; // User is signed in; App will be loaded by onAuthStateChanged()
+            } catch (error) {
+  /* 
+    TODO could use the following if needed (or remove)
+                  // Handle Errors here.
+                  var errorCode = error.code;
+                  var errorMessage = error.message;
+  */
+                  console.log(error);
+            }
+        }
+      }
+      fn(<SignIn />)
+  }
   

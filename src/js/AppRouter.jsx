@@ -1,23 +1,12 @@
 import React from "react";
 import firebase from 'firebase/app';
-import 'firebase/auth';
 
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
-import Header from './Header';
-import Manage from './Manage';
-import SignPage from './SignPage';
+import Header from './helpers/Header';
+import Home from './Home';
+import SignPage from './claPages/SignPage';
 import View from './View';
-
-
-function About() {
-  return <h2>About</h2>;
-}
-
-function Users() {
-  return <h2>Users</h2>;
-}
-
 
 class AppRouter extends React.Component {
 
@@ -55,9 +44,8 @@ class AppRouter extends React.Component {
                     user={user}
                     onSignOut={this.signOut}
                 />
-                {/* <Link to="/users/">Users</Link> */}
                 <Route path="/" exact render={() => (
-                    <Manage user={user}/>
+                    <Home user={user}/>
                 )}/>
                 <Route path="/sign/:type" render={props => (
                     <SignPage user={user} {...props} />
@@ -65,7 +53,6 @@ class AppRouter extends React.Component {
                 <Route path="/view/:id" render={props => (
                     <View user={user} {...props} />
                 )}/>
-                {/* <Route path="/users/" component={Users} /> */}
             </div>
             </Router>
         );

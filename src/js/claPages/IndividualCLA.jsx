@@ -1,10 +1,11 @@
 import React from 'react';
 import firebase from 'firebase/app';
-import 'firebase/firestore';
 
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+
+import ClaDb from '../lib/ClaDb'
 
 // import { makeStyles } from '@material-ui/core/styles';
 
@@ -27,7 +28,7 @@ class IndividualCLA extends React.Component {
     formEnabled: true
   }
 
-  db = firebase.firestore()
+  db = new ClaDb()
   
   handleSubmit = (event) => {
     if(!this.state.formEnabled) {
@@ -42,22 +43,7 @@ class IndividualCLA extends React.Component {
     }
     console.log("submit:", email, name)
     this.setState({formEnabled: false})
-    //TODO consider moving this to a helper or library
-    this.db.collection('clas').add({
-        signer: email,
-        signerDetails: { name, email },
-        whitelist: [ email ],
-        type: "individual",
-        dateSigned: new Date()
-    }).then(ref => {
-        console.log('Added document with ID: ', ref.id);
-        // redirect to user homepage
-        window.location.href = "/";
-    }).catch(error => {
-        console.log("Error saving CLA");
-        console.log(error);
-        this.setState({formEnabled: true});
-    });
+    this.db.createIndividualCla(name, email)
   }
 
   handleChange = (event) => {

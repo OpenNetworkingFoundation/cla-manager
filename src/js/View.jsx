@@ -1,5 +1,5 @@
 import React from 'react';
-import CLADisplayWidget from './CLADisplayWidget';
+import CLADisplayWidget from './claPages/CLADisplayWidget';
 
 /**
  * Top-level controller for the page to sign a CLA. 
