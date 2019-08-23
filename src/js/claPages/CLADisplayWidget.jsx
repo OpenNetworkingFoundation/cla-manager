@@ -14,7 +14,7 @@ class CLADisplayWidget extends React.Component {
       cla = <IndividualCLA user={this.props.user} />;
     }
     else if (this.props.type === 'institution') {
-      cla = <InstitutionCLAForm user={this.props.user} onSubmit={this.props.onSubmit}/>;
+      cla = <InstitutionCLAForm user={this.props.user} /*onSubmit={this.props.onSubmit}*//>;
     }
 
     return (

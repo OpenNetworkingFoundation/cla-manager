@@ -1,12 +1,39 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import firebase from 'firebase/app';
+
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { TextValidator} from 'react-material-ui-form-validator';
+
+function initializeForm(formInfo, handleChange) {
+  let fakeEvent = {
+    target: {
+      value: ''
+    }
+  };
+
+  let checkField = fieldName => {
+    if (formInfo[fieldName] === undefined) {
+      fakeEvent.target.name = fieldName;
+      handleChange(fakeEvent);
+    }
+  }
+
+  checkField('institutionName');
+  checkField('yourName');
+  checkField('yourTitle');
+  checkField('institutionAddress');
+}
 
 export default function InstitutionInfoForm(props) {
   const formInfo = props.formInfo;
+  const handleChange = props.handleChange;
+  const email = firebase.auth().currentUser.email;
+  initializeForm(formInfo, handleChange);
   return (
     <React.Fragment>
       <Typography variant="h6" gutterBottom>
@@ -14,47 +41,60 @@ export default function InstitutionInfoForm(props) {
       </Typography>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <TextField
+          <TextValidator
             required
-            id="institutionName"
+            // id="institutionName"
             name="institutionName"
             label="Institution Name"
             fullWidth
-            autoComplete="iname"
+            // autoComplete="iname"
             value={formInfo.institutionName}
+            onChange={handleChange}
+            validators={['required']}
+            errorMessages={['You must enter a name']}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <TextValidator
             required
-            id="yourName"
+            // id="yourName"
             name="yourName"
             label="Your Name"
             fullWidth
-            autoComplete="yname"
+            // autoComplete="yname"
             value={formInfo.yourName}
+            onChange={handleChange}
+            validators={['required']}
+            errorMessages={['You must enter a name']}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <TextValidator
             required
-            id="yourTitle"
+            // id="yourTitle"
             name="yourTitle"
             label="Your Title"
             fullWidth
-            autoComplete="ytitle"
+            // autoComplete="ytitle"
             value={formInfo.yourTitle}
+            onChange={handleChange}
+            validators={['required']}
+            errorMessages={['You must enter a name']}
           />
         </Grid>
+        <p>Email: <span id="display-email">{email}</span></p>
         <Grid item xs={12}>
-          <TextField
+          <TextValidator
             required
-            id="institutionAddress"
+            // id="institutionAddress"
             name="institutionAddress"
             label="Institution Address"
             fullWidth
-            autoComplete="iaddress"
+            // autoComplete="iaddress"
             value={formInfo.institutionAddress}
+            onChange={handleChange}
+            validators={['required']}
+            errorMessages={['You must enter a name']}
           />
         </Grid>
         <Grid item xs={12}>
@@ -134,3 +174,8 @@ export default function InstitutionInfoForm(props) {
     </React.Fragment>
   );
 }
+
+InstitutionInfoForm.propTypes = {
+  formInfo: PropTypes.object.isRequired,
+  handleChange: PropTypes.func.isRequired,
+};

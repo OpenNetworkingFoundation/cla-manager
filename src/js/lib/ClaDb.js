@@ -12,13 +12,29 @@ export default class ClaDb {
     }
 
     createIndividualCla(name, email) {
-        this.db.collection('clas').add({
+        let cla = {
             signer: email,
             signerDetails: { name, email },
             whitelist: [ email ],
             type: "individual",
             dateSigned: new Date()
-        }).then(ref => {
+        };
+        this.createCla(cla);   
+    }
+
+    createInstitutionalCla(name, email) {
+        let cla = {
+            signer: email,
+            signerDetails: { name, email },
+            whitelist: [ email ],
+            type: "institutional",
+            dateSigned: new Date()
+        };  
+        this.createCla(cla);
+    }
+
+    createCla(cla) {
+        this.db.collection('clas').add(cla).then(ref => {
             console.log('Added document with ID: ', ref.id);
             // redirect to user homepage
             window.location.href = "/";
@@ -26,11 +42,7 @@ export default class ClaDb {
             console.log("Error saving CLA");
             console.log(error);
             this.setState({formEnabled: true});
-        });    
-    }
-
-    createInstitutionalCla() {
-
+        });
     }
 
     getCla(key) {
