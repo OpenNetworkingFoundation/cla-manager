@@ -57,7 +57,6 @@ class IndividualCLA extends React.Component {
     const { name, email, formEnabled } = this.state;
 
     return (
-      <Paper>  
       <div>
       <p style={{textAlign: "center"}}><b>Open Networking Foundation</b><br />
         <b>Open Networking Individual Contributor License Agreement ("Agreement")</b></p>
@@ -76,13 +75,15 @@ class IndividualCLA extends React.Component {
       <p>7. <b>Contributions That Are Not Your Original Creation.&nbsp; </b>Should You wish to submit work that is not Your original creation, You may submit it to ONF separately from any Contribution, identifying the complete details of its source and of any license or other restriction (including, but not limited to, related patents, trademarks, and license agreements) of which you are personally aware, and conspicuously marking the work as "Submitted on behalf of a third-party: [named here]".</p>
       <p>8. <b>Required Notifications. </b>You agree to notify ONF of any facts or circumstances of which you become aware that would make these representations inaccurate in any respect.</p>
      
-      <div className="mdl-card__supporting-text">
-        <ValidatorForm  
+      <div style={{textAlign: 'center'}}>
+        <ValidatorForm
+            style={{display: 'inline-block'}}
             ref="form"
             onSubmit={this.handleSubmit}
             onError={errors => console.log(errors)}
         >
             <TextValidator
+                style={{width: '100%'}}
                 label="Full Name"
                 name="name"
                 value={name}
@@ -102,7 +103,6 @@ class IndividualCLA extends React.Component {
         </ValidatorForm>
       </div>
       </div>
-      </Paper>
     );
   }
 }

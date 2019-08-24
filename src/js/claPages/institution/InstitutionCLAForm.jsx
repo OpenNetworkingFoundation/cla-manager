@@ -101,7 +101,7 @@ class InstitutionCLAForm extends React.Component {
             activeStep: this.state.activeStep + delta
         });
         return (
-            <Paper /*className={classes.paper}*/>
+            <div /*className={classes.paper}*/>
                 <Typography component="h1" variant="h4" align="center">
                     CLA
                 </Typography>
@@ -138,7 +138,7 @@ class InstitutionCLAForm extends React.Component {
                         </ValidatorForm>
                         )}
                 </React.Fragment>
-            </Paper>
+            </div>
         );
     }
 }
