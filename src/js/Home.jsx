@@ -100,9 +100,9 @@ export default class Home extends React.Component {
     render() {
         return (
             <main>
-                <Paper>
+                <Paper elevation={0} style={{padding: '10px'}}>
                     <Grid container>
-                        <Grid item>
+                        <Grid item> 
                             <AgreementsContainer
                                 header='Individual Agreements'
                                 description='Individual agreements we have on file for you:'
