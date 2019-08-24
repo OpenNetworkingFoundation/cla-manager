@@ -1,45 +1,56 @@
 //TODO needs cleanup and comments
-import React from 'react';
+import React, { useState } from 'react';
 import firebase from 'firebase/app';
 
-import Header from './helpers/Header';
-// import { withStyles } from '@material-ui/core/styles';
-// import AppBar from '@material-ui/core/AppBar';
-// import Toolbar from '@material-ui/core/Toolbar';
-// import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
+import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 
-// const styles = theme => ({
-//     button: {
-//       margin: theme.spacing(1),
-//     },
-//     leftIcon: {
-//       marginRight: theme.spacing(1),
-//     },
-//     rightIcon: {
-//       marginLeft: theme.spacing(1),
-//     },
-//     iconSmall: {
-//       fontSize: 20,
-//     },
-// });
+const useStyles = makeStyles(theme => ({
+  '@global': {
+    body: {
+      backgroundColor: theme.palette.common.white,
+    },
+  },
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+    textAlign: 'center'
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2)
+  },
+  sendIcon: {
+    marginLeft: theme.spacing(1)
+  },
+  resultMessage: {}
+}));
 
-export class SignIn extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-          errorCode: null,
-          errorMessage: null,
-          successMessage: null,
-        };
+export default function SignIn() {
+    const [errorCode, setErrorCode] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
+
+    const classes = useStyles();
     
-        this.signIn = this.signIn.bind(this);
-    }
-    
-    signIn(event) {
+    const signIn = (event) => {
         event.preventDefault();
         event.stopPropagation();
         var email = document.getElementById('email').value;
@@ -58,58 +69,68 @@ export class SignIn extends React.Component {
             // The link was successfully sent. Inform the user.
             alert('An email was sent to ' + email + '. Please use the link in the email to sign-in.');
             // Re-enable the sign-in button.
-            this.setState({
-                successMessage: "Email sent. Check your inbox.", 
-                errorCode: null, errorMessage: null
-            })
+            setSuccessMessage("Email sent. Check your inbox.");
+            setErrorCode(null);
+            setErrorMessage(null);
             //document.getElementById('quickstart-sign-in').disabled = false;
         }).catch(error => {
             // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            console.log(errorCode)
-            console.log(errorMessage);
-            this.setState({ errorCode, errorMessage, successMessage: null })
+            let newErrorCode = error.code;
+            let newErrorMessage = error.message;
+            console.log(newErrorCode)
+            console.log(newErrorMessage);
+            setErrorCode(newErrorCode);
+            setErrorMessage(newErrorMessage);
+            setSuccessMessage(null);
         });
         return false;
     }
 
-
-
-    render() {
-        // const classes = this.props.classes;
-        return (
-            <div>
-                {/* {this.handleSignIn()} */}
-                <Header />
-                Need to sign in
-                {/* TODO put an email field validator on this */}
-                <form noValidate autoComplete="off" onSubmit={this.signIn}>
-                    <TextField
-                        id="email"
-                        label="Email Address"
-                        // onChange={handleChange('name')}
-                        margin="normal"
-                        variant="outlined"
-                        //error={this.state.errorMessage}
-                    />
-                    {this.state.errorMessage}
-                    {this.state.successMessage}
-                    <Button 
-                        variant="contained"
-                        color="primary"
-                        // className={classes.button}
-                        onClick={this.signIn}
-                    >
-                        Send Sign In Link
-                        {/* This Button uses a Font Icon, see the installation instructions in the docs. */}
-                        <Icon /*className={classes.rightIcon}*/>send</Icon>
-                    </Button>
-
+    return (
+        <Container component="main" maxWidth="xs">
+            <CssBaseline />
+            <div className={classes.paper}>
+                <Avatar className={classes.avatar}>
+                    <LockOutlinedIcon />
+                </Avatar>
+                <Typography component="h1" variant="h5">
+                    Sign in
+                </Typography>
+                <form 
+                    className={classes.form}
+                    onSubmit={(e) => e.preventDefault()}
+                    noValidate
+                >
+                     <TextField
+                         variant="outlined"
+                         margin="normal"
+                         required
+                         fullWidth
+                         id="email"
+                         label="Email Address"
+                         name="email"
+                         autoComplete="email"
+                         autoFocus
+                     />
+                     <Button
+                         className={classes.submit}
+                         variant="contained"
+                         color="primary"
+                         // className={classes.button}
+                         onClick={signIn}
+                     >
+                         Send Sign In Link
+                         {/* This Button uses a Font Icon, see the installation instructions in the docs. */}
+                         <Icon className={classes.sendIcon}>send</Icon>
+                     </Button>
+                     <div className={classes.resultMessage}>
+                         {errorMessage}
+                         {successMessage}
+                     </div>
                 </form>
             </div>
-        );
-    }
+        </Container>
+    );
 }
   
 // export default withStyles(styles)(SignIn);
