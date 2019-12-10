@@ -10,11 +10,21 @@ jobs:
       - restore_cache:
           keys:
             - functions-dependencies-{{ checksum "functions/package.json" }}
+            - client-dependencies-{{ checksum "package.json" }}
             # fallback to using the latest cache if no exact match is found
             - functions-dependencies-
+            - client-dependencies-
+      # install client dependencies
+      - run: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: client-dependencies-{{ checksum "package.json" }}
+      # install function dependencies
       - run: npm --prefix ./functions install
       - save_cache:
           paths:
             - functions/node_modules
           key: functions-dependencies-{{ checksum "functions/package.json" }}
+      # running function test
       - run: npm --prefix ./functions test
