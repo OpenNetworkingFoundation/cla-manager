@@ -1,3 +1,22 @@
+# CLAM (CLA Manager)
+
+## Setting up a development environment
+
+If you don't have one, create an application on [Firebase](https://console.firebase.google.com/).
+
+
+Once you have it, you'll need to keep track of the `Project ID` and `Web API Key` (You can find them in the `Settings` panel).
+You'll also need to setup Email/Password authentication in the `Authentication` panel.
+
+Once this is done you can start the application with the following command:
+
+```bash
+REACT_APP_FIREBASE_ENV=<ProjectId> REACT_APP_FIREBASE_API_KEY=<WebApiKey> npm start
+```
+
+
+# TLDR;
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
