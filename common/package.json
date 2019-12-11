@@ -1,0 +1,21 @@
+{
+  "name": "cla-manager-common",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm install && npm run lint",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "eslint": "^5.12.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "jest": "^24.0.0"
+  },
+  "engines": {
+    "node": "10"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "private": true
+}
