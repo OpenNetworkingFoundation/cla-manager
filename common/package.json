@@ -1,6 +1,6 @@
 {
   "name": "cla-manager-common",
-  "description": "Cloud Functions for Firebase",
+  "description": "Common code",
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm install && npm run lint",
