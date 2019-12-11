@@ -106,7 +106,7 @@ function Github (options) {
 
   async function isClaSigned(commit) {
       //FIXME this is a hack for storing PR data
-      const match = commit.url.match(/repos\/([^\/]+)\/([^\/]+)/)
+      const match = commit.url.match(/repos\/([^/]+)\/([^/]+)/)
       const ref = {
         owner: match[1],
         repo: match[2],
