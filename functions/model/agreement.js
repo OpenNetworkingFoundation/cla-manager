@@ -76,3 +76,6 @@ class Agreement {
         return this._signer;
     }
 }
+
+exports.Agreement = Agreement
+exports.AgreementType = AgreementType

@@ -83,3 +83,6 @@ class Addendum {
         return this._removed;
     }
 }
+
+exports.Addendum = Addendum
+exports.AddendumType = AddendumType

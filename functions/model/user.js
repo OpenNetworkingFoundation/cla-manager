@@ -41,3 +41,5 @@ class User {
         return this._githubId;
     }
 }
+
+module.exports = User

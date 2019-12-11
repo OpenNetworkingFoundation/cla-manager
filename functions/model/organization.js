@@ -41,3 +41,5 @@ class Organization {
         return this._domains;
     }
 }
+
+exports.Organization = Organization
