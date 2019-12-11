@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "cla-manager-functions",
   "description": "Cloud Functions for Firebase",
   "author": "Brian O'Connor <bocon@opennetworking.org> (http://localhost)",
   "repository": "https://github.com/cla-manager.git",
@@ -15,7 +15,8 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "npm run lint && jest"
+    "pretest": "npm install && npm run lint",
+    "test": "jest"
   },
   "dependencies": {
     "@octokit/app": "^2.2.4",
