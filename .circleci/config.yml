@@ -36,6 +36,7 @@ jobs:
           paths:
             - common/node_modules
           key: common-dependencies-{{ checksum "common/package.json" }}
+      # run the tests
       - run: npm --prefix ./common test
       - run: npm --prefix ./functions test
       - run: npm --prefix ./client test
