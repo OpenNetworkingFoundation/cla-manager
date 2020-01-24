@@ -1,4 +1,6 @@
-import firebase from 'firebase/app';
+// deprecated, use common/db/db.js
+
+import {FirebaseApp} from '../../common/app/app';
 
 export default class ClaDb {
 
@@ -7,7 +9,7 @@ export default class ClaDb {
             this.db = db;
             console.log(db)
         } else {
-            this.db = firebase.firestore();
+            this.db = FirebaseApp.firestore();
         }
     }
 
@@ -41,7 +43,8 @@ export default class ClaDb {
         }).catch(error => {
             console.log("Error saving CLA");
             console.log(error);
-            this.setState({formEnabled: true});
+            // FIXME redirect to an error page
+            // this.setState({formEnabled: true});
         });
     }
 
@@ -55,7 +58,7 @@ export default class ClaDb {
 
     // Returns unsubscribe function
     subscribeToClas(email, fn) {
-        return this.db.collection('clas')
+        return this.db.collection('agreements')
         .where('whitelist', 'array-contains', email)
         .onSnapshot(fn)
     }

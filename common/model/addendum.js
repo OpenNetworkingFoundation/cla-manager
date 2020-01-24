@@ -2,7 +2,7 @@
  * types of agreement addendums.
  * @type {{CONTRIBUTOR: string, COSIGNER: string}}
  */
-const AddendumType = {
+const addendumType = {
     /**
      * Contributor addendum.
      */
@@ -16,7 +16,7 @@ const AddendumType = {
 /**
  * Agreement addendum model class.
  */
-class Addendum {
+class addendum {
     /**
      * Creates a new agreement addendum.
      * @param {string} id global identifier
@@ -84,5 +84,5 @@ class Addendum {
     }
 }
 
-exports.Addendum = Addendum
-exports.AddendumType = AddendumType
+export const Addendum = addendum
+export const AddendumType = addendumType

@@ -1,5 +1,4 @@
 import React from 'react';
-import CLADisplayWidget from './claPages/CLADisplayWidget';
 
 /**
  * Top-level controller for the page to sign a CLA. 
@@ -7,7 +6,6 @@ import CLADisplayWidget from './claPages/CLADisplayWidget';
 class ViewPage extends React.Component {
     render() {
         const id = this.props.match.params.id;
-        const user = this.props.user;
         return (
             <React.Fragment>
                 {console.log(this.props)}

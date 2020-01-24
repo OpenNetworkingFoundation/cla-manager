@@ -10,11 +10,9 @@ class SignPage extends React.Component {
         const user = this.props.user;
         return (
             <React.Fragment>
-                {console.log(this.props)}
                 <CLADisplayWidget
                     type={type}
                     user={user}
-                    onSubmit={this.handleCLASignature}
                 />
             </React.Fragment>
         );

@@ -2,10 +2,6 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import Button from '@material-ui/core/Button';
 
-function signNewAgreement(type) {
-  window.location.href = '/sign.html?type=' + type;
-}
-
 
 /**
  * Input widget which lets a user sign a new agreement.

@@ -1,6 +1,4 @@
-// import {Addendum} from "./addendum"
-const Addendum = require("./addendum").Addendum
-const AddendumType = require("./addendum").AddendumType
+import { Addendum, AddendumType } from './addendum'
 const User = require("./user")
 
 describe('The Addendum model', () => {

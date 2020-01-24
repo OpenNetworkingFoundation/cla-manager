@@ -1,21 +1,11 @@
 import React from 'react';
-import firebase from 'firebase/app';
+import {FirebaseApp} from '../../common/app/app';
 
 import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
+import Alert from '@material-ui/lab/Alert';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
-import ClaDb from '../lib/ClaDb'
-
-// import { makeStyles } from '@material-ui/core/styles';
-
-// const useStyles = makeStyles(theme => ({
-//   root: {
-//     padding: theme.spacing(3, 2),
-//   },
-// }));
-
-
+import {Agreement, AgreementType} from '../../common/model/agreement'
 
 /**
  * Component which displays an individual CLA.
@@ -24,37 +14,59 @@ class IndividualCLA extends React.Component {
 
   state = {
     name: '',
-    email: firebase.auth().currentUser.email,
-    formEnabled: true
+    email: FirebaseApp.auth().currentUser.email,
+    formEnabled: true,
+    error: null
   }
-
-  db = new ClaDb()
   
   handleSubmit = (event) => {
     if(!this.state.formEnabled) {
-      console.log("submit blocked due to outstanding request")
+      console.error("submit blocked due to outstanding request")
       return;
     }
     const email = this.state.email;
     const name = this.state.name;
     if(!email || !name) {
+      // TODO handle this is in the HTML, not with an alert
       alert("invalid email or name");
       return;
     }
-    console.log("submit:", email, name)
+    
     this.setState({formEnabled: false})
-    this.db.createIndividualCla(name, email)
+
+    // TODO this needs to be a User
+    const signer = {
+      "name": name,
+      "email": email,
+    }
+
+    const agreement = new Agreement(
+      AgreementType.INDIVIDUAL,
+      "TODO, add agreement body",
+      signer
+    )
+    console.log(this.state.email)
+    agreement.save()
+    .then(res => {
+      window.location.href = "/";
+    })
+    .catch(err => {
+        if (err.code === "permission-denied") {
+          this.setState({formEnabled: true, error: 'Permission denied, please try again later'})  
+          return
+        }
+        this.setState({formEnabled: true, error: 'Request failed, please try again later'})
+    })
   }
 
   handleChange = (event) => {
-    // console.log(event.target.name);
     const name = event.target.value;
     this.setState({ name });
   }
 
   render() {
     // const classes = useStyles();
-    const { name, email, formEnabled } = this.state;
+    const { name, email, formEnabled, error } = this.state;
 
     return (
       <div>
@@ -77,29 +89,30 @@ class IndividualCLA extends React.Component {
      
       <div style={{textAlign: 'center'}}>
         <ValidatorForm
-            style={{display: 'inline-block'}}
-            ref="form"
-            onSubmit={this.handleSubmit}
-            onError={errors => console.log(errors)}
+          style={{display: 'inline-block'}}
+          ref="form"
+          onSubmit={this.handleSubmit}
+          onError={errors => console.log(errors)}
         >
-            <TextValidator
-                style={{width: '100%'}}
-                label="Full Name"
-                name="name"
-                value={name}
-                onChange={this.handleChange}
-                validators={['required']}
-                errorMessages={['You must enter your name']}
-                margin="normal"
-                variant="outlined"
-                disabled={!formEnabled}
-            />
-            <p>Email: <span id="display-email">{email}</span></p>
-            <Button type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={!formEnabled}
-            >I AGREE</Button>
+          { this.state.error ? <Alert severity="error">{error}</Alert> : null }
+          <TextValidator
+              style={{width: '100%'}}
+              label="Full Name"
+              name="name"
+              value={name}
+              onChange={this.handleChange}
+              validators={['required']}
+              errorMessages={['You must enter your name']}
+              margin="normal"
+              variant="outlined"
+              disabled={!formEnabled}
+          />
+          <p>Email: <span id="display-email">{email}</span></p>
+          <Button type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={!formEnabled}
+          >I AGREE</Button>
         </ValidatorForm>
       </div>
       </div>
