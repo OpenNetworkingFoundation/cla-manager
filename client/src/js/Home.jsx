@@ -6,7 +6,6 @@ import Paper from '@material-ui/core/Paper';
 
 import AgreementsContainer from './helpers/AgreementsContainer';
 import NewAgreementContainer from './helpers/NewAgreementContainer';
-import ClaDb from './lib/ClaDb';
 
 import {Agreement} from '../common/model/agreement';
 
@@ -26,7 +25,6 @@ export default class Home extends React.Component {
             individualCLATable: [],
             institutionCLATable: [],
         };
-        this.db = new ClaDb()
     }
 
     /**
