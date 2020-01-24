@@ -5,8 +5,6 @@ import firebase from 'firebase/app';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import { TextValidator} from 'react-material-ui-form-validator';
 
 function initializeForm(formInfo, handleChange) {

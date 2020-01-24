@@ -1,3 +1,5 @@
+// deprecated, use common/db/db.js
+
 import firebase from 'firebase/app';
 
 export default class ClaDb {
@@ -41,7 +43,8 @@ export default class ClaDb {
         }).catch(error => {
             console.log("Error saving CLA");
             console.log(error);
-            this.setState({formEnabled: true});
+            // FIXME redirect to an error page
+            // this.setState({formEnabled: true});
         });
     }
 

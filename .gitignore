@@ -28,3 +28,6 @@ package-lock.json
 
 # ide
 .idea/*
+
+# generated code
+client/build

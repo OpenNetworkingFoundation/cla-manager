@@ -1,5 +1,5 @@
 function isSigner() {
-	return request.auth.token.email == resource.data.signer;
+	return request.auth.token.email == resource.data.signer.email;
 }
 
 function isAdmin() {
@@ -15,8 +15,7 @@ service cloud.firestore {
     match /clas/{cla} {
       allow read: if request.auth != null && onWhitelist();
       allow update: if request.auth != null && isAdmin();
-      allow create: if request.auth != null
-      								&& request.auth.token.email == request.resource.data.signer;
+      allow create: if request.auth != null && request.auth.token.email == request.resource.data.signer.email;
       allow delete: if request.auth != null && isSigner();
     }
   }

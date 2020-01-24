@@ -1,8 +1,10 @@
+import DB from '../db/db'
+
 /**
  * Types of agreements.
  * @type {{CORPORATE: string, INDIVIDUAL: string}}
  */
-const AgreementType = {
+const agreementType = {
     /**
      * Individual CLA.
      */
@@ -16,7 +18,7 @@ const AgreementType = {
 /**
  * Agreement model class.
  */
-class Agreement {
+class agreement {
 
     /**
      * Creates a new agreement.
@@ -28,12 +30,17 @@ class Agreement {
      * @param {string} body the agreement text body
      * @param {User} signer the signer of the agreement
      */
-    constructor(id, type, organization, body, signer) {
-        this._id = id;
+    constructor(type, body, signer, organization=null) {
+        this._id = null;
+        this._dateSigned = new Date();
+        // TODO validate that type is of type AgreementType
+        // TODO if type is CORPORATE make sure organization is filled
         this._type = type;
-        this._organization = organization;
         this._body = body;
+        // TODO validate that signer is of type User
         this._signer = signer;
+        // organization is an optional parameter, defaults to null
+        this._organization = organization;
     }
 
     /**
@@ -75,7 +82,35 @@ class Agreement {
     get signer() {
         return this._signer;
     }
+
+    /**
+     * Returns the signing date.
+     * @returns {Date}
+     */
+    get dateSigned() {
+        return this._dateSigned;
+    }
+
+    save() {
+        const data = {
+            signer: this._signer,
+            type: this._type,
+            dateSigned: this.dateSigned
+        }
+        if (this._organization) {
+            data["organization"] = this._organization
+        }
+
+        console.info("Sending data to FirebaseDB:", data)
+
+        return DB.connection().collection('clas')
+            .add(data)
+            .then(res => {
+                this._id = res.id
+                return res
+            });
+    }
 }
 
-exports.Agreement = Agreement
-exports.AgreementType = AgreementType
+export const Agreement = agreement
+export const AgreementType = agreementType

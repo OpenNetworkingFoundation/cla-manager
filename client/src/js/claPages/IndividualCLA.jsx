@@ -2,20 +2,9 @@ import React from 'react';
 import firebase from 'firebase/app';
 
 import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
-import ClaDb from '../lib/ClaDb'
-
-// import { makeStyles } from '@material-ui/core/styles';
-
-// const useStyles = makeStyles(theme => ({
-//   root: {
-//     padding: theme.spacing(3, 2),
-//   },
-// }));
-
-
+import {Agreement, AgreementType} from '../../common/model/agreement'
 
 /**
  * Component which displays an individual CLA.
@@ -27,8 +16,6 @@ class IndividualCLA extends React.Component {
     email: firebase.auth().currentUser.email,
     formEnabled: true
   }
-
-  db = new ClaDb()
   
   handleSubmit = (event) => {
     if(!this.state.formEnabled) {
@@ -38,16 +25,36 @@ class IndividualCLA extends React.Component {
     const email = this.state.email;
     const name = this.state.name;
     if(!email || !name) {
+      // TODO handle this is in the HTML, not with an alert
       alert("invalid email or name");
       return;
     }
-    console.log("submit:", email, name)
+    
     this.setState({formEnabled: false})
-    this.db.createIndividualCla(name, email)
+
+    const signer = {
+      "name": name,
+      "email": email,
+  }
+
+    const agreement = new Agreement(
+      AgreementType.INDIVIDUAL,
+      "TODO, add agreement body",
+      signer
+    )
+    console.log("submit:", agreement)
+
+    agreement.save()
+    .then(res => {
+      window.location.href = "/";
+    })
+    .catch(err => {
+        console.error(err)
+        this.setState({formEnabled: true})
+    })
   }
 
   handleChange = (event) => {
-    // console.log(event.target.name);
     const name = event.target.value;
     this.setState({ name });
   }
