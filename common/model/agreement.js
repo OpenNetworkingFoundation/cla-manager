@@ -112,6 +112,12 @@ class agreement {
                 return res
             });
     }
+
+    static subscribe(email, successCb, errorCb) {
+        return DB.connection().collection(agreementCollection)
+        .where('signer.email', '==', email)
+        .onSnapshot(successCb, errorCb)
+    }
 }
 
 export const Agreement = agreement

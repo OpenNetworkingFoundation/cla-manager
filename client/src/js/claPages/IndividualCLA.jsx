@@ -1,5 +1,5 @@
 import React from 'react';
-import firebase from 'firebase/app';
+import {FirebaseApp} from '../../common/app/app';
 
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
@@ -14,7 +14,7 @@ class IndividualCLA extends React.Component {
 
   state = {
     name: '',
-    email: firebase.auth().currentUser.email,
+    email: FirebaseApp.auth().currentUser.email,
     formEnabled: true,
     error: null
   }
@@ -45,13 +45,16 @@ class IndividualCLA extends React.Component {
       "TODO, add agreement body",
       signer
     )
-
+    console.log(this.state.email)
     agreement.save()
     .then(res => {
       window.location.href = "/";
     })
     .catch(err => {
-        console.error(err)
+        if (err.code === "permission-denied") {
+          this.setState({formEnabled: true, error: 'Permission denied, please try again later'})  
+          return
+        }
         this.setState({formEnabled: true, error: 'Request failed, please try again later'})
     })
   }

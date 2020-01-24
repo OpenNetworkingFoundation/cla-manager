@@ -31,3 +31,4 @@ package-lock.json
 
 # generated code
 client/build
+.firebase

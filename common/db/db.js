@@ -1,8 +1,7 @@
-
-import firebase from 'firebase/app';
+import {FirebaseApp} from "../app/app";
 
 export default class DB {
 	static connection() {
-		return firebase.firestore()
+		return FirebaseApp.firestore()
 	}
 }

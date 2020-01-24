@@ -1,6 +1,6 @@
 // deprecated, use common/db/db.js
 
-import firebase from 'firebase/app';
+import {FirebaseApp} from '../../common/app/app';
 
 export default class ClaDb {
 
@@ -9,7 +9,7 @@ export default class ClaDb {
             this.db = db;
             console.log(db)
         } else {
-            this.db = firebase.firestore();
+            this.db = FirebaseApp.firestore();
         }
     }
 
@@ -58,7 +58,7 @@ export default class ClaDb {
 
     // Returns unsubscribe function
     subscribeToClas(email, fn) {
-        return this.db.collection('clas')
+        return this.db.collection('agreements')
         .where('whitelist', 'array-contains', email)
         .onSnapshot(fn)
     }

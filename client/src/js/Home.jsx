@@ -1,6 +1,5 @@
 import React from 'react';
-import firebase from 'firebase/app';
-
+import {FirebaseApp} from '../common/app/app';
 import Grid from '@material-ui/core/Grid';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
@@ -8,6 +7,8 @@ import Paper from '@material-ui/core/Paper';
 import AgreementsContainer from './helpers/AgreementsContainer';
 import NewAgreementContainer from './helpers/NewAgreementContainer';
 import ClaDb from './lib/ClaDb';
+
+import {Agreement} from '../common/model/agreement';
 
 const dateOptions = {
     year: 'numeric', month: 'short', day: 'numeric',
@@ -32,7 +33,7 @@ export default class Home extends React.Component {
      * Update the page to show all CLAs associated to the logged in user's email.
      */
     componentDidMount() {
-        const email = firebase.auth().currentUser.email
+        const email = FirebaseApp.auth().currentUser.email
         if (!email) {
             // Clear all rows from the CLA tables.
             this.setState({
@@ -42,8 +43,11 @@ export default class Home extends React.Component {
             return;
         }
 
-        this.claUnsubscribe = this.db.subscribeToClas(email,
-            this.renderClaTables.bind(this));
+        this.claUnsubscribe = Agreement.subscribe(email,
+            this.renderClaTables.bind(this), (err) => {
+                // FIXME handle the error
+                console.warn(err)
+            });
     }
 
     /**
@@ -70,7 +74,7 @@ export default class Home extends React.Component {
                 const linkUrl = `/view/${cla.id}`;
                 const row = {
                     id: cla.id,
-                    name: cla.data().signer,
+                    name: cla.data().signer.name,
                     date,
                     displayDate: date.toLocaleDateString('default', dateOptions),
                     link: <Link href={linkUrl}>View Agreement</Link>
