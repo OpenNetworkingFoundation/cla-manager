@@ -2,6 +2,7 @@ import React from 'react';
 import firebase from 'firebase/app';
 
 import Button from '@material-ui/core/Button';
+import Alert from '@material-ui/lab/Alert';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
 import {Agreement, AgreementType} from '../../common/model/agreement'
@@ -14,12 +15,13 @@ class IndividualCLA extends React.Component {
   state = {
     name: '',
     email: firebase.auth().currentUser.email,
-    formEnabled: true
+    formEnabled: true,
+    error: null
   }
   
   handleSubmit = (event) => {
     if(!this.state.formEnabled) {
-      console.log("submit blocked due to outstanding request")
+      console.error("submit blocked due to outstanding request")
       return;
     }
     const email = this.state.email;
@@ -32,17 +34,17 @@ class IndividualCLA extends React.Component {
     
     this.setState({formEnabled: false})
 
+    // TODO this needs to be a User
     const signer = {
       "name": name,
       "email": email,
-  }
+    }
 
     const agreement = new Agreement(
       AgreementType.INDIVIDUAL,
       "TODO, add agreement body",
       signer
     )
-    console.log("submit:", agreement)
 
     agreement.save()
     .then(res => {
@@ -50,7 +52,7 @@ class IndividualCLA extends React.Component {
     })
     .catch(err => {
         console.error(err)
-        this.setState({formEnabled: true})
+        this.setState({formEnabled: true, error: 'Request failed, please try again later'})
     })
   }
 
@@ -61,7 +63,7 @@ class IndividualCLA extends React.Component {
 
   render() {
     // const classes = useStyles();
-    const { name, email, formEnabled } = this.state;
+    const { name, email, formEnabled, error } = this.state;
 
     return (
       <div>
@@ -84,29 +86,30 @@ class IndividualCLA extends React.Component {
      
       <div style={{textAlign: 'center'}}>
         <ValidatorForm
-            style={{display: 'inline-block'}}
-            ref="form"
-            onSubmit={this.handleSubmit}
-            onError={errors => console.log(errors)}
+          style={{display: 'inline-block'}}
+          ref="form"
+          onSubmit={this.handleSubmit}
+          onError={errors => console.log(errors)}
         >
-            <TextValidator
-                style={{width: '100%'}}
-                label="Full Name"
-                name="name"
-                value={name}
-                onChange={this.handleChange}
-                validators={['required']}
-                errorMessages={['You must enter your name']}
-                margin="normal"
-                variant="outlined"
-                disabled={!formEnabled}
-            />
-            <p>Email: <span id="display-email">{email}</span></p>
-            <Button type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={!formEnabled}
-            >I AGREE</Button>
+          { this.state.error ? <Alert severity="error">{error}</Alert> : null }
+          <TextValidator
+              style={{width: '100%'}}
+              label="Full Name"
+              name="name"
+              value={name}
+              onChange={this.handleChange}
+              validators={['required']}
+              errorMessages={['You must enter your name']}
+              margin="normal"
+              variant="outlined"
+              disabled={!formEnabled}
+          />
+          <p>Email: <span id="display-email">{email}</span></p>
+          <Button type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={!formEnabled}
+          >I AGREE</Button>
         </ValidatorForm>
       </div>
       </div>
