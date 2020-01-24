@@ -48,6 +48,7 @@ describe('The Agreement model', () => {
 	it('should save a model to the database', () => {
 		model.save()
 		expect(DB.connection).toHaveBeenCalledTimes(1)
+		expect(mockCollection).toBeCalledWith("agreements")
 		expect(mockAdd).toBeCalledWith({
             signer: model.signer,
             type: model.type,

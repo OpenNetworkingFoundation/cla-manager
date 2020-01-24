@@ -1,5 +1,7 @@
 import DB from '../db/db'
 
+const agreementCollection = 'agreements';
+
 /**
  * Types of agreements.
  * @type {{CORPORATE: string, INDIVIDUAL: string}}
@@ -103,7 +105,7 @@ class agreement {
 
         console.info("Sending data to FirebaseDB:", data)
 
-        return DB.connection().collection('clas')
+        return DB.connection().collection(agreementCollection)
             .add(data)
             .then(res => {
                 this._id = res.id
