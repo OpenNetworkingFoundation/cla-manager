@@ -4,6 +4,7 @@
 client/node_modules
 functions/node_modules
 common/node_modules
+node_modules
 /.pnp
 .pnp.js
 

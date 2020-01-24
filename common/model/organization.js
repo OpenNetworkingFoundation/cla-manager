@@ -42,4 +42,4 @@ class Organization {
     }
 }
 
-exports.Organization = Organization
+exports.Organization = Organization;

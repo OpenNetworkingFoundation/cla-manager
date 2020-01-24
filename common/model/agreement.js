@@ -32,7 +32,7 @@ class agreement {
      * @param {string} body the agreement text body
      * @param {User} signer the signer of the agreement
      */
-    constructor(type, body, signer, organization=null) {
+    constructor(type, body, signer, organization = null) {
         this._id = null;
         this._dateSigned = new Date();
         // TODO validate that type is of type AgreementType
@@ -115,10 +115,10 @@ class agreement {
 
     static subscribe(email, successCb, errorCb) {
         return DB.connection().collection(agreementCollection)
-        .where('signer.email', '==', email)
-        .onSnapshot(successCb, errorCb)
+            .where('signer.email', '==', email)
+            .onSnapshot(successCb, errorCb)
     }
 }
 
-export const Agreement = agreement
-export const AgreementType = agreementType
+exports.Agreement = Agreement
+exports.AgreementType = AgreementType

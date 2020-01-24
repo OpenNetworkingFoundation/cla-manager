@@ -42,4 +42,4 @@ class User {
     }
 }
 
-module.exports = User
+exports.User = User
