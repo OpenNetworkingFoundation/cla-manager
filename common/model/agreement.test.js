@@ -1,13 +1,26 @@
 import DB from '../db/db'
 jest.mock('../db/db', () => jest.fn())
 
+const mockOnSnapshot = jest.fn((success, error) => {
+	// TODO return data
+	// TODO mock errors too
+	return success([])
+})
+
 const mockAdd = jest.fn(() => {
 	return Promise.resolve({id: "test-id"})
 })
 
+const mockWhere = jest.fn(() => {
+	return {
+		onSnapshot: mockOnSnapshot
+	}
+})
+
 const mockCollection = jest.fn(() => {
 	return {
-		add: mockAdd
+		add: mockAdd,
+		where: mockWhere,
 	}
 })
 
@@ -54,5 +67,20 @@ describe('The Agreement model', () => {
             type: model.type,
             dateSigned: model.dateSigned
 		})
+	})
+
+	it('should get a list of models from the DB', (done) => {
+		const email = "info@onf.org"
+		Agreement.subscribe(
+			email,
+			res => {
+				expect(mockWhere).toBeCalledWith('signer.email', '==', email)
+				expect(res).toEqual([]);
+				done()
+			},
+			err => {
+				done(err)
+			}
+		)
 	})
 })
