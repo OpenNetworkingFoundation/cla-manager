@@ -12,8 +12,12 @@
     "babel": "^6.23.0",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^25.1.0",
-    "eslint": "^5.12.0",
-    "eslint-plugin-promise": "^4.0.1",
+    "eslint": "^6.2.2",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "jest": "^24.0.0",
     "firebase": "^6.4.0"
   },
@@ -24,13 +28,23 @@
     "testEnvironment": "node"
   },
   "private": true,
+  "standard": {
+    "env": [
+      "jest"
+    ]
+  },
   "eslintConfig": {
+    "extends": "standard",
     "parser": "babel-eslint",
     "parserOptions": {
       "sourceType": "module"
     },
     "rules": {
       "promise/always-return": 0
+    },
+    "env": {
+      "node": true,
+      "jest": true
     }
   }
 }
