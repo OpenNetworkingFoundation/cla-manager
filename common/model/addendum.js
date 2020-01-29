@@ -1,7 +1,12 @@
+import DB from '../db/db'
+
 /**
  * types of agreement addendums.
  * @type {{CONTRIBUTOR: string, COSIGNER: string}}
  */
+
+const addendumCollection = 'addendums';
+
 const addendumType = {
   /**
    * Contributor addendum.
@@ -79,8 +84,32 @@ class addendum {
    * Returns the removed users.
    * @returns {User[]}
    */
-  get removed () {
-    return this._removed
+  get removed() {
+    return this._removed;
+  }
+
+  save() {
+    const data = {
+      signer: this.signer,
+      added: this.added,
+      removed: this.removed,
+      agreementId: this.agreementId
+    }
+
+    console.info("Sending data to FirebaseDB:", data)
+
+    return DB.connection().collection(addendumCollection)
+      .add(data)
+      .then(res => {
+          this._id = res.id
+          return this
+      });
+  }
+
+  static get(agreementId) {
+    return DB.connection().collection(addendumCollection)
+    .where('agreementId', '==', agreementId)
+    .get()
   }
 }
 
