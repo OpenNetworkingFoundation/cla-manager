@@ -60,7 +60,7 @@ function Cla () {
               return transaction.set(prRef, { refs: [ref] })
             }
             const newRefs = doc.data().refs.push(ref)
-            return transaction.update(sfDocRef, { refs: newRefs })
+            return transaction.update(prRef, { refs: newRefs })
           })
         }).then(() => {
           console.log('Transaction successfully committed!')

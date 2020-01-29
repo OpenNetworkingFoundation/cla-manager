@@ -29,6 +29,7 @@ exports.modifyUser = functions.firestore
     if (document) {
       const whitelist = document.data().whitelist
       console.log('rechecking', whitelist)
-      github.recheckPrsForEmails(whitelist)
+      // TODO: re-enable once recheckPrsForEmails is fixed
+      // github.recheckPrsForEmails(whitelist)
     }
   })

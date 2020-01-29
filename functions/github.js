@@ -72,7 +72,7 @@ function Github (options) {
       const commits = response.data
       allSigned = await commits
         .map(async commit => isClaSigned(commit))
-        .reduce((r, v) => r = r && v, true)
+        .reduce((r, v) => (r && v), true)
         // TODO for debugging
       //        commits.forEach(async commit => {
       //            const signed = await isClaSigned(commit)
@@ -143,27 +143,27 @@ function Github (options) {
     return signed
   }
 
-  function recheckPrsForEmails (emails) {
-    console.log('rechecking:', emails)
-    return Promise.all(emails.map(async email => {
-      const refs = await claClient.getPrsForEmail(email)
-      return refs.map(ref => {
-        // FIXME This is a Hack that won't work if there is more than one commit
-        return client.repos.createStatus({
-          owner: ref.owner,
-          repo: ref.repo,
-          sha: ref.sha,
-          context: 'cla-manager',
-          state: 'success',
-          description: 'CLA is signed'
-        })
-      })
-    }))
-  }
+  // function recheckPrsForEmails (emails) {
+  //   console.log('rechecking:', emails)
+  //   return Promise.all(emails.map(async email => {
+  //     const refs = await claClient.getPrsForEmail(email)
+  //     return refs.map(ref => {
+  //       // FIXME This is a Hack that won't work if there is more than one commit
+  //       return client.repos.createStatus({
+  //         owner: ref.owner,
+  //         repo: ref.repo,
+  //         sha: ref.sha,
+  //         context: 'cla-manager',
+  //         state: 'success',
+  //         description: 'CLA is signed'
+  //       })
+  //     })
+  //   }))
+  // }
 
   return {
     receive: webhooks.receive,
-    handler: webhooks.middleware,
-    recheckPrsForEmails
+    handler: webhooks.middleware
+    // recheckPrsForEmails
   }
 }
