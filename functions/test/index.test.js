@@ -28,7 +28,7 @@ nock.disableNetConnect()
 describe('Github PR Webhook', () => {
   let github
   let mockCert
-  let cla = {
+  const cla = {
     isClaSigned: () => false
   }
 
@@ -42,10 +42,10 @@ describe('Github PR Webhook', () => {
 
   beforeEach(() => {
     github = new Github({
-        id: 123, // App ID
-        cert: mockCert, // App Private Key
-        secret: "secret", // Webhook Secret
-        cla: cla
+      id: 123, // App ID
+      cert: mockCert, // App Private Key
+      secret: 'secret', // Webhook Secret
+      cla: cla
     })
     // Return a token for fake application (id=555)
     nock('https://api.github.com')
@@ -66,7 +66,7 @@ describe('Github PR Webhook', () => {
         })
       .reply(200)
 
-    expect.assertions(1);
+    expect.assertions(1)
     // Receive a webhook event
     await github.receive({ name: 'pull_request', payload })
   })
@@ -82,7 +82,7 @@ describe('Github PR Webhook', () => {
         })
       .reply(200)
 
-    expect.assertions(1);
+    expect.assertions(1)
     // Receive a webhook event
     await github.receive({ name: 'pull_request', payload })
   })
@@ -90,11 +90,10 @@ describe('Github PR Webhook', () => {
   test('Fail on 300 commits', async () => {
     // Receive a webhook event
     await github.receive({ name: 'pull_request', payload: hugePayload })
-    .then(() => {
-        return
-    }, error => {
-        expect(error.errors[0].message).toBe('number of commits exceeds the 250 commit limit')
-    })
-  })
+      .then(() => {
 
+      }, error => {
+        expect(error.errors[0].message).toBe('number of commits exceeds the 250 commit limit')
+      })
+  })
 })
