@@ -5,33 +5,41 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
+import { Paper } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    padding: theme.spacing(2)
+  }
+}));
 
 /**
  * Layout component which renders information about all signed agreements
  * associated to a given user.
  */
 
-class AgreementsContainer extends React.Component {
-  render() {
+function AgreementsContainer(props) {
+  const classes = useStyles();
     // If this table has no data, no need to show it.
-    if (this.props.data.length === 0) {
+    if (props.data.length === 0) {
       return null;
     }
 
     return (
-      <React.Fragment>
-        <h4>{this.props.header}</h4>
-        <p>{this.props.description}</p>
+      <Paper elevation={23} className={classes.root}>
+        <h4>{props.header}</h4>
+        <p>{props.description}</p>
         <Table>
           <TableHead>
             <TableRow>
-              {this.props.columnTitles.map(t => <TableCell key={t}>{t}</TableCell>)}
+              {props.columnTitles.map(t => <TableCell key={t}>{t}</TableCell>)}
             </TableRow>
           </TableHead>
           <TableBody>{
-            this.props.data.map(r => (
+            props.data.map(r => (
               <TableRow key={r.id + '-row'}>
-                {this.props.columnIds.map((n, i) => {
+                {props.columnIds.map((n, i) => {
                   // Enable screen readers to identify a cell's value by it's row and column name
                   const attrs = i !== 0 ? {} : {
                     component: 'th',
@@ -44,10 +52,9 @@ class AgreementsContainer extends React.Component {
             ))
           }</TableBody>
         </Table>
-      </React.Fragment>
+      </Paper>
     );
   }
-}
 
 AgreementsContainer.propTypes = {
   header: PropTypes.string.isRequired,

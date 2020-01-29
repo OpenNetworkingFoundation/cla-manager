@@ -7,6 +7,7 @@ import Header from './helpers/Header';
 import Home from './Home';
 import SignPage from './claPages/SignPage';
 import View from './View';
+import { Container } from "@material-ui/core";
 
 class AppRouter extends React.Component {
 
@@ -44,15 +45,17 @@ class AppRouter extends React.Component {
                     user={user}
                     onSignOut={this.signOut}
                 />
-                <Route path="/" exact render={() => (
-                    <Home user={user}/>
-                )}/>
-                <Route path="/sign/:type" render={props => (
-                    <SignPage user={user} {...props} />
-                )}/>
-                <Route path="/view/:id" render={props => (
-                    <View user={user} {...props} />
-                )}/>
+                <Container>
+                    <Route path="/" exact render={() => (
+                        <Home user={user}/>
+                    )}/>
+                    <Route path="/sign/:type" render={props => (
+                        <SignPage user={user} {...props} />
+                    )}/>
+                    <Route path="/view/:id" render={props => (
+                        <View user={user} {...props} />
+                    )}/>
+                </Container>
             </div>
             </Router>
         );

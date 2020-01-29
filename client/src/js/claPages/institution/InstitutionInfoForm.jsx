@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import firebase from 'firebase/app';
+import {FirebaseApp} from '../../../common/app/app';
 
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -30,7 +30,7 @@ function initializeForm(formInfo, handleChange) {
 export default function InstitutionInfoForm(props) {
   const formInfo = props.formInfo;
   const handleChange = props.handleChange;
-  const email = firebase.auth().currentUser.email;
+  const email = FirebaseApp.auth().currentUser.email;
   initializeForm(formInfo, handleChange);
   return (
     <React.Fragment>
