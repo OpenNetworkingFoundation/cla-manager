@@ -1,7 +1,7 @@
 /**
  * Organization model class.
  */
-class Organization {
+class organization {
 
     /**
      * Creates a new organization.
@@ -42,4 +42,5 @@ class Organization {
     }
 }
 
-exports.Organization = Organization
+
+export const Organization = organization

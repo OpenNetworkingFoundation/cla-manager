@@ -33,7 +33,7 @@ const mockConnection = jest.fn(() => {
 DB.connection = mockConnection
 
 import { Agreement, AgreementType } from './agreement'
-const User = require("./user")
+import { User } from './user'
 
 describe('The Agreement model', () => {
 	let model, signer = null;
@@ -55,7 +55,7 @@ describe('The Agreement model', () => {
 		expect(model.type).toEqual(AgreementType.INDIVIDUAL);
 		expect(model.signer.email).toEqual(signer.email);
 		expect(model.signer.name).toEqual(signer.name);
-		expect(model._organization).toEqual(null)
+		expect(model.organization).toEqual(null)
 	})
 
 	it('should save a model to the database', () => {

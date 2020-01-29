@@ -1,7 +1,7 @@
 /**
  * User model class.
  */
-class User {
+class user {
 
     /**
      * Creates a new user.
@@ -42,4 +42,4 @@ class User {
     }
 }
 
-module.exports = User
+export const User = user
