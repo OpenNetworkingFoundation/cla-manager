@@ -1,9 +1,14 @@
 version: 2
+
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:10
+
 jobs:
-  build:
-    docker:
-      - image: circleci/node:10
-    working_directory: ~/repo
+  test:
+    <<: *defaults
     steps:
       - checkout
       # Restore cache for all the packages
@@ -40,3 +45,50 @@ jobs:
       - run: npm --prefix ./common test
       - run: npm --prefix ./functions test
       - run: npm --prefix ./client test
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+  build:
+    <<: *defaults
+    environment:
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Build the clinet
+          command: |
+            pushd client
+            CI=false npm run build
+            popd
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+  deploy:
+    <<: *defaults
+    environment:
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Install Firebase Tools
+          command: npm install --prefix=./firebase-deploy firebase-tools
+      - run:
+          name: Deploy Client to Firebase
+          command: |
+            pushd client
+            ../firebase-deploy/node_modules/.bin/firebase --project ${FIREBASE_PROJECT_ID} deploy --token=${FIREBASE_DEPLOY_TOKEN}
+            popd
+
+workflows:
+  version: 2
+  test-deploy:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+      - deploy:
+          requires:
+            - build
