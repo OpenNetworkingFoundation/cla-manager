@@ -1,4 +1,4 @@
-const User = require("./user").User;
+import { User } from './user'
 
 describe('The User model', () => {
     let model = null;

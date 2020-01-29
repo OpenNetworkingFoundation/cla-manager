@@ -1,5 +1,5 @@
 import { Addendum, AddendumType } from './addendum'
-const User = require("./user")
+import { User } from './user'
 
 describe('The Addendum model', () => {
     let model, signer, contributor1, contributor2 = null;

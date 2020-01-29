@@ -120,5 +120,5 @@ class agreement {
     }
 }
 
-exports.Agreement = Agreement
-exports.AgreementType = AgreementType
+export const Agreement = agreement
+export const AgreementType = agreementType

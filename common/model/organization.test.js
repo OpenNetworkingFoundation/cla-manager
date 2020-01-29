@@ -1,4 +1,4 @@
-const Organization = require("./organization").Organization;
+import { Organization } from "./organization";
 
 describe('The Organization model', () => {
     let model = null;

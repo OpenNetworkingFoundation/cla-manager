@@ -33,7 +33,7 @@ const mockConnection = jest.fn(() => {
 DB.connection = mockConnection
 
 import { Agreement, AgreementType } from './agreement'
-const User = require("./user")
+import { User } from './user'
 
 describe('The Agreement model', () => {
 	let model, signer = null;
