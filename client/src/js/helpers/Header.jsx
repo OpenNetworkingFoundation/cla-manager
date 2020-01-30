@@ -1,10 +1,10 @@
-import React from 'react';
-import SignOutContainer from './SignOutContainer';
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Link from '@material-ui/core/Link';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import React from 'react'
+import SignOutContainer from './SignOutContainer'
+import { makeStyles } from '@material-ui/core/styles'
+import AppBar from '@material-ui/core/AppBar'
+import Link from '@material-ui/core/Link'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
 
 /**
  * Renders the standard header for pages within the CLA Manager application.
@@ -12,34 +12,34 @@ import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   title: {
-    flexGrow: 1,
-  },
-});
+    flexGrow: 1
+  }
+})
 
-export default function Header(props) {
-  const classes = useStyles();
-  const user = props.user;
+export default function Header (props) {
+  const classes = useStyles()
+  const user = props.user
 
   return (
     <div className={classes.root}>
-      <AppBar position="static" /*color="default"*/>
+      <AppBar position='static'>
         <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            <Link href="/" color="inherit">
+          <Typography variant='h6' className={classes.title}>
+            <Link href='/' color='inherit'>
               CLAM (Your friendly CLA Manager)
             </Link>
           </Typography>
           {user && (
-              <SignOutContainer
-                user={user}
-                onSignOut={props.onSignOut}
-              />
+            <SignOutContainer
+              user={user}
+              onSignOut={props.onSignOut}
+            />
           )}
         </Toolbar>
       </AppBar>
     </div>
-  );
+  )
 }

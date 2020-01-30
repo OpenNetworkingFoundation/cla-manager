@@ -2,7 +2,7 @@
   "name": "cla-manager-common",
   "description": "Common code",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . && npx standard",
     "pretest": "npm install && npm run lint",
     "test": "jest",
     "test-only": "jest"

@@ -1,17 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import Confirm from './Confirm';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
-import ReviewForm from './ReviewForm';
-import InstitutionInfoForm from './InstitutionInfoForm';
-import ContributorEmailForm from './ContributorEmailForm';
+import React from 'react'
+import PropTypes from 'prop-types'
+import Confirm from './Confirm'
+import Stepper from '@material-ui/core/Stepper'
+import Step from '@material-ui/core/Step'
+import StepLabel from '@material-ui/core/StepLabel'
+import Button from '@material-ui/core/Button'
+import Typography from '@material-ui/core/Typography'
+import ReviewForm from './ReviewForm'
+import InstitutionInfoForm from './InstitutionInfoForm'
+import ContributorEmailForm from './ContributorEmailForm'
 
-import { ValidatorForm } from 'react-material-ui-form-validator';
-
+import { ValidatorForm } from 'react-material-ui-form-validator'
 
 const steps = ['Review Agreement', 'Schedule A: Contributors', 'Institution Info', 'Review'];
 

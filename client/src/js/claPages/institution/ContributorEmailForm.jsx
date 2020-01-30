@@ -1,58 +1,57 @@
-import React from 'react';
-import Grid from '@material-ui/core/Grid';
-import PropTypes from 'prop-types';
+import React from 'react'
+import Grid from '@material-ui/core/Grid'
+import PropTypes from 'prop-types'
 
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button'
+import Typography from '@material-ui/core/Typography'
 // import TextField from '@material-ui/core/TextField';
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
 // import Checkbox from '@material-ui/core/Checkbox';
-import { TextValidator} from 'react-material-ui-form-validator';
+import { TextValidator } from 'react-material-ui-form-validator'
 
 /**
  * Form within the institution sign flow. Contains inputs
  * for adding contributor emails.
  */
 export default class AddressForm extends React.Component {
-
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     // Extract the keys from existing form info
-    let keys = Object.keys(this.props.formInfo)
-      .filter(k => k.startsWith("name"))
+    const keys = Object.keys(this.props.formInfo)
+      .filter(k => k.startsWith('name'))
       .map(k => k.split('-')[1])
-      .sort();
+      .sort()
     this.state = {
       keys
-    };
-    this.addNewInput = this.addNewInput.bind(this);
+    }
+    this.addNewInput = this.addNewInput.bind(this)
   }
 
-  addNewInput(e) {
-    let fakeEvent = {
+  addNewInput (e) {
+    const fakeEvent = {
       target: {
         value: ''
       }
-    };
-    let newIndex = this.state.keys.slice(-1)[0] + 1 || 0;
-    fakeEvent.target.name = 'name-' + newIndex;
-    this.props.handleChange(fakeEvent);
-    fakeEvent.target.name = 'email-' + newIndex;
-    this.props.handleChange(fakeEvent);
-    this.setState({ keys: [...this.state.keys, newIndex] });
+    }
+    const newIndex = this.state.keys.slice(-1)[0] + 1 || 0
+    fakeEvent.target.name = 'name-' + newIndex
+    this.props.handleChange(fakeEvent)
+    fakeEvent.target.name = 'email-' + newIndex
+    this.props.handleChange(fakeEvent)
+    this.setState({ keys: [...this.state.keys, newIndex] })
   }
 
-  render() {
+  render () {
     return (
-      <React.Fragment>
-        <Typography variant="h5" gutterBottom>
+      <>
+        <Typography variant='h5' gutterBottom>
           Schedule A
         </Typography>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant='h6' gutterBottom>
           Contributors
         </Typography>
-        <Typography variant="body1">
-        <i>Initial list of designated employees.  NB: authorization is not tied to particular Contributions.</i>
+        <Typography variant='body1'>
+          <i>Initial list of designated employees.  NB: authorization is not tied to particular Contributions.</i>
         </Typography>
         <Grid container spacing={3}>
           {
@@ -68,23 +67,23 @@ export default class AddressForm extends React.Component {
                     value={inputInfo.email}
                   /> */}
                   <TextValidator
-                      label="Full Name"
-                      name={'name-' + index}
-                      value={this.props.formInfo['name-' + index]}
-                      onChange={this.props.handleChange}
-                      validators={['required']}
-                      errorMessages={['You must enter a name']}
+                    label='Full Name'
+                    name={'name-' + index}
+                    value={this.props.formInfo['name-' + index]}
+                    onChange={this.props.handleChange}
+                    validators={['required']}
+                    errorMessages={['You must enter a name']}
                   />
                   <TextValidator
-                      label="Email"
-                      name={'email-' + index}
-                      value={this.props.formInfo['email-' + index]}
-                      onChange={this.props.handleChange}
-                      validators={['required', 'isEmail']}
-                      errorMessages={['You must enter an email', 'Email is not valid']}
-                    />
+                    label='Email'
+                    name={'email-' + index}
+                    value={this.props.formInfo['email-' + index]}
+                    onChange={this.props.handleChange}
+                    validators={['required', 'isEmail']}
+                    errorMessages={['You must enter an email', 'Email is not valid']}
+                  />
                 </Grid>
-              );
+              )
             })
           }
           <Grid item xs={12}>
@@ -93,12 +92,12 @@ export default class AddressForm extends React.Component {
             </Button>
           </Grid>
         </Grid>
-      </React.Fragment>
-    );
+      </>
+    )
   }
 }
 
 AddressForm.propTypes = {
   formInfo: PropTypes.object.isRequired,
-  handleChange: PropTypes.func.isRequired,
-};
+  handleChange: PropTypes.func.isRequired
+}

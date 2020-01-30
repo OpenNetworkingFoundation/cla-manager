@@ -1,49 +1,49 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import {FirebaseApp} from '../../../common/app/app';
+import React from 'react'
+import PropTypes from 'prop-types'
+import { FirebaseApp } from '../../../common/app/app'
 
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import { TextValidator} from 'react-material-ui-form-validator';
+import Grid from '@material-ui/core/Grid'
+import Typography from '@material-ui/core/Typography'
+import TextField from '@material-ui/core/TextField'
+import { TextValidator } from 'react-material-ui-form-validator'
 
-function initializeForm(formInfo, handleChange) {
-  let fakeEvent = {
+function initializeForm (formInfo, handleChange) {
+  const fakeEvent = {
     target: {
       value: ''
     }
-  };
+  }
 
-  let checkField = fieldName => {
+  const checkField = fieldName => {
     if (formInfo[fieldName] === undefined) {
-      fakeEvent.target.name = fieldName;
-      handleChange(fakeEvent);
+      fakeEvent.target.name = fieldName
+      handleChange(fakeEvent)
     }
   }
 
-  checkField('institutionName');
-  checkField('yourName');
-  checkField('yourTitle');
-  checkField('institutionAddress');
+  checkField('institutionName')
+  checkField('yourName')
+  checkField('yourTitle')
+  checkField('institutionAddress')
 }
 
-export default function InstitutionInfoForm(props) {
-  const formInfo = props.formInfo;
-  const handleChange = props.handleChange;
-  const email = FirebaseApp.auth().currentUser.email;
-  initializeForm(formInfo, handleChange);
+export default function InstitutionInfoForm (props) {
+  const formInfo = props.formInfo
+  const handleChange = props.handleChange
+  const email = FirebaseApp.auth().currentUser.email
+  initializeForm(formInfo, handleChange)
   return (
-    <React.Fragment>
-      <Typography variant="h6" gutterBottom>
-        Institution Info 
+    <>
+      <Typography variant='h6' gutterBottom>
+        Institution Info
       </Typography>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <TextValidator
             required
             // id="institutionName"
-            name="institutionName"
-            label="Institution Name"
+            name='institutionName'
+            label='Institution Name'
             fullWidth
             // autoComplete="iname"
             value={formInfo.institutionName}
@@ -56,8 +56,8 @@ export default function InstitutionInfoForm(props) {
           <TextValidator
             required
             // id="yourName"
-            name="yourName"
-            label="Your Name"
+            name='yourName'
+            label='Your Name'
             fullWidth
             // autoComplete="yname"
             value={formInfo.yourName}
@@ -70,8 +70,8 @@ export default function InstitutionInfoForm(props) {
           <TextValidator
             required
             // id="yourTitle"
-            name="yourTitle"
-            label="Your Title"
+            name='yourTitle'
+            label='Your Title'
             fullWidth
             // autoComplete="ytitle"
             value={formInfo.yourTitle}
@@ -80,13 +80,13 @@ export default function InstitutionInfoForm(props) {
             errorMessages={['You must enter a name']}
           />
         </Grid>
-        <p>Email: <span id="display-email">{email}</span></p>
+        <p>Email: <span id='display-email'>{email}</span></p>
         <Grid item xs={12}>
           <TextValidator
             required
             // id="institutionAddress"
-            name="institutionAddress"
-            label="Institution Address"
+            name='institutionAddress'
+            label='Institution Address'
             fullWidth
             // autoComplete="iaddress"
             value={formInfo.institutionAddress}
@@ -96,84 +96,84 @@ export default function InstitutionInfoForm(props) {
           />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h6">
+          <Typography variant='h6'>
             Primary Contact
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
             required
-            id="primaryContactName"
-            name="primaryContactName"
-            label="Name"
+            id='primaryContactName'
+            name='primaryContactName'
+            label='Name'
             fullWidth
-            autoComplete="pcontactname"
+            autoComplete='pcontactname'
             value={formInfo.primaryContactName}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
             required
-            id="primaryContactEmail"
-            name="primaryContactEmail"
-            label="Email"
+            id='primaryContactEmail'
+            name='primaryContactEmail'
+            label='Email'
             fullWidth
-            autoComplete="pcontactemail"
+            autoComplete='pcontactemail'
             value={formInfo.primaryContactEmail}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
             required
-            id="primaryContactPhone"
-            name="primaryContactPhone"
-            label="Phone"
+            id='primaryContactPhone'
+            name='primaryContactPhone'
+            label='Phone'
             fullWidth
-            autoComplete="pcontactphone"
+            autoComplete='pcontactphone'
             value={formInfo.primaryContactPhone}
           />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h6">
+          <Typography variant='h6'>
             Secondary Contact
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
-            id="secondaryContactName"
-            name="secondaryContactName"
-            label="Name"
+            id='secondaryContactName'
+            name='secondaryContactName'
+            label='Name'
             fullWidth
-            autoComplete="scontactname"
+            autoComplete='scontactname'
             value={formInfo.secondaryContactName}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
-            id="secondaryContactEmail"
-            name="secondaryContactEmail"
-            label="Email"
+            id='secondaryContactEmail'
+            name='secondaryContactEmail'
+            label='Email'
             fullWidth
-            autoComplete="scontactemail"
+            autoComplete='scontactemail'
             value={formInfo.secondaryContactEmail}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
-            id="secondaryContactPhone"
-            name="secondaryContactPhone"
-            label="Phone"
+            id='secondaryContactPhone'
+            name='secondaryContactPhone'
+            label='Phone'
             fullWidth
-            autoComplete="scontactphone"
+            autoComplete='scontactphone'
             value={formInfo.secondaryContactPhone}
           />
         </Grid>
       </Grid>
-    </React.Fragment>
-  );
+    </>
+  )
 }
 
 InstitutionInfoForm.propTypes = {
   formInfo: PropTypes.object.isRequired,
-  handleChange: PropTypes.func.isRequired,
-};
+  handleChange: PropTypes.func.isRequired
+}
