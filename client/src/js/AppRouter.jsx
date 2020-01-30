@@ -49,6 +49,7 @@ class AppRouter extends React.Component {
                         <Home user={user}/>
                       )}/>
                       <Route path="/sign/:type" render={props => (
+                        // FIXME If type is institutional, ask if they can sing
                         <AgreementForm agreementType={props.match.params.type} user={user}/>
                       )}/>
                       <Route path="/view/:id" render={props => (

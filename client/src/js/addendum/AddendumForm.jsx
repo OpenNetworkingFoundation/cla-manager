@@ -28,20 +28,21 @@ function AddendumForm(props) {
 	}
 
 	const signer = {
-		"name": "name",
+		"name": "name", // FIXME use real name
 		"email": props.user.email,
 	  }
 
 	const handleSubmit = (evt) => {
 		evt.preventDefault();
 
+		// TODO add Date
 		const addendum = new Addendum(
 			null,
 			AddendumType.CONTRIBUTOR,
 			props.agreementId,
 			signer,
-			added.split(","),
-			removed.split(","),
+			added.split(","), // FIXME use User model
+			removed.split(","), // FIXME use User model
 		)
 
 		addendum.save().then(res => {
@@ -55,6 +56,13 @@ function AddendumForm(props) {
 	return(
 		<ValidatorForm onSubmit={handleSubmit}>
 			<Grid container spacing={2}>
+				<Grid item xs={12} sm={5}>
+					Users to add:
+				</Grid>
+				<Grid item xs={12} sm={5}>
+					Users to remove:
+				</Grid>
+				<Grid item xs={12} sm={2}></Grid>
 				<Grid item xs={12} sm={5}>
 					<TextValidator
 						fullWidth
