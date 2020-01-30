@@ -93,7 +93,7 @@ class agreement {
 
   save () {
     const data = {
-      signer: this._signer,
+      signer: this._signer.data(),
       type: this._type,
       dateSigned: this.dateSigned
     }

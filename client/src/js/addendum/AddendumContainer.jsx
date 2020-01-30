@@ -32,7 +32,7 @@ function AddendumContainer(props) {
 			setAddendums(parsed);
 		})
 		.catch(console.error)
-	}, [])
+	}, [props.agreementId])
 
 	const addendumAdded = (addendum) => {
 		setAddendums(addendums => [...addendums, addendum]);
