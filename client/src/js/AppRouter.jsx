@@ -8,6 +8,7 @@ import Header from './helpers/Header'
 import Home from './Home'
 import { Container } from '@material-ui/core'
 import AgreementForm from './agreement/AgreementForm'
+import SignCheck from './helpers/SignCheck'
 
 class AppRouter extends React.Component {
   constructor (props) {
@@ -52,8 +53,7 @@ class AppRouter extends React.Component {
             />
             <Route
               path='/sign/:type' render={props => (
-                // FIXME If type is institutional, ask if they can sing
-                <AgreementForm agreementType={props.match.params.type} user={user} />
+                <SignCheck agreementType={props.match.params.type} user={user} />
               )}
             />
             <Route

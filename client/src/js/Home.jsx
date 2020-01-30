@@ -6,7 +6,7 @@ import Link from '@material-ui/core/Link'
 import AgreementsContainer from './helpers/AgreementsContainer'
 import NewAgreementContainer from './helpers/NewAgreementContainer'
 
-import { Agreement } from '../common/model/agreement'
+import { Agreement, AgreementType } from '../common/model/agreement'
 import { Button } from '@material-ui/core'
 
 const dateOptions = {
@@ -82,12 +82,12 @@ export default class Home extends React.Component {
           link: <Link href={linkUrl}><Button variant='outlined' color='primary'>View Agreement</Button></Link>
         }
 
-        if (type === 'individual') {
+        if (type === AgreementType.INDIVIDUAL) {
           if (cla.data().signerDetails && cla.data().signerDetails.name) {
             row.name = cla.data().signerDetails.name
           }
           individualCLATable.push(row)
-        } else if (type === 'institutional') {
+        } else if (type === AgreementType.CORPORATE) {
           institutionCLATable.push(row)
         } else {
           console.log('unknown cla type: ', cla.data())

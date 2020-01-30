@@ -44,7 +44,7 @@ function AgreementForm (props) {
     )
 
     const agreement = new Agreement(
-      AgreementType.INDIVIDUAL,
+      props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
       'TODO, add agreement body',
       signer
     )
