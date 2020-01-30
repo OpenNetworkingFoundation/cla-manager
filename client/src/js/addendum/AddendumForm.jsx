@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator'
 import { Box, Button, Grid } from '@material-ui/core'
 import { Addendum, AddendumType } from '../../common/model/addendum'
+import UserForm from '../user/UserForm'
 
 /**
  * Component which given an Addendum id displays it,
@@ -10,19 +10,18 @@ import { Addendum, AddendumType } from '../../common/model/addendum'
  */
 
 function AddendumForm (props) {
-  const [added, setAdded] = useState('')
-  const [removed, setRemoved] = useState('')
+  const [added, setAdded] = useState([])
+  const [removed, setRemoved] = useState([])
 
   if (props.addendum) {
     return (
       <Grid container spacing={2}>
         <Grid item xs={12} sm={5}>
-          {props.addendum.added.join(', ')}
+          {props.addendum.added.map(u => `${u.name} - ${u.email} = ${u.githubId}`)}
         </Grid>
         <Grid item xs={12} sm={5}>
-          {props.addendum.removed.join(', ')}
+          {props.addendum.removed.map(u => `${u.name} - ${u.email} = ${u.githubId}`)}
         </Grid>
-
       </Grid>
     )
   }
@@ -32,29 +31,39 @@ function AddendumForm (props) {
     email: props.user.email
   }
 
-  const handleSubmit = (evt) => {
-    evt.preventDefault()
+  const addUserToAddendumAdded = (user) => {
+    setAdded(addendums => [...added, user])
+  }
 
-    // TODO add Date
+  const addUserToAddendumRemoved = (user) => {
+    setRemoved(addendums => [...removed, user])
+  }
+
+  const handleSubmit = (evt) => {
+    // evt.preventDefault()
+
+    // TODO do we need validation?
+
+    console.log(added, removed)
+
     const addendum = new Addendum(
-      null,
       AddendumType.CONTRIBUTOR,
       props.agreementId,
       signer,
-      added.split(','), // FIXME use User model
-      removed.split(',') // FIXME use User model
+      added.map(u => u.data()),
+      removed.map(u => u.data())
     )
 
     addendum.save().then(res => {
       props.callback(res)
-      setAdded('')
-      setRemoved('')
+      setAdded([])
+      setRemoved([])
     })
       .catch(console.error)
   }
 
   return (
-    <ValidatorForm onSubmit={handleSubmit}>
+    <Box>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={5}>
           Users to add:
@@ -62,35 +71,19 @@ function AddendumForm (props) {
         <Grid item xs={12} sm={5}>
           Users to remove:
         </Grid>
-        <Grid item xs={12} sm={2} />
+        <Grid item xs={12} sm={2}/>
         <Grid item xs={12} sm={5}>
-          <TextValidator
-            fullWidth
-            label='Add identities'
-            name='added'
-            value={added}
-            onChange={e => setAdded(e.target.value)}
-            validators={['required']}
-            errorMessages={['Enter a comma separated list of users']}
-            variant='outlined'
-          />
+          {added.map(u => `${u.name} - ${u.email}`)}
+          <UserForm callback={addUserToAddendumAdded}/>
         </Grid>
         <Grid item xs={12} sm={5}>
-          <TextValidator
-            fullWidth
-            label='Remove identities'
-            name='removed'
-            value={removed}
-            onChange={e => setRemoved(e.target.value)}
-            validators={['required']}
-            errorMessages={['Enter a comma separated list of users']}
-            variant='outlined'
-          />
+          {removed.map(u => `${u.name} - ${u.email}`)}
+          <UserForm callback={addUserToAddendumRemoved}/>
         </Grid>
         <Grid item xs={12} sm={2}>
           <Box textAlign='right' m={1}>
             <Button
-              type='submit'
+              onClick={handleSubmit}
               variant='contained'
               color='primary'
               size='large'
@@ -99,7 +92,7 @@ function AddendumForm (props) {
           </Box>
         </Grid>
       </Grid>
-    </ValidatorForm>
+    </Box>
   )
 }
 

@@ -3,11 +3,12 @@ import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum } from '../../common/model/addendum'
 import AddendumForm from './AddendumForm'
-import { Card, Grid } from '@material-ui/core'
+import { Box, Card, Grid } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
   root: {
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
+    marginTop: theme.spacing(2)
   }
 }))
 
@@ -41,13 +42,31 @@ function AddendumContainer (props) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
+        <h2>Create new Addendums:</h2>
         <Card variant='outlined' className={classes.root}>
-          {addendums.map(a => <AddendumForm
-            key={a.id} user={props.user} agreementId={props.agreementId}
-            addendum={a}
-          />)}
-          <AddendumForm key='new' user={props.user} agreementId={props.agreementId} callback={addendumAdded} />
+          <AddendumForm key='new' user={props.user} agreementId={props.agreementId} callback={addendumAdded}/>
         </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <h2>Existing Addendums:</h2>
+        <Card variant='outlined' className={classes.root}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={5}>
+              <Box fontWeight={700}>Added users:</Box>
+            </Grid>
+            <Grid item xs={12} sm={5}>
+              <Box fontWeight={700}>Removed users:</Box>
+            </Grid>
+          </Grid>
+        </Card>
+        {addendums.map(a =>
+          <Card key={a.id} variant='outlined' className={classes.root}>
+            <AddendumForm
+              key={a.id} user={props.user} agreementId={props.agreementId}
+              addendum={a}
+            />
+          </Card>
+        )}
       </Grid>
     </Grid>
   )
