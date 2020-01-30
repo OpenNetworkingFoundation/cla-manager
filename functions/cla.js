@@ -1,12 +1,6 @@
-const admin = require('firebase-admin')
-const functions = require('firebase-functions')
-
 module.exports = Cla
 
-function Cla () {
-  admin.initializeApp(functions.config().firebase)
-  const db = admin.firestore()
-
+function Cla (db) {
   async function isClaSigned (user, ref) {
     if (!user || !user.email) {
       console.log('email is not provided')
@@ -83,7 +77,7 @@ function Cla () {
   //     console.log('email is not provided')
   //     return false
   //   }
-  //   const doc = await db.collection('failedPRs').doc(email).get()
+  //   const doc = await firestore.collection('failedPRs').doc(email).get()
   //   if (pr.exists) {
   //     console.log('PR data:', doc.data())
   //     return doc.data().refs
@@ -99,10 +93,10 @@ function Cla () {
 //
 // async function setup() {
 //
-/// /    var claRef = db.collection('clas');
+/// /    var claRef = firestore.collection('clas');
 /// /
 /// /    Promise.all([
-/// /        await db.collection('clas').add({
+/// /        await firestore.collection('clas').add({
 /// /          admins: ['bocon@opennetworking.org'],
 /// /          whitelist: ['bocon@opennetworking.org'],
 /// /          blacklist: [], // not in whitelist
