@@ -6,3 +6,9 @@
 */firestore-debug.log
 client/build
 .firebase
+
+# gerrit hook
+gerrit/.tox
+gerrit/.coverage
+*.pyc
+__pycache__

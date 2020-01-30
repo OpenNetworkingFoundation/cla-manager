@@ -7,7 +7,7 @@ defaults: &defaults
     - image: opennetworking/clam-ci
 
 jobs:
-  test:
+  test-node:
     <<: *defaults
     steps:
       - checkout
@@ -55,6 +55,14 @@ jobs:
           root: ~/repo
           paths: .
 
+  test-py:
+    docker:
+      # CentOS 7 used on ONF Gerrit has python 3.6 installed
+      - image: python:3.6
+    steps:
+        - checkout
+        - run: pip install tox && cd gerrit && tox
+
   build:
     <<: *defaults
     environment:
@@ -98,10 +106,12 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      - test
+      - test-node
+      - test-py
       - build:
           requires:
-            - test
+            - test-node
+            - test-py
       - deploy:
           requires:
             - build
