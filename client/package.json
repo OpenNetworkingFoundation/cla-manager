@@ -31,7 +31,7 @@
     "pretest": "npm install && npm run lint",
     "test": "react-scripts test --watchAll=false --passWithNoTests",
     "eject": "react-scripts eject",
-    "lint": "eslint . && npx standard"
+    "lint": "eslint ."
   },
   "eslintConfig": {
     "extends": "react-app"
