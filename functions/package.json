@@ -22,8 +22,8 @@
     "@octokit/app": "^2.2.4",
     "@octokit/rest": "^16.26.0",
     "@octokit/webhooks": "^6.2.1",
-    "firebase-admin": "~7.0.0",
-    "firebase-functions": "^2.3.1"
+    "firebase-admin": "^8.9.2",
+    "firebase-functions": "^3.3.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",

@@ -1,14 +1,20 @@
+const admin = require('firebase-admin')
 const functions = require('firebase-functions')
+admin.initializeApp(functions.config().firebase)
+const db = admin.firestore()
 
 const Github = require('./github')
 const Cla = require('./cla')
+const Contributor = require('./contributor')
 
 const github = new Github({
   id: functions.config().github.app_id,
   cert: functions.config().github.key,
   secret: functions.config().github.secret,
-  cla: new Cla()
+  cla: new Cla(db)
 })
+
+const contributor = new Contributor(db)
 
 exports.githubWebook = functions.https.onRequest(github.handler)
 
@@ -17,7 +23,7 @@ exports.githubWebook = functions.https.onRequest(github.handler)
 
 exports.modifyUser = functions.firestore
   .document('clas/{claID}')
-  .onWrite((change, context) => {
+  .onWrite((change) => {
     // Get an object with the current document value.
     // If the document does not exist, it has been deleted.
     const document = change.after.exists ? change.after.data() : null
@@ -33,3 +39,10 @@ exports.modifyUser = functions.firestore
       // github.recheckPrsForEmails(whitelist)
     }
   })
+
+/**
+ * When a new addendum is created, update the list of active contributors in the parent agreement.
+ */
+exports.updateActiveContributors = functions.firestore
+  .document('/addendums/{id}')
+  .onCreate(contributor.updateActiveContributors)
