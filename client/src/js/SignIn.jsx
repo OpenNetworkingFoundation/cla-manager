@@ -1,6 +1,6 @@
 //TODO needs cleanup and comments
 import React, { useState } from 'react';
-import firebase from 'firebase/app';
+import {FirebaseApp} from '../common/app/app';
 
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -63,7 +63,7 @@ export default function SignIn() {
             'handleCodeInApp': true // This must be true.
         };
 
-        firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings).then(() => {
+        FirebaseApp.auth().sendSignInLinkToEmail(email, actionCodeSettings).then(() => {
             // Save the email locally so you don’t need to ask the user for it again if they open
             // the link on the same device.
             window.localStorage.setItem('emailForSignIn', email);
@@ -142,7 +142,7 @@ export default function SignIn() {
  * Returns true if user is logged in, false otherwise
  */
 export async function HandleSignInLink(fn) {
-    if (firebase.auth().isSignInWithEmailLink(window.location.href)) {        
+    if (FirebaseApp.auth().isSignInWithEmailLink(window.location.href)) {        
         // You can also get the other parameters passed in the query string such as state=STATE.
         // Get the email if available.
         let email = window.localStorage.getItem('emailForSignIn');
@@ -153,7 +153,7 @@ export async function HandleSignInLink(fn) {
         }
         if (email) {
             try {
-              const result = await firebase.auth().signInWithEmailLink(email, window.location.href);
+              const result = await FirebaseApp.auth().signInWithEmailLink(email, window.location.href);
               const history = window.history
               // Clear the URL to remove the sign-in link parameters.
               if (history && history.replaceState) {
