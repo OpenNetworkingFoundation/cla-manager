@@ -59,7 +59,7 @@ jobs:
           name: Build the clinet
           command: |
             pushd client
-            CI=false npm run build
+            REACT_APP_FIREBASE_ENV=${FIREBASE_PROJECT_ID} REACT_APP_FIREBASE_API_KEY=${FIREBASE_API_KEY} CI=false npm run build
             popd
       - persist_to_workspace:
           root: ~/repo
@@ -78,7 +78,7 @@ jobs:
           name: Deploy Client to Firebase
           command: |
             pushd client
-            ../firebase-deploy/node_modules/.bin/firebase --project ${FIREBASE_PROJECT_ID} deploy --token=${FIREBASE_DEPLOY_TOKEN}
+            ../firebase-deploy/node_modules/.bin/firebase --project ${FIREBASE_PROJECT_ID} deploy --token=${FIREBASE_DEPLOY_TOKEN} --only firestore,hosting
             popd
 
 workflows:
@@ -92,3 +92,6 @@ workflows:
       - deploy:
           requires:
             - build
+          filters:
+            branches:
+              only: master
