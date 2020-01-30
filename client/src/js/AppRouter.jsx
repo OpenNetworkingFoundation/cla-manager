@@ -1,6 +1,6 @@
 
 import React from 'react'
-import firebase from 'firebase/app'
+import { FirebaseApp } from '../common/app/app'
 
 import { BrowserRouter as Router, Route } from 'react-router-dom'
 
@@ -20,7 +20,7 @@ class AppRouter extends React.Component {
      * Handles the sign out button press.
      */
   handleSignOut () {
-    firebase.auth().signOut().catch((error) => {
+    FirebaseApp.auth().signOut().catch((error) => {
       this.handleAuthError(error)
     })
   }
