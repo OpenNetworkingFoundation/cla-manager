@@ -101,7 +101,7 @@ class agreement {
       dateSigned: this._dateSigned,
       type: this._type,
       body: this._body,
-      signer: this._signer.data(),
+      signer: this._signer.data()
     }
     if (this._type === AgreementType.CORPORATE) {
       json.organization = this._organization
