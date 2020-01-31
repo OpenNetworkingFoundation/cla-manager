@@ -1,5 +1,6 @@
 import DB from '../db/db'
 import { Addendum } from './addendum'
+import { User } from './user'
 
 const agreementCollection = 'agreements'
 
@@ -55,6 +56,14 @@ class agreement {
    */
   get id () {
     return this._id
+  }
+
+  /**
+   * Sets the agreement ID.
+   * @param {string}
+   */
+  set id (id) {
+    this._id = id
   }
 
   /**
@@ -142,19 +151,47 @@ class agreement {
   getActiveUser () {
     return this.getAddendums()
       .then(addendums => {
-        const users = addendums.reduce((users, addendum) => {
-          addendum.added.forEach(u => users.add(u))
-          addendum.removed.forEach(u => users.delete(u))
+        const users = addendums.docs.reduce((users, addendum) => {
+          addendum.data().added.forEach(u => users.add(u))
+          addendum.data().removed.forEach(u => users.delete(u))
           return users
         }, new Set())
         return Array.from(users)
       })
   }
 
+  /**
+   * Converts from firestore format to Agreement
+   * @returns {Agreement}
+   */
+  static fromDocumentSnapshot (doc) {
+    const data = doc.data()
+    const signer = new User(data.signer.name, data.signer.email)
+    let a
+    if (data.type === AgreementType.INDIVIDUAL) {
+      a = new Agreement(data.type, data.body, signer)
+    } else if (data.type === AgreementType.CORPORATE) {
+      a = new Agreement(data.type, data.body, signer, data.organization)
+    }
+    a.id = doc.id
+    return a
+  }
+
   static subscribe (email, successCb, errorCb) {
     return DB.connection().collection(agreementCollection)
       .where('signer.email', '==', email)
       .onSnapshot(successCb, errorCb)
+  }
+
+  /**
+   * Gets an agreement from firestore
+   * @returns {Promise<Agreement>}
+   */
+  static get (agreementId) {
+    return DB.connection().collection(agreementCollection)
+      .doc(agreementId)
+      .get()
+      .then(Agreement.fromDocumentSnapshot)
   }
 }
 

@@ -1,5 +1,4 @@
 import DB from '../db/db'
-import { AgreementType } from './agreement'
 
 /**
  * types of agreement addendums.
@@ -113,7 +112,6 @@ class addendum {
   }
 
   save () {
-
     console.info('Sending data to FirebaseDB:', this.toJson())
 
     return DB.connection().collection(addendumCollection)
@@ -124,6 +122,7 @@ class addendum {
       })
   }
 
+  // NOTE should we return instances of the class?
   static get (agreementId) {
     return DB.connection().collection(addendumCollection)
       .where('agreementId', '==', agreementId)
