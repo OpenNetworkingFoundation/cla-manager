@@ -113,6 +113,7 @@ describe('The Agreement model', () => {
     expect(DB.connection).toHaveBeenCalledTimes(1)
     expect(mockCollection).toBeCalledWith('agreements')
     expect(mockAdd).toBeCalledWith({
+      body: 'TODO, add agreement body',
       signer: individualAgreement.signer.data(),
       type: individualAgreement.type,
       dateSigned: individualAgreement.dateSigned
