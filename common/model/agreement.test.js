@@ -1,9 +1,15 @@
 import DB from '../db/db'
 
-import { Agreement, AgreementType } from './agreement'
+import { Agreement, AgreementType, AgreementCollection } from './agreement'
 import { User } from './user'
+import { Addendum, AddendumCollection, AddendumType } from './addendum'
 
 jest.mock('../db/db', () => jest.fn())
+
+const signer = new User('John', 'john@onf.dev', 'john')
+const user1 = new User('Felix', 'felix@onf.dev', 'felix')
+const user2 = new User('Martha', 'martha@onf.dev', 'martha')
+const user3 = new User('Felipe', 'felipe@onf.dev', 'felipe')
 
 const mockOnSnapshot = jest.fn((success) => {
   // TODO return data
@@ -11,20 +17,40 @@ const mockOnSnapshot = jest.fn((success) => {
   return success([])
 })
 
-const mockAdd = jest.fn(() => {
+const mockAgreementAdd = jest.fn(() => {
   return Promise.resolve({ id: 'test-id' })
 })
 
-const mockWhere = jest.fn(() => {
+const mockAgreementWhere = jest.fn(() => {
   return {
     onSnapshot: mockOnSnapshot
   }
 })
 
-const mockCollection = jest.fn(() => {
+const mockAddendumGet = jest.fn(() => {
+  const addendums = [
+    new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson(),
+    new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson()
+  ]
+  return Promise.resolve(addendums)
+})
+
+const mockAddendumWhere = jest.fn(() => {
   return {
-    add: mockAdd,
-    where: mockWhere
+    get: mockAddendumGet
+  }
+})
+
+const mockCollection = jest.fn((collection) => {
+  if (collection === AgreementCollection) {
+    return {
+      add: mockAgreementAdd,
+      where: mockAgreementWhere
+    }
+  } else if (collection === AddendumCollection) {
+    return {
+      where: mockAddendumWhere
+    }
   }
 })
 
@@ -38,12 +64,9 @@ DB.connection = mockConnection
 
 describe('The Agreement model', () => {
   let individualAgreement, corporateAgreement
-  let signer = null
 
   beforeEach(() => {
     DB.mockClear()
-
-    signer = new User('John', 'john@onf.dev', 'john')
 
     individualAgreement = new Agreement(
       AgreementType.INDIVIDUAL,
@@ -108,30 +131,63 @@ describe('The Agreement model', () => {
     })
   })
 
-  it('should save a individualAgreement to the database', () => {
-    individualAgreement.save()
-    expect(DB.connection).toHaveBeenCalledTimes(1)
-    expect(mockCollection).toBeCalledWith('agreements')
-    expect(mockAdd).toBeCalledWith({
-      body: 'TODO, add agreement body',
-      signer: individualAgreement.signer.data(),
-      type: individualAgreement.type,
-      dateSigned: individualAgreement.dateSigned
+  describe('the save method', () => {
+    it('should store a individualAgreement in the database', () => {
+      individualAgreement.save()
+      expect(DB.connection).toHaveBeenCalledTimes(1)
+      expect(mockCollection).toBeCalledWith('agreements')
+      expect(mockAgreementAdd).toBeCalledWith({
+        body: 'TODO, add agreement body',
+        signer: individualAgreement.signer.data(),
+        type: individualAgreement.type,
+        dateSigned: individualAgreement.dateSigned
+      })
     })
   })
 
-  it('should get a list of models from the DB', (done) => {
-    const email = 'info@onf.org'
-    Agreement.subscribe(
-      email,
-      res => {
-        expect(mockWhere).toBeCalledWith('signer.email', '==', email)
-        expect(res).toEqual([])
-        done()
-      },
-      err => {
-        done(err)
-      }
-    )
+  describe('the getAddendums method', () => {
+    it('should return a list of addendums', (done) => {
+      individualAgreement.getAddendums()
+        .then(res => {
+          expect(res.length).toEqual(2)
+          expect(res[0].added.length).toEqual(2)
+          expect(res[0].removed.length).toEqual(0)
+          expect(res[1].added.length).toEqual(1)
+          expect(res[1].removed.length).toEqual(1)
+          done()
+        })
+        .catch(done)
+    })
+  })
+
+  describe('the getActiveUser method', () => {
+    it('should return a list of valid users for an agreement ', (done) => {
+      individualAgreement.getActiveUser()
+        .then(res => {
+          expect(res.length).toEqual(2)
+          // NOTE user1 is removed in the second addendum
+          expect(res[0]).toEqual(user2)
+          expect(res[1]).toEqual(user3)
+          done()
+        })
+        .catch(done)
+    })
+  })
+
+  describe('the subscriber method', () => {
+    it('should get a list of models from the DB', (done) => {
+      const email = 'info@onf.org'
+      Agreement.subscribe(
+        email,
+        res => {
+          expect(mockAgreementWhere).toBeCalledWith('signer.email', '==', email)
+          expect(res).toEqual([])
+          done()
+        },
+        err => {
+          done(err)
+        }
+      )
+    })
   })
 })

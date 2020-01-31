@@ -25,7 +25,6 @@ describe('The Addendum model', () => {
     expect(model.signer).toEqual(signer)
     expect(model.added).toEqual([contributor1])
     expect(model.removed).toEqual([contributor2])
-    console.log(model.dateSigned, model.dateSigned instanceof Date)
     expect(model.dateSigned instanceof Date).toBe(true)
   })
 })

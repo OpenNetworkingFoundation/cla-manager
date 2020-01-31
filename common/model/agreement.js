@@ -1,4 +1,5 @@
 import DB from '../db/db'
+import { Addendum } from './addendum'
 
 const agreementCollection = 'agreements'
 
@@ -96,6 +97,10 @@ class agreement {
     return this._dateSigned
   }
 
+  /**
+   * Returns the model in JSON compatible format.
+   * @returns {Object}
+   */
   toJson () {
     const json = {
       dateSigned: this._dateSigned,
@@ -109,12 +114,40 @@ class agreement {
     return json
   }
 
+  /**
+   * Saves the model into Firestore and returns the saved instance
+   * @returns {Promise<Object>}
+   */
   save () {
     return DB.connection().collection(agreementCollection)
       .add(this.toJson())
       .then(res => {
         this._id = res.id
         return res
+      })
+  }
+
+  /**
+   * Returns a list of Addendum associated with this list
+   * @returns {Promise<Addendum[]>}
+   */
+  getAddendums () {
+    return Addendum.get(this.id)
+  }
+
+  /**
+   * Returns a list of User that are valid on this Agreement
+   * @returns {Promise<User[]>}
+   */
+  getActiveUser () {
+    return this.getAddendums()
+      .then(addendums => {
+        const users = addendums.reduce((users, addendum) => {
+          addendum.added.forEach(u => users.add(u))
+          addendum.removed.forEach(u => users.delete(u))
+          return users
+        }, new Set())
+        return Array.from(users)
       })
   }
 
@@ -127,3 +160,4 @@ class agreement {
 
 export const Agreement = agreement
 export const AgreementType = agreementType
+export const AgreementCollection = agreementCollection
