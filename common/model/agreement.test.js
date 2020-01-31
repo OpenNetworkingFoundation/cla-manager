@@ -80,7 +80,7 @@ describe('The Agreement model', () => {
       corporateAgreement = new Agreement(
         AgreementType.CORPORATE,
         'TODO, add agreement body',
-        signer,
+        signer
       )
     }
     expect(create).toThrow(TypeError)

@@ -98,10 +98,10 @@ class agreement {
 
   toJson () {
     const json = {
-      'dateSigned': this._dateSigned,
-      'type': this._type,
-      'body': this._body,
-      'signer': this._signer.data(),
+      dateSigned: this._dateSigned,
+      type: this._type,
+      body: this._body,
+      signer: this._signer.data(),
     }
     if (this._type === AgreementType.CORPORATE) {
       json.organization = this._organization
