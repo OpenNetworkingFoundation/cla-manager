@@ -88,12 +88,21 @@ class addendum {
     return this._removed
   }
 
+  /**
+   * Returns the dateSigned.
+   * @returns {Date}
+   */
+  get dateSigned () {
+    return this._dateSigned
+  }
+
   save () {
     const data = {
       signer: this.signer,
       added: this.added,
       removed: this.removed,
-      agreementId: this.agreementId
+      agreementId: this.agreementId,
+      dateSigned: this._dateSigned
     }
 
     console.info('Sending data to FirebaseDB:', data)

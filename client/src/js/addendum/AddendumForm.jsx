@@ -40,12 +40,9 @@ function AddendumForm (props) {
   }
 
   const handleSubmit = (evt) => {
-    // evt.preventDefault()
-
     // TODO do we need validation?
 
-    console.log(added, removed)
-
+    // TODO add a Date
     const addendum = new Addendum(
       AddendumType.CONTRIBUTOR,
       props.agreementId,

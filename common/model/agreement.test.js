@@ -37,7 +37,7 @@ const mockConnection = jest.fn(() => {
 DB.connection = mockConnection
 
 describe('The Agreement model', () => {
-  let model
+  let individualAgreement, corporateAgreement
   let signer = null
 
   beforeEach(() => {
@@ -45,28 +45,77 @@ describe('The Agreement model', () => {
 
     signer = new User('John', 'john@onf.dev', 'john')
 
-    model = new Agreement(
+    individualAgreement = new Agreement(
       AgreementType.INDIVIDUAL,
       'TODO, add agreement body',
       signer
     )
-  })
-  it('should correctly instantiate the class for INDIVIDUAL', () => {
-    expect(model.id).toEqual(null)
-    expect(model.type).toEqual(AgreementType.INDIVIDUAL)
-    expect(model.signer.email).toEqual(signer.email)
-    expect(model.signer.name).toEqual(signer.name)
-    expect(model.organization).toEqual(null)
+
+    corporateAgreement = new Agreement(
+      AgreementType.CORPORATE,
+      'TODO, add agreement body',
+      signer,
+      'ONF'
+    )
   })
 
-  it('should save a model to the database', () => {
-    model.save()
+  it('should correctly instantiate the class for INDIVIDUAL', () => {
+    expect(individualAgreement.id).toEqual(null)
+    expect(individualAgreement.type).toEqual(AgreementType.INDIVIDUAL)
+    expect(individualAgreement.signer.email).toEqual(signer.email)
+    expect(individualAgreement.signer.name).toEqual(signer.name)
+    expect(individualAgreement.organization).toEqual(null)
+  })
+
+  it('should correctly instantiate the class for CORPORATE', () => {
+    expect(corporateAgreement.id).toEqual(null)
+    expect(corporateAgreement.type).toEqual(AgreementType.CORPORATE)
+    expect(corporateAgreement.signer.email).toEqual(signer.email)
+    expect(corporateAgreement.signer.name).toEqual(signer.name)
+    expect(corporateAgreement.organization).toEqual('ONF')
+  })
+
+  it('should not instantiate the class for CORPORATE if organization is missing', function () {
+    const create = () => {
+      corporateAgreement = new Agreement(
+        AgreementType.CORPORATE,
+        'TODO, add agreement body',
+        signer,
+      )
+    }
+    expect(create).toThrow(TypeError)
+  })
+
+  describe('the toJson method', function () {
+    it('should return a JSON object for the individualAgreement', () => {
+      const json = individualAgreement.toJson()
+      expect(json instanceof Object).toBe(true)
+
+      expect(json.type).toEqual(AgreementType.INDIVIDUAL)
+      expect(json.signer.email).toEqual(signer.email)
+      expect(json.signer.name).toEqual(signer.name)
+      expect(json.organization).toBe(undefined)
+    })
+
+    it('should return a JSON object for the corporateAgreement', () => {
+      const json = corporateAgreement.toJson()
+      expect(json instanceof Object).toBe(true)
+
+      expect(json.type).toEqual(AgreementType.CORPORATE)
+      expect(json.signer.email).toEqual(signer.email)
+      expect(json.signer.name).toEqual(signer.name)
+      expect(json.organization).toBe('ONF')
+    })
+  })
+
+  it('should save a individualAgreement to the database', () => {
+    individualAgreement.save()
     expect(DB.connection).toHaveBeenCalledTimes(1)
     expect(mockCollection).toBeCalledWith('agreements')
     expect(mockAdd).toBeCalledWith({
-      signer: model.signer,
-      type: model.type,
-      dateSigned: model.dateSigned
+      signer: individualAgreement.signer.data(),
+      type: individualAgreement.type,
+      dateSigned: individualAgreement.dateSigned
     })
   })
 

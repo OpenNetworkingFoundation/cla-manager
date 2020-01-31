@@ -88,6 +88,7 @@ export default class Home extends React.Component {
           }
           individualCLATable.push(row)
         } else if (type === AgreementType.CORPORATE) {
+          row.organization = cla.data().organization
           institutionCLATable.push(row)
         } else {
           console.log('unknown cla type: ', cla.data())
@@ -131,8 +132,8 @@ export default class Home extends React.Component {
             <AgreementsContainer
               header='Institutional Agreements'
               description='Institutional agreements we have on file for you:'
-              columnTitles={['Institution', 'Date Signed', 'View / Manage']}
-              columnIds={['name', 'displayDate', 'link']}
+              columnTitles={['Organization', 'Signer', 'Date Signed', 'View / Manage']}
+              columnIds={['organization', 'name', 'displayDate', 'link']}
               data={this.state.institutionCLATable}
             />
           </Grid>

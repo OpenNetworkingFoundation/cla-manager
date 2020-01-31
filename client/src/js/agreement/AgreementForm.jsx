@@ -25,29 +25,53 @@ function AgreementForm (props) {
   const history = useHistory()
   const agreementId = props.agreementId
 
-  // TODO if props.agreementId is set, load an existing agreement
-
   const classes = useStyles()
   const [name, setName] = useState('')
+  const [orgName, setOrgName] = useState('')
   const [error, setError] = useState(null)
+
+  let organizationTextValidator = null
+
+  if (props.agreementType === AgreementType.CORPORATE) {
+    organizationTextValidator = (
+      <TextValidator
+        fullWidth
+        label='Organization Name'
+        name='orgName'
+        value={orgName}
+        onChange={e => setOrgName(e.target.value)}
+        validators={['required']}
+        errorMessages={['You must enter the company name']}
+        variant='outlined'
+      />
+    )
+  }
 
   const handleSubmit = (evt) => {
     evt.preventDefault()
-    console.log('Name used:', name)
-    console.log(props.agreementType)
-    // TODO save model
-    // TODO after save send to view/<agreementId>
 
     const signer = new User(
       name,
       FirebaseApp.auth().currentUser.email
     )
 
-    const agreement = new Agreement(
-      props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
-      'TODO, add agreement body',
-      signer
-    )
+    let agreement = null
+
+    if (props.agreementType === AgreementType.INDIVIDUAL) {
+      agreement = new Agreement(
+        props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
+        'TODO, add agreement body',
+        signer
+      )
+    }
+    else if (props.agreementType === AgreementType.CORPORATE) {
+      agreement = new Agreement(
+        props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
+        'TODO, add agreement body',
+        signer,
+        orgName
+      )
+    }
 
     agreement.save()
       .then(res => {
@@ -71,6 +95,7 @@ function AgreementForm (props) {
           {error ? <Alert severity='error'>{error}</Alert> : null}
         </Grid>
         <Grid item xs={12} md={6}>
+          {organizationTextValidator}
           <TextValidator
             fullWidth
             label='Full Name'

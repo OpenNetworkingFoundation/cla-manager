@@ -12,7 +12,6 @@ describe('The Addendum model', () => {
     contributor2 = new User('Gigi', 'gigi@onf.dev', 'gigi-onf')
 
     model = new Addendum(
-      'ffgg',
       AddendumType.CONTRIBUTOR,
       'aabb',
       signer,
@@ -21,11 +20,12 @@ describe('The Addendum model', () => {
     )
   })
   it('should correctly instantiate the class', () => {
-    expect(model.id).toEqual('ffgg')
     expect(model.type).toEqual('contributor')
     expect(model.agreementId).toEqual('aabb')
     expect(model.signer).toEqual(signer)
     expect(model.added).toEqual([contributor1])
     expect(model.removed).toEqual([contributor2])
+    console.log(model.dateSigned, model.dateSigned instanceof Date)
+    expect(model.dateSigned instanceof Date).toBe(true)
   })
 })

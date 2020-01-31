@@ -24,21 +24,26 @@ class agreement {
   /**
    * Creates a new agreement.
    * @param {agreementType} type type of agreement
-   * @param {organization|null} organization organization covered by the
    * agreement, if {@link type} is {@link agreementType.CORPORATE}, otherwise
    * {@code null}
    * @param {string} body the agreement text body
    * @param {user} signer the signer of the agreement
+   * @param {string|null} organization organization covered by the
    */
   constructor (type, body, signer, organization = null) {
     this._id = null
     this._dateSigned = new Date()
-    // TODO validate that type is of type AgreementType
-    // TODO if type is CORPORATE make sure organization is filled
+
     this._type = type
     this._body = body
     // TODO validate that signer is of type User
     this._signer = signer
+
+    // TODO validate that type is of type AgreementType
+    // TODO if type is CORPORATE make sure organization is filled
+    if (type === AgreementType.CORPORATE && organization == null) {
+      throw TypeError(`Agreement.type is ${type} and organization is missing`)
+    }
     // organization is an optional parameter, defaults to null
     this._organization = organization
   }
@@ -91,20 +96,22 @@ class agreement {
     return this._dateSigned
   }
 
+  toJson () {
+    const json = {
+      'dateSigned': this._dateSigned,
+      'type': this._type,
+      'body': this._body,
+      'signer': this._signer.data(),
+    }
+    if (this._type === AgreementType.CORPORATE) {
+      json.organization = this._organization
+    }
+    return json
+  }
+
   save () {
-    const data = {
-      signer: this._signer.data(),
-      type: this._type,
-      dateSigned: this.dateSigned
-    }
-    if (this._organization) {
-      data.organization = this._organization
-    }
-
-    console.info('Sending data to FirebaseDB:', data)
-
     return DB.connection().collection(agreementCollection)
-      .add(data)
+      .add(this.toJson())
       .then(res => {
         this._id = res.id
         return res
