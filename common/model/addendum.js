@@ -1,7 +1,12 @@
+import DB from '../db/db'
+
 /**
  * types of agreement addendums.
  * @type {{CONTRIBUTOR: string, COSIGNER: string}}
  */
+
+const addendumCollection = 'addendums'
+
 const addendumType = {
   /**
    * Contributor addendum.
@@ -22,17 +27,17 @@ class addendum {
    * @param {string} id global identifier
    * @param {AddendumType} type type of addendum
    * @param {string} agreementId ID of the agreement to which this addendum applies
-   * @param {user} signer signer  of the addendum
-   * @param {user[]} added array of users added by the addendum
-   * @param {user[]} removed array of users removed by the addendum
+   * @param {User} signer signer  of the addendum
+   * @param {User[]} added array of users added by the addendum
+   * @param {User[]} removed array of users removed by the addendum
    */
-  constructor (id, type, agreementId, signer, added, removed) {
-    this._id = id
+  constructor (type, agreementId, signer, added, removed) {
     this._agreementId = agreementId
     this._signer = signer
     this._added = added
     this._removed = removed
     this._type = type
+    this._dateSigned = new Date()
   }
 
   /**
@@ -81,6 +86,39 @@ class addendum {
    */
   get removed () {
     return this._removed
+  }
+
+  /**
+   * Returns the dateSigned.
+   * @returns {Date}
+   */
+  get dateSigned () {
+    return this._dateSigned
+  }
+
+  save () {
+    const data = {
+      signer: this.signer,
+      added: this.added,
+      removed: this.removed,
+      agreementId: this.agreementId,
+      dateSigned: this._dateSigned
+    }
+
+    console.info('Sending data to FirebaseDB:', data)
+
+    return DB.connection().collection(addendumCollection)
+      .add(data)
+      .then(res => {
+        this._id = res.id
+        return this
+      })
+  }
+
+  static get (agreementId) {
+    return DB.connection().collection(addendumCollection)
+      .where('agreementId', '==', agreementId)
+      .get()
   }
 }
 

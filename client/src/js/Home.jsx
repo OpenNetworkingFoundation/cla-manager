@@ -6,7 +6,7 @@ import Link from '@material-ui/core/Link'
 import AgreementsContainer from './helpers/AgreementsContainer'
 import NewAgreementContainer from './helpers/NewAgreementContainer'
 
-import { Agreement } from '../common/model/agreement'
+import { Agreement, AgreementType } from '../common/model/agreement'
 import { Button } from '@material-ui/core'
 
 const dateOptions = {
@@ -32,8 +32,8 @@ export default class Home extends React.Component {
   }
 
   /**
-     * Update the page to show all CLAs associated to the logged in user's email.
-     */
+   * Update the page to show all CLAs associated to the logged in user's email.
+   */
   componentDidMount () {
     const email = FirebaseApp.auth().currentUser.email
     if (!email) {
@@ -53,8 +53,8 @@ export default class Home extends React.Component {
   }
 
   /**
-     * Unsubscribe from CLA DB updates.
-     */
+   * Unsubscribe from CLA DB updates.
+   */
   componentWillUnmount () {
     if (this.claUnsubscribe) {
       this.claUnsubscribe()
@@ -63,8 +63,8 @@ export default class Home extends React.Component {
   }
 
   /**
-     * Renders the CLAs in the appropriate tables.
-     */
+   * Renders the CLAs in the appropriate tables.
+   */
   renderClaTables (snapshot) {
     if (snapshot || snapshot.size) {
       const individualCLATable = []
@@ -82,12 +82,13 @@ export default class Home extends React.Component {
           link: <Link href={linkUrl}><Button variant='outlined' color='primary'>View Agreement</Button></Link>
         }
 
-        if (type === 'individual') {
+        if (type === AgreementType.INDIVIDUAL) {
           if (cla.data().signerDetails && cla.data().signerDetails.name) {
             row.name = cla.data().signerDetails.name
           }
           individualCLATable.push(row)
-        } else if (type === 'institutional') {
+        } else if (type === AgreementType.CORPORATE) {
+          row.organization = cla.data().organization
           institutionCLATable.push(row)
         } else {
           console.log('unknown cla type: ', cla.data())
@@ -131,8 +132,8 @@ export default class Home extends React.Component {
             <AgreementsContainer
               header='Institutional Agreements'
               description='Institutional agreements we have on file for you:'
-              columnTitles={['Institution', 'Date Signed', 'View / Manage']}
-              columnIds={['name', 'displayDate', 'link']}
+              columnTitles={['Organization', 'Signer', 'Date Signed', 'View / Manage']}
+              columnIds={['organization', 'name', 'displayDate', 'link']}
               data={this.state.institutionCLATable}
             />
           </Grid>

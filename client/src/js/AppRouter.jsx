@@ -1,13 +1,14 @@
+
 import React from 'react'
-import firebase from 'firebase/app'
+import { FirebaseApp } from '../common/app/app'
 
 import { BrowserRouter as Router, Route } from 'react-router-dom'
 
 import Header from './helpers/Header'
 import Home from './Home'
-import SignPage from './claPages/SignPage'
-import View from './View'
 import { Container } from '@material-ui/core'
+import AgreementForm from './agreement/AgreementForm'
+import SignCheck from './helpers/SignCheck'
 
 class AppRouter extends React.Component {
   constructor (props) {
@@ -19,7 +20,7 @@ class AppRouter extends React.Component {
      * Handles the sign out button press.
      */
   handleSignOut () {
-    firebase.auth().signOut().catch((error) => {
+    FirebaseApp.auth().signOut().catch((error) => {
       this.handleAuthError(error)
     })
   }
@@ -52,12 +53,12 @@ class AppRouter extends React.Component {
             />
             <Route
               path='/sign/:type' render={props => (
-                <SignPage user={user} {...props} />
+                <SignCheck agreementType={props.match.params.type} user={user} />
               )}
             />
             <Route
               path='/view/:id' render={props => (
-                <View user={user} {...props} />
+                <AgreementForm user={user} agreementId={props.match.params.id} />
               )}
             />
           </Container>

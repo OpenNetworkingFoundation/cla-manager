@@ -39,6 +39,15 @@ class user {
   get githubId () {
     return this._githubId
   }
+
+  data () {
+    return Object.keys(this).reduce((d, k) => {
+      if (this[k]) {
+        d[k.replace('_', '')] = this[k]
+      }
+      return d
+    }, {})
+  }
 }
 
 export const User = user
