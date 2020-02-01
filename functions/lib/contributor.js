@@ -6,14 +6,15 @@ module.exports = Contributor
  */
 function Contributor (db) {
   /**
-   * Given a new addendum, updates the set of active contributors in the parent agreement.
+   * Given a snapshot of an addendum updates the set of active contributors in the parent agreement.
    * @param {DocumentSnapshot} snapshot of a new addendum
-   * @returns {Promise<T>}
+   * @returns {Promise}
    */
   async function updateActiveContributors (snapshot) {
     const newAddendumDoc = snapshot.data()
     const agreementRef = db.collection('agreements')
       .doc(newAddendumDoc.agreementId)
+    // FIXME: there's no guarantee of total ordering
     return db.runTransaction(function (transaction) {
       // This code may get re-run multiple times if there are conflicts.
       return transaction.get(agreementRef)
@@ -33,27 +34,29 @@ function Contributor (db) {
             activeEmails.delete(user.email)
             activeGithubIds.delete(user.githubId)
           })
-          transaction.update(agreementRef, {
+          const newData = {
             activeEmails: Array.from(activeEmails),
             activeGithubIds: Array.from(activeGithubIds)
-          })
+          }
+          transaction.update(agreementRef, newData)
+          return newData
         })
-    }).then(function () {
-      console.info('Transaction successfully committed!', newAddendumDoc)
+    }).then(function (result) {
+      console.debug('Transaction successfully committed!', result)
     }).catch(function (error) {
       console.error('Transaction failed: ', error, newAddendumDoc)
     })
   }
 
-  function getAsSet (doc, key) {
-    if (Object.prototype.hasOwnProperty.call(doc, key)) {
-      return new Set(doc[key])
-    } else {
-      return new Set()
-    }
-  }
-
   return {
     updateActiveContributors: updateActiveContributors
+  }
+}
+
+function getAsSet (doc, key) {
+  if (Object.prototype.hasOwnProperty.call(doc, key)) {
+    return new Set(doc[key])
+  } else {
+    return new Set()
   }
 }

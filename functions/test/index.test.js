@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 
 // Requiring our app implementation
-const Github = require('../github')
+const Github = require('../lib/github')
 
 // Requiring our fixtures
 const payload = require('./fixtures/pull_request.opened')
