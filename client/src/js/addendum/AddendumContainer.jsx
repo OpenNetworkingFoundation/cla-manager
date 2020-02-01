@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
-import AddendumForm from './AddendumForm'
-import { Box, Card, Grid, Link, Button } from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
+import { Card, Grid, Button } from '@material-ui/core'
 import { Agreement } from '../../common/model/agreement'
 import UserForm from '../user/UserForm'
+import IdentityCard from './IdentityCard'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -57,13 +56,11 @@ function AddendumContainer (props) {
         return agreement.getActiveUser()
       })
       .then((res) => {
-        console.info(res)
         setActiveIdentities(res)
       })
   }, [props.agreementId, addendums])
 
   const createAddendum = () => {
-    // TODO create an addendum
     const signer = {
       name: 'name', // FIXME use real name
       email: props.user.email
@@ -76,8 +73,6 @@ function AddendumContainer (props) {
       addedIdentities.map(u => u.toJson()),
       removedIdentities
     )
-
-    console.log(addendum)
 
     addendum.save().then(res => {
       setAddedIdentities([])
@@ -111,20 +106,7 @@ function AddendumContainer (props) {
       <Grid item xs={12}>
         <h2>Active identities for this agreement:</h2>
         {activeIdentities.map((a, i) =>
-          <Card key={i} variant='outlined' className={classes.root}>
-            <Grid container spacing={2}>
-              <Grid item xs={10}>
-                {a.name} - {a.email} - {a.githubId}
-              </Grid>
-              <Grid item xs={2}>
-                <Box textAlign='right' m={1}>
-                  <Link href='#' onClick={removeUser(a)}>
-                    <DeleteIcon></DeleteIcon>
-                  </Link>
-                </Box>
-              </Grid>
-            </Grid>
-          </Card>
+          <IdentityCard key={i} user={a} callback={removeUser}/>
         )}
       </Grid>
       <Grid item xs={12}>
