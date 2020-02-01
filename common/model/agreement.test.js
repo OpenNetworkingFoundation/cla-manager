@@ -12,7 +12,7 @@ const user2 = new User('Martha', 'martha@onf.dev', 'martha')
 const user3 = new User('Felipe', 'felipe@onf.dev', 'felipe')
 
 const mockOnSnapshot = jest.fn((success) => {
-  // TODO return data
+  // TODO return toJson
   // TODO mock errors too
   return success([])
 })
@@ -28,16 +28,24 @@ const mockAgreementWhere = jest.fn(() => {
 })
 
 const mockAddendumGet = jest.fn(() => {
-  const addendums = [
-    new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson(),
-    new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson()
-  ]
+  const addendums = {
+    docs: [
+      { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
+      { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
+    ]
+  }
   return Promise.resolve(addendums)
+})
+
+const mockAddendumOrderBy = jest.fn(() => {
+  return {
+    get: mockAddendumGet
+  }
 })
 
 const mockAddendumWhere = jest.fn(() => {
   return {
-    get: mockAddendumGet
+    orderBy: mockAddendumOrderBy
   }
 })
 
@@ -138,7 +146,7 @@ describe('The Agreement model', () => {
       expect(mockCollection).toBeCalledWith('agreements')
       expect(mockAgreementAdd).toBeCalledWith({
         body: 'TODO, add agreement body',
-        signer: individualAgreement.signer.data(),
+        signer: individualAgreement.signer.toJson(),
         type: individualAgreement.type,
         dateSigned: individualAgreement.dateSigned
       })
@@ -149,11 +157,11 @@ describe('The Agreement model', () => {
     it('should return a list of addendums', (done) => {
       individualAgreement.getAddendums()
         .then(res => {
-          expect(res.length).toEqual(2)
-          expect(res[0].added.length).toEqual(2)
-          expect(res[0].removed.length).toEqual(0)
-          expect(res[1].added.length).toEqual(1)
-          expect(res[1].removed.length).toEqual(1)
+          expect(res.docs.length).toEqual(2)
+          expect(res.docs[0].data().added.length).toEqual(2)
+          expect(res.docs[0].data().removed.length).toEqual(0)
+          expect(res.docs[1].data().added.length).toEqual(2)
+          expect(res.docs[1].data().removed.length).toEqual(1)
           done()
         })
         .catch(done)

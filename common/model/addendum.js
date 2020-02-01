@@ -112,7 +112,7 @@ class addendum {
   }
 
   save () {
-    console.info('Sending data to FirebaseDB:', this.toJson())
+    console.info('Sending toJson to FirebaseDB:', this.toJson())
 
     return DB.connection().collection(addendumCollection)
       .add(this.toJson())
@@ -126,6 +126,7 @@ class addendum {
   static get (agreementId) {
     return DB.connection().collection(addendumCollection)
       .where('agreementId', '==', agreementId)
+      .orderBy('dateSigned')
       .get()
   }
 }

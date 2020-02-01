@@ -115,7 +115,7 @@ class agreement {
       dateSigned: this._dateSigned,
       type: this._type,
       body: this._body,
-      signer: this._signer.data()
+      signer: this._signer.toJson()
     }
     if (this._type === AgreementType.CORPORATE) {
       json.organization = this._organization
@@ -151,12 +151,18 @@ class agreement {
   getActiveUser () {
     return this.getAddendums()
       .then(addendums => {
-        const users = addendums.docs.reduce((users, addendum) => {
+        const reduced = addendums.docs.reduce((users, addendum) => {
           addendum.data().added.forEach(u => users.add(u))
-          addendum.data().removed.forEach(u => users.delete(u))
+          addendum.data().removed.forEach(removedUser => {
+            users.forEach(existingUser => {
+              if (existingUser.name === removedUser.name) {
+                users.delete(existingUser)
+              }
+            })
+          })
           return users
         }, new Set())
-        return Array.from(users)
+        return Array.from(reduced)
       })
   }
 

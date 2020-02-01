@@ -25,7 +25,7 @@ function Cla () {
 
       // TODO just for debugging
       //  snapshot.forEach(doc => {
-      //      console.log(doc.id, ' => ', doc.data().whitelist);
+      //      console.log(doc.id, ' => ', doc.toJson().whitelist);
       //  })
 
       // If there is no CLA signed by email, then check by domain
@@ -36,7 +36,7 @@ function Cla () {
 
         // TODO just for debugging
         //                snapshot.forEach(doc => {
-        //                    console.log(doc.id, ' => ', doc.data().domain , ' - ', doc.data().blacklist);
+        //                    console.log(doc.id, ' => ', doc.toJson().domain , ' - ', doc.toJson().blacklist);
         //                })
 
         // Check that the email is not in the blacklist
@@ -85,10 +85,10 @@ function Cla () {
   //   }
   //   const doc = await db.collection('failedPRs').doc(email).get()
   //   if (pr.exists) {
-  //     console.log('PR data:', doc.data())
-  //     return doc.data().refs
+  //     console.log('PR toJson:', doc.toJson())
+  //     return doc.toJson().refs
   //   }
-  //   // doc.data() will be undefined in this case
+  //   // doc.toJson() will be undefined in this case
   //   console.log('No outstanding PR')
   //   return []
   // }

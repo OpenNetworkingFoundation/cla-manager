@@ -40,7 +40,7 @@ class user {
     return this._githubId
   }
 
-  data () {
+  toJson () {
     return Object.keys(this).reduce((d, k) => {
       if (this[k]) {
         d[k.replace('_', '')] = this[k]

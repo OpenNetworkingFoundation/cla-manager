@@ -23,7 +23,7 @@ exports.modifyUser = functions.firestore
     const document = change.after.exists ? change.after.data() : null
 
     // Get an object with the previous document value (for update or delete)
-    // const oldDocument = change.before.data()
+    // const oldDocument = change.before.toJson()
 
     // Check to see if there are any outstanding PRs for newly added users
     if (document) {

@@ -22,10 +22,6 @@ function AddendumForm (props) {
     setAdded(addendums => [...added, user])
   }
 
-  const addUserToAddendumRemoved = (user) => {
-    setRemoved(addendums => [...removed, user])
-  }
-
   const handleSubmit = (evt) => {
     // TODO do we need validation?
 
@@ -51,7 +47,7 @@ function AddendumForm (props) {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={10}>
           {added.map(u => `${u.name} - ${u.email}`)}
-          <UserForm callback={addUserToAddendumAdded}/>
+
         </Grid>
         <Grid item xs={12} sm={2}>
           <Box textAlign='right' m={1}>
