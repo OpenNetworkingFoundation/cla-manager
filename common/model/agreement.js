@@ -154,9 +154,14 @@ class agreement {
         const reduced = addendums.docs.reduce((users, addendum) => {
           addendum.data().added.forEach(u => users.add(u))
           addendum.data().removed.forEach(removedUser => {
-            users.forEach(existingUser => {
-              if (existingUser.name === removedUser.name) {
+            Array.from(users).some(existingUser => {
+              if (
+                existingUser.name === removedUser.name &&
+                existingUser.email === removedUser.email &&
+                existingUser.githubId === removedUser.githubId
+              ) {
                 users.delete(existingUser)
+                return true
               }
             })
           })
