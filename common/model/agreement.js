@@ -1,4 +1,6 @@
 import DB from '../db/db'
+import { Addendum } from './addendum'
+import { User } from './user'
 
 const agreementCollection = 'agreements'
 
@@ -57,6 +59,14 @@ class agreement {
   }
 
   /**
+   * Sets the agreement ID.
+   * @param {string}
+   */
+  set id (id) {
+    this._id = id
+  }
+
+  /**
    * Returns the agreement type.
    * @returns {AgreementType}
    */
@@ -96,12 +106,16 @@ class agreement {
     return this._dateSigned
   }
 
+  /**
+   * Returns the model in JSON compatible format.
+   * @returns {Object}
+   */
   toJson () {
     const json = {
       dateSigned: this._dateSigned,
       type: this._type,
       body: this._body,
-      signer: this._signer.data()
+      signer: this._signer.toJson()
     }
     if (this._type === AgreementType.CORPORATE) {
       json.organization = this._organization
@@ -109,6 +123,10 @@ class agreement {
     return json
   }
 
+  /**
+   * Saves the model into Firestore and returns the saved instance
+   * @returns {Promise<Object>}
+   */
   save () {
     return DB.connection().collection(agreementCollection)
       .add(this.toJson())
@@ -118,12 +136,76 @@ class agreement {
       })
   }
 
+  /**
+   * Returns a list of Addendum associated with this list
+   * @returns {Promise<Addendum[]>}
+   */
+  getAddendums () {
+    return Addendum.get(this.id)
+  }
+
+  /**
+   * Returns a list of User that are valid on this Agreement
+   * @returns {Promise<User[]>}
+   */
+  getActiveUser () {
+    return this.getAddendums()
+      .then(addendums => {
+        const reduced = addendums.docs.reduce((users, addendum) => {
+          addendum.data().added.forEach(u => users.add(u))
+          addendum.data().removed.forEach(removedUser => {
+            Array.from(users).some(existingUser => {
+              if (
+                existingUser.name === removedUser.name &&
+                existingUser.email === removedUser.email &&
+                existingUser.githubId === removedUser.githubId
+              ) {
+                users.delete(existingUser)
+                return true
+              }
+            })
+          })
+          return users
+        }, new Set())
+        return Array.from(reduced)
+      })
+  }
+
+  /**
+   * Converts from firestore format to Agreement
+   * @returns {Agreement}
+   */
+  static fromDocumentSnapshot (doc) {
+    const data = doc.data()
+    const signer = new User(data.signer.name, data.signer.email)
+    let a
+    if (data.type === AgreementType.INDIVIDUAL) {
+      a = new Agreement(data.type, data.body, signer)
+    } else if (data.type === AgreementType.CORPORATE) {
+      a = new Agreement(data.type, data.body, signer, data.organization)
+    }
+    a.id = doc.id
+    return a
+  }
+
   static subscribe (email, successCb, errorCb) {
     return DB.connection().collection(agreementCollection)
       .where('signer.email', '==', email)
       .onSnapshot(successCb, errorCb)
   }
+
+  /**
+   * Gets an agreement from firestore
+   * @returns {Promise<Agreement>}
+   */
+  static get (agreementId) {
+    return DB.connection().collection(agreementCollection)
+      .doc(agreementId)
+      .get()
+      .then(Agreement.fromDocumentSnapshot)
+  }
 }
 
 export const Agreement = agreement
 export const AgreementType = agreementType
+export const AgreementCollection = agreementCollection

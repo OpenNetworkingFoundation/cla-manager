@@ -13,19 +13,6 @@ function AddendumForm (props) {
   const [added, setAdded] = useState([])
   const [removed, setRemoved] = useState([])
 
-  if (props.addendum) {
-    return (
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={5}>
-          {props.addendum.added.map(u => `${u.name} - ${u.email} = ${u.githubId}`)}
-        </Grid>
-        <Grid item xs={12} sm={5}>
-          {props.addendum.removed.map(u => `${u.name} - ${u.email} = ${u.githubId}`)}
-        </Grid>
-      </Grid>
-    )
-  }
-
   const signer = {
     name: 'name', // FIXME use real name
     email: props.user.email
@@ -33,10 +20,6 @@ function AddendumForm (props) {
 
   const addUserToAddendumAdded = (user) => {
     setAdded(addendums => [...added, user])
-  }
-
-  const addUserToAddendumRemoved = (user) => {
-    setRemoved(addendums => [...removed, user])
   }
 
   const handleSubmit = (evt) => {
@@ -62,20 +45,9 @@ function AddendumForm (props) {
   return (
     <Box>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={5}>
-          Users to add:
-        </Grid>
-        <Grid item xs={12} sm={5}>
-          Users to remove:
-        </Grid>
-        <Grid item xs={12} sm={2}/>
-        <Grid item xs={12} sm={5}>
+        <Grid item xs={12} sm={10}>
           {added.map(u => `${u.name} - ${u.email}`)}
-          <UserForm callback={addUserToAddendumAdded}/>
-        </Grid>
-        <Grid item xs={12} sm={5}>
-          {removed.map(u => `${u.name} - ${u.email}`)}
-          <UserForm callback={addUserToAddendumRemoved}/>
+
         </Grid>
         <Grid item xs={12} sm={2}>
           <Box textAlign='right' m={1}>

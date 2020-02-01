@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 
 function AgreementsContainer (props) {
   const classes = useStyles()
-  // If this table has no data, no need to show it.
+  // If this table has no toJson, no need to show it.
   if (props.data.length === 0) {
     return null
   }

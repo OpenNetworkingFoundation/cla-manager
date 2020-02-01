@@ -96,31 +96,41 @@ class addendum {
     return this._dateSigned
   }
 
-  save () {
-    const data = {
+  /**
+   * Returns the model in JSON compatible format.
+   * @returns {Object}
+   */
+  toJson () {
+    const json = {
       signer: this.signer,
       added: this.added,
       removed: this.removed,
       agreementId: this.agreementId,
       dateSigned: this._dateSigned
     }
+    return json
+  }
 
-    console.info('Sending data to FirebaseDB:', data)
+  save () {
+    console.info('Sending toJson to FirebaseDB:', this.toJson())
 
     return DB.connection().collection(addendumCollection)
-      .add(data)
+      .add(this.toJson())
       .then(res => {
         this._id = res.id
         return this
       })
   }
 
+  // NOTE should we return instances of the class?
   static get (agreementId) {
     return DB.connection().collection(addendumCollection)
       .where('agreementId', '==', agreementId)
+      .orderBy('dateSigned')
       .get()
   }
 }
 
 export const Addendum = addendum
 export const AddendumType = addendumType
+export const AddendumCollection = addendumCollection

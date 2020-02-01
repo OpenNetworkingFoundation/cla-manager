@@ -7,7 +7,7 @@ function isAdmin() {
 }
 
 function onWhitelist() {
-	return request.auth.token.email in resource.data.signer.email || isAdmin();
+	return request.auth.token.email == resource.data.signer.email || isAdmin();
 }
 
 service cloud.firestore {
