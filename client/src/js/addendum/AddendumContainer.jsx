@@ -12,16 +12,6 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
   },
-  removed: {
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.error.light
-  },
-  added: {
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.success.light
-  }
 }))
 
 /**
@@ -106,39 +96,26 @@ function AddendumContainer (props) {
       <Grid item xs={12}>
         <h2>Active identities for this agreement:</h2>
         {activeIdentities.map((a, i) =>
-          <IdentityCard key={i} user={a} callback={removeUser}/>
+          <IdentityCard key={i} user={a} callback={removeUser} type={'default'}/>
         )}
       </Grid>
       <Grid item xs={12}>
         <h2>Update Agreement:</h2>
         {removedIdentities.map((a, i) =>
-          <Card key={i} variant='outlined' className={classes.removed}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                {a.name} - {a.email} - {a.githubId}
-              </Grid>
-            </Grid>
-          </Card>
+          <IdentityCard key={i} user={a} type={'removed'}/>
         )}
         {addedIdentities.map((a, i) =>
-          <Card key={i} variant='outlined' className={classes.added}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                {a.name} - {a.email} - {a.githubId}
-              </Grid>
-            </Grid>
-          </Card>
+          <IdentityCard key={i} user={a} type={'added'}/>
         )}
         <Card variant='outlined' className={classes.root}>
-          {/*<AddendumForm key='new' user={props.user} agreementId={props.agreementId} callback={addendumAdded}/>*/}
           <UserForm callback={userAdded}/>
         </Card>
       </Grid>
       <Button fullWidth
-              variant='contained'
-              color='primary'
-              disabled={addedIdentities.length === 0 && removedIdentities.length === 0}
-              onClick={createAddendum}>
+        variant='contained'
+        color='primary'
+        disabled={addedIdentities.length === 0 && removedIdentities.length === 0}
+        onClick={createAddendum}>
         Save changes
       </Button>
     </Grid>

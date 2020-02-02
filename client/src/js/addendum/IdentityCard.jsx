@@ -5,7 +5,7 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles(theme => ({
-  root: {
+  default: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
   },
@@ -23,8 +23,11 @@ const useStyles = makeStyles(theme => ({
 
 function IdentityCard (props) {
   const classes = useStyles()
+
+  const getClass = type => classes[type]
+
   return (
-    <Card variant='outlined' className={classes.root}>
+    <Card variant='outlined' className={getClass(props.type)}>
       <Grid container spacing={2}>
         <Grid item xs={10}>
           {props.user.name} - {props.user.email} - {props.user.githubId}
@@ -45,6 +48,7 @@ function IdentityCard (props) {
 
 IdentityCard.propTypes = {
   user: PropTypes.object.isRequired,
+  type: PropTypes.oneOf(['added', 'removed', 'default']).isRequired,
   callback: PropTypes.func
 }
 
