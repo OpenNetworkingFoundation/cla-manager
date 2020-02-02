@@ -21,6 +21,7 @@ module.exports.setupDb = async (auth, data) => {
     })
   }
 
+  // firebase.firestore.setLogLevel('debug')
   const db = app.firestore()
 
   // Write mock documents before rules
@@ -53,6 +54,10 @@ module.exports.setupDbAdmin = async (data) => {
 
 module.exports.teardownDb = async () => {
   await Promise.all(firebase.apps().map(app => app.delete()))
+}
+
+module.exports.addAndGetSnapshot = async (collectionRef, document) => {
+  return collectionRef.add(document).then(res => res.get())
 }
 
 expect.extend({
