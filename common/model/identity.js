@@ -10,7 +10,6 @@ export const IdentityType = {
  * This class is used to associate identities to Addendum
  */
 export class Identity {
-
   /**
    * Creates a new Identity.
    * @param {IdentityType} type the type of the identity
