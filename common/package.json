@@ -3,9 +3,8 @@
   "description": "Common code",
   "scripts": {
     "lint": "eslint .",
-    "pretest": "npm install && npm run lint",
-    "test": "jest",
-    "test-only": "jest"
+    "pretest": "npm run lint",
+    "test": "jest"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.8.3",
@@ -26,8 +25,11 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "coverageDirectory": "./coverage/",
-    "collectCoverage": true
+    "collectCoverage": true,
+    "coverageDirectory": "./",
+    "coverageReporters": [
+      "json"
+    ]
   },
   "private": true,
   "standard": {

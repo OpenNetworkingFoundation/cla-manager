@@ -1,6 +1,6 @@
 .idea
 */node_modules
-*/coverage
+*/coverage-final.json
 */package-lock.json
 */firebase-debug.log
 */firestore-debug.log
