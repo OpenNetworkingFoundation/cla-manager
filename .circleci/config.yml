@@ -32,6 +32,9 @@ jobs:
       - run: npm --prefix ./common test
       - run: npm --prefix ./functions test
       - run: npm --prefix ./client test
+      - run:
+          name: Upload coverage reports
+          command: bash <(curl -s https://codecov.io/bash)
       # update the cache for all the packages
       - save_cache:
           paths:

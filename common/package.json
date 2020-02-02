@@ -25,7 +25,9 @@
     "node": "10"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   },
   "private": true,
   "standard": {
