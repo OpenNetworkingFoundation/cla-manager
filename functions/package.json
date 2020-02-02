@@ -15,7 +15,7 @@
     "start": "npm run shell",
     "deploy": "npx firebase deploy --only functions",
     "logs": "npx firebase functions:log",
-    "pretest": "npm install && npm run lint",
+    "pretest": "npm run lint",
     "test": "npx firebase emulators:exec --only firestore 'test/run.sh'"
   },
   "dependencies": {
@@ -47,7 +47,12 @@
     "node": "10"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageDirectory": "./",
+    "coverageReporters": [
+      "json"
+    ]
   },
   "private": true,
   "standard": {
