@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { Button } from '@material-ui/core'
+import { Button, ButtonGroup, Grid } from '@material-ui/core'
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator'
-import { User } from '../../common/model/user'
 import { makeStyles } from '@material-ui/core/styles'
+import { Identity, IdentityType } from '../../common/model/identity'
+import GitHubIcon from '@material-ui/icons/GitHub'
+import MailOutlineIcon from '@material-ui/icons/MailOutline'
 
 const useStyles = makeStyles(theme => ({
   textField: {
@@ -16,60 +18,88 @@ function UserForm (props) {
   const classes = useStyles()
 
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [github, setGithub] = useState('')
+  const [value, setValue] = useState('')
+  const [type, setType] = useState(IdentityType.MAIL)
 
   const handleSubmit = (evt) => {
     evt.preventDefault()
-    const user = new User(name, email, github)
+    const user = new Identity(type, name, value)
     props.callback(user)
     setName('')
-    setEmail('')
-    setGithub('')
+    setValue('')
   }
+
+  const selectedButton = buttonValue => buttonValue === type ? 'contained' : 'outlined'
 
   return (
     <ValidatorForm onSubmit={handleSubmit}>
-      <TextValidator
-        className={classes.textField}
-        fullWidth
-        label='Name'
-        name='name'
-        value={name}
-        onChange={e => setName(e.target.value)}
-        validators={['required']}
-        errorMessages={['Enter the name of the user']}
-        variant='outlined'
-      />
-      <TextValidator
-        className={classes.textField}
-        fullWidth
-        label='Email'
-        name='email'
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        validators={['required', 'isEmail']}
-        errorMessages={['Enter the email of the user']}
-        variant='outlined'
-      />
-      <TextValidator
-        className={classes.textField}
-        fullWidth
-        label='Github account'
-        name='github'
-        value={github}
-        onChange={e => setGithub(e.target.value)}
-        validators={[]}
-        errorMessages={['Enter the email of the user']}
-        variant='outlined'
-      />
-      <Button
-        fullWidth
-        type="submit"
-        variant='contained'
-        color='primary'
-      >Add User
-      </Button>
+      <Grid container spacing={2}>
+        <Grid item xs={10}>
+          <ButtonGroup
+            className={classes.textField}
+            fullWidth
+            size='large'
+            color='primary'>
+            <Button
+              onClick={() => setType(IdentityType.MAIL)}
+              variant={selectedButton(IdentityType.MAIL)}
+              endIcon={<MailOutlineIcon/>}>
+              Email</Button>
+            <Button
+              onClick={() => setType(IdentityType.GITHUB)}
+              variant={selectedButton(IdentityType.GITHUB)}
+              endIcon={<GitHubIcon/>}>
+              GithubId
+            </Button>
+          </ButtonGroup>
+          <TextValidator
+            className={classes.textField}
+            fullWidth
+            label='Name'
+            name='name'
+            value={name}
+            onChange={e => setName(e.target.value)}
+            validators={['required']}
+            errorMessages={['Enter the name of the user']}
+            variant='outlined'
+          />
+          {type === IdentityType.MAIL ?
+            <TextValidator
+              className={classes.textField}
+              fullWidth
+              label='Email'
+              name='email'
+              value={value}
+              onChange={e => setValue(e.target.value)}
+              validators={['required', 'isEmail']}
+              errorMessages={['Enter the value of the user']}
+              variant='outlined'
+            /> : null
+          }
+          {type === IdentityType.GITHUB ?
+            <TextValidator
+              className={classes.textField}
+              fullWidth
+              label='GithuId'
+              name='githubId'
+              value={value}
+              onChange={e => setValue(e.target.value)}
+              validators={['required']}
+              errorMessages={['Enter the githubId of the user']}
+              variant='outlined'
+            /> : null
+          }
+        </Grid>
+        <Grid item xs={2}>
+          <Button
+            fullWidth
+            type="submit"
+            variant='contained'
+            color='primary'
+          >Add Identity
+          </Button>
+        </Grid>
+      </Grid>
     </ValidatorForm>
   )
 }
