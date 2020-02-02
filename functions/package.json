@@ -10,13 +10,13 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "serve": "firebase serve --only functions",
-    "shell": "firebase functions:shell",
+    "serve": "npx firebase serve --only functions",
+    "shell": "npx firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log",
+    "deploy": "npx firebase deploy --only functions",
+    "logs": "npx firebase functions:log",
     "pretest": "npm install && npm run lint",
-    "test": "jest"
+    "test": "npx firebase emulators:exec --only firestore 'test/run.sh'"
   },
   "dependencies": {
     "@octokit/app": "^2.2.4",
@@ -26,14 +26,20 @@
     "firebase-functions": "^3.3.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.8.3",
+    "babel": "^6.23.0",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^25.1.0",
+    "@firebase/testing": "^0.16.6",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "firebase-tools": "^7.12.1",
     "firebase-functions-test": "^0.1.6",
-    "jest": "^24.0.0",
+    "jest": "^25.1.0",
     "nock": "^10.0.0",
     "smee-client": "^1.0.2"
   },
@@ -47,6 +53,18 @@
   "standard": {
     "env": [
       "jest"
+    ]
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
     ]
   }
 }

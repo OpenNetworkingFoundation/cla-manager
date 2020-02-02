@@ -4,7 +4,7 @@ version: 2
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: circleci/node:10
+    - image: opennetworking/clam-ci
 
 jobs:
   test:
@@ -28,23 +28,26 @@ jobs:
       - run: npm --prefix ./functions install
       - run: npm --prefix ./client install
       - run: npm --prefix ./common install
+      # run the tests
+      - run: npm --prefix ./common test
+      - run: npm --prefix ./functions test
+      - run: npm --prefix ./client test
       # update the cache for all the packages
       - save_cache:
           paths:
             - functions/node_modules
           key: functions-dependencies-{{ checksum "functions/package.json" }}
+          when: always
       - save_cache:
           paths:
             - client/node_modules
           key: client-dependencies-{{ checksum "client/package.json" }}
+          when: always
       - save_cache:
           paths:
             - common/node_modules
           key: common-dependencies-{{ checksum "common/package.json" }}
-      # run the tests
-      - run: npm --prefix ./common test
-      - run: npm --prefix ./functions test
-      - run: npm --prefix ./client test
+          when: always
       - persist_to_workspace:
           root: ~/repo
           paths: .

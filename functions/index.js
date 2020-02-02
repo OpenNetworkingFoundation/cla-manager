@@ -3,9 +3,9 @@ const functions = require('firebase-functions')
 admin.initializeApp(functions.config().firebase)
 const db = admin.firestore()
 
-const Github = require('./github')
-const Cla = require('./cla')
-const Contributor = require('./contributor')
+const Github = require('./lib/github')
+const Cla = require('./lib/cla')
+const Contributor = require('./lib/contributor')
 
 const github = new Github({
   id: functions.config().github.app_id,
