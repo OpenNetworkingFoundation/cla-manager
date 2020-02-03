@@ -87,7 +87,7 @@ jobs:
       - run:
           name: Configure function parameters
           command: |
-            ./firebase-deploy/node_modules/.bin/firebase --project ${FIREBASE_PROJECT_ID} functions:config:set github.app_id="${GH_APP_ID}" github.key="${GH_APP_KEY}" github.secret="${GH_APP_SECRET}"
+            ./firebase-deploy/node_modules/.bin/firebase --project ${FIREBASE_PROJECT_ID} --token=${FIREBASE_DEPLOY_TOKEN} functions:config:set github.app_id="${GH_APP_ID}" github.key="${GH_APP_KEY}" github.secret="${GH_APP_SECRET}"
       - run:
           name: Deploy Functions to Firebase
           command: |
