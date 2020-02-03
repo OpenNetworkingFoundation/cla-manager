@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
+    "lint-fix": "npx standard --fix",
     "serve": "npx firebase serve --only functions",
     "shell": "npx firebase functions:shell",
     "start": "npm run shell",
@@ -19,9 +20,9 @@
     "test": "npx firebase emulators:exec --only firestore 'test/run.sh'"
   },
   "dependencies": {
-    "@octokit/app": "^2.2.4",
-    "@octokit/rest": "^16.26.0",
-    "@octokit/webhooks": "^6.2.1",
+    "@octokit/app": "^2.2.5",
+    "@octokit/rest": "^16.43.0",
+    "@octokit/webhooks": "^6.3.2",
     "firebase-admin": "^8.9.2",
     "firebase-functions": "^3.3.0"
   },
@@ -56,20 +57,11 @@
   },
   "private": true,
   "standard": {
+    "ignore": [
+      "lib/common/"
+    ],
     "env": [
       "jest"
-    ]
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": "current"
-          }
-        }
-      ]
     ]
   }
 }

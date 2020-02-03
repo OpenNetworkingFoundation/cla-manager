@@ -1,6 +1,72 @@
 module.exports = Cla
 
+/**
+ * Returns CLA-related functions.
+ * @param db {FirebaseFirestore.Firestore}
+ */
 function Cla (db) {
+  function getSet (whitelist, typ) {
+    if (!Object.prototype.hasOwnProperty.call(whitelist, typ)) {
+      whitelist[typ] = new Set()
+    }
+    return whitelist[typ]
+  }
+
+  function toJson (whitelist) {
+    return Object.keys(whitelist).reduce((d, k) => {
+      if (whitelist[k] instanceof Set) {
+        d[k] = Array.from(whitelist[k])
+      }
+      return d
+    }, {})
+  }
+
+  /**
+   * Given a snapshot of a newly created addendum, updates the whitelist in the
+   * parent agreement by replying all addendums in chronological order.
+   * @param {DocumentSnapshot} snapshot of a new addendum
+   * @returns {Promise}
+   */
+  async function updateWhitelist (snapshot) {
+    const newAddendumDoc = snapshot.data()
+    const agreementId = newAddendumDoc.agreementId
+    return db.collection('agreements').doc(agreementId).get()
+      .then(agreement => {
+        if (!agreement.exists) {
+          return Promise.reject(new Error('Agreement does not exist'))
+        }
+        return db.collection('addendums')
+          .where('agreementId', '==', agreementId)
+          .orderBy('dateSigned')
+          .get().then(function (query) {
+            const whitelist = {
+              agreementId: agreementId,
+              lastUpdated: new Date()
+            }
+            query.docs.map(s => s.data())
+              // When using the firestore emulator, query results don't always
+              // include the latest writes, such as the new addendum. We manually
+              // append it to the results to always pass the tests.
+              .concat([newAddendumDoc])
+              .forEach(function (addendum) {
+                addendum.added.forEach(identity => {
+                  getSet(whitelist, identity.type).add(identity.value)
+                })
+                addendum.removed.forEach(identity => {
+                  getSet(whitelist, identity.type).delete(identity.value)
+                })
+              })
+            // Store the whitelist using the same ID as the agreement.
+            return db.collection('whitelists')
+              .doc(agreementId)
+              .set(toJson(whitelist))
+          })
+      })
+      .then(function () {
+        console.debug('Whitelist updated!', agreementId)
+      })
+  }
+
   async function isClaSigned (user, ref) {
     if (!user || !user.email) {
       console.log('email is not provided')
@@ -87,7 +153,10 @@ function Cla (db) {
   //   return []
   // }
 
-  return { isClaSigned }
+  return {
+    updateWhitelist: updateWhitelist,
+    isClaSigned: isClaSigned
+  }
 }
 
 //

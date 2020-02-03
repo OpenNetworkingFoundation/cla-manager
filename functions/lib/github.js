@@ -27,19 +27,19 @@ function Github (options) {
   //  if (!appId) throw 'app id is not defined in options'
   //  if (!privateKey) throw 'cert is not defined in options'
 
-  const app = new App({ id, privateKey })
+  const ghApp = new App({ id, privateKey })
   // const jwt = app.getSignedJsonWebToken() // global app token
-  const webhooks = new WebhooksApi(secret ? { secret } : {})
+  const ghWebhooks = new WebhooksApi(secret ? { secret } : {})
 
-  webhooks.on('*', ({ id, name, payload }) => {
+  ghWebhooks.on('*', ({ id, name, payload }) => {
     console.log(name, 'event received')
   })
 
-  webhooks.on('error', (error) => {
+  ghWebhooks.on('error', (error) => {
     console.log(`Error occured in "${error.event.name} handler: ${error.stack}"`)
   })
 
-  webhooks.on(['pull_request.opened', 'pull_request.synchronize'], async context => {
+  ghWebhooks.on(['pull_request.opened', 'pull_request.synchronize'], async context => {
     const pr = context.payload.pull_request
 
     const owner = pr.base.repo.owner.login
@@ -50,23 +50,21 @@ function Github (options) {
 
     console.log(`Pull Request: ${owner}/${repo}/${prNum}, type ${eventType}, ${numCommits} commits`)
 
-    /* TODO
-         if numCommits <= 250, use the commits_url or pull request list commits API
-         else, use the repo commits API; can be an error for now
-       */
+    // TODO if numCommits <= 250, use the commits_url or pull request list
+    //  commits API else, use the repo commits API; can be an error for now
     if (numCommits > 250) {
       throw new Error('number of commits exceeds the 250 commit limit')
     }
 
     const installationId = context.payload.installation.id
-    const installationAccessToken = await app.getInstallationAccessToken({ installationId })
+    const installationAccessToken = await ghApp.getInstallationAccessToken({ installationId })
 
-    const client = new Octokit({
+    const ghClient = new Octokit({
       auth: installationAccessToken // jwt,
       // log: reqLogger //FIXME
     })
 
-    const responses = client.paginate.iterator(`GET ${pr.commits_url}`)
+    const responses = ghClient.paginate.iterator(`GET ${pr.commits_url}`)
     let allSigned
     for await (const response of responses) {
       const commits = response.data
@@ -74,13 +72,13 @@ function Github (options) {
         .map(async commit => isClaSigned(commit))
         .reduce((r, v) => (r && v), true)
         // TODO for debugging
-      //        commits.forEach(async commit => {
-      //            const signed = await isClaSigned(commit)
-      //            console.log(`sha: ${commit.sha},
-      //                author: ${commit.commit.author.name}/${commit.commit.author.email}/${commit.author.login},
-      //                committer: ${commit.commit.committer.name}/${commit.commit.committer.email}/${commit.committer.login}
-      //                signed: ${signed}`)
-      //        })
+        //  commits.forEach(async commit => {
+        //      const signed = await isClaSigned(commit)
+        //      console.log(`sha: ${commit.sha},
+        //          author: ${commit.commit.author.name}/${commit.commit.author.email}/${commit.author.login},
+        //          committer: ${commit.commit.committer.name}/${commit.commit.committer.email}/${commit.committer.login}
+        //          signed: ${signed}`)
+        //  })
         // TODO end debugging
       if (!allSigned) break // no need to continue; we found an unsigned commit
     }
@@ -101,7 +99,7 @@ function Github (options) {
       status.target_url = 'https://sign.the.cla'
       status.description = 'CLA is not signed'
     }
-    return client.repos.createStatus(status)
+    return ghClient.repos.createStatus(status)
   })
 
   async function isClaSigned (commit) {
@@ -162,8 +160,8 @@ function Github (options) {
   // }
 
   return {
-    receive: webhooks.receive,
-    handler: webhooks.middleware
+    receive: ghWebhooks.receive,
+    handler: ghWebhooks.middleware
     // recheckPrsForEmails
   }
 }

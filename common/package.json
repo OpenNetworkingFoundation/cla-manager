@@ -1,6 +1,6 @@
 {
-  "name": "cla-manager-common",
-  "description": "Common code",
+  "name": "clam-common",
+  "description": "CLAM Common Code",
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
@@ -21,7 +21,7 @@
     "jest": "^24.0.0"
   },
   "engines": {
-    "node": "10"
+    "node": ">=10"
   },
   "jest": {
     "testEnvironment": "node",

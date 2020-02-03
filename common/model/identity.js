@@ -1,5 +1,5 @@
 export const IdentityType = {
-  UNKNOWN: 'unknown',
+  // UNKNOWN: 'unknown',
   EMAIL: 'email',
   GITHUB: 'github'
 }
@@ -17,7 +17,7 @@ export class Identity {
   /**
    * Creates a new Identity.
    * @param {IdentityType} type the type of the identity
-   * @param {string} name name of the  user
+   * @param {string} name name of the user
    * @param {string} value the identifier for this identity
    */
 
