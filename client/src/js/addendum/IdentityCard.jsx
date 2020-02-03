@@ -35,7 +35,7 @@ function IdentityCard (props) {
         <Grid item xs={2}>
           <CardContent>
             {props.user.type === IdentityType.GITHUB ? <GitHubIcon fontSize={'large'}/> : null}
-            {props.user.type === IdentityType.MAIL ? <MailOutlineIcon fontSize={'large'}/> : null}
+            {props.user.type === IdentityType.EMAIL ? <MailOutlineIcon fontSize={'large'}/> : null}
           </CardContent>
         </Grid>
         <Grid item xs={8}>

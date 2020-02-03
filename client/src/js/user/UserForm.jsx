@@ -19,7 +19,7 @@ function UserForm (props) {
 
   const [name, setName] = useState('')
   const [value, setValue] = useState('')
-  const [type, setType] = useState(IdentityType.MAIL)
+  const [type, setType] = useState(IdentityType.EMAIL)
 
   const handleSubmit = (evt) => {
     evt.preventDefault()
@@ -41,8 +41,8 @@ function UserForm (props) {
             size='large'
             color='primary'>
             <Button
-              onClick={() => setType(IdentityType.MAIL)}
-              variant={selectedButton(IdentityType.MAIL)}
+              onClick={() => setType(IdentityType.EMAIL)}
+              variant={selectedButton(IdentityType.EMAIL)}
               endIcon={<MailOutlineIcon/>}>
               Email</Button>
             <Button
@@ -63,7 +63,7 @@ function UserForm (props) {
             errorMessages={['Enter the name of the user']}
             variant='outlined'
           />
-          {type === IdentityType.MAIL ?
+          {type === IdentityType.EMAIL ?
             <TextValidator
               className={classes.textField}
               fullWidth
@@ -72,7 +72,7 @@ function UserForm (props) {
               value={value}
               onChange={e => setValue(e.target.value)}
               validators={['required', 'isEmail']}
-              errorMessages={['Enter the value of the user']}
+              errorMessages={['Enter the email of the user']}
               variant='outlined'
             /> : null
           }

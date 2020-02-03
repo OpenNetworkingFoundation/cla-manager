@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Run the tests before committing code
+#
+# To enable this hook, copy this file in the `.git/hooks` directory or symlink it with this command from the project root:
+# ln -sf $(pwd)/env/pre-commit $(pwd)/.git/hooks/pre-commit
+
+npm --prefix ./common test
+npm --prefix ./functions test
+npm --prefix ./client test
