@@ -2,27 +2,16 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
-import AddendumForm from './AddendumForm'
-import { Box, Card, Grid, Link, Button } from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
+import { Card, Grid, Button } from '@material-ui/core'
 import { Agreement } from '../../common/model/agreement'
 import UserForm from '../user/UserForm'
+import IdentityCard from './IdentityCard'
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
   },
-  removed: {
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.error.light
-  },
-  added: {
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.success.light
-  }
 }))
 
 /**
@@ -57,13 +46,11 @@ function AddendumContainer (props) {
         return agreement.getActiveUser()
       })
       .then((res) => {
-        console.info(res)
         setActiveIdentities(res)
       })
   }, [props.agreementId, addendums])
 
   const createAddendum = () => {
-    // TODO create an addendum
     const signer = {
       name: 'name', // FIXME use real name
       email: props.user.email
@@ -76,8 +63,6 @@ function AddendumContainer (props) {
       addedIdentities.map(u => u.toJson()),
       removedIdentities
     )
-
-    console.log(addendum)
 
     addendum.save().then(res => {
       setAddedIdentities([])
@@ -106,49 +91,47 @@ function AddendumContainer (props) {
     }
   }
 
+  const undoRemove = (user) => {
+    return (evt) => {
+      evt.preventDefault()
+      alert('Undo remove Unimplemented')
+    }
+  }
+
+  const undoAdd = (user) => {
+    return (evt) => {
+      evt.preventDefault()
+      alert('Undo Add Unimplemented')
+    }
+  }
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <h2>Active identities for this agreement:</h2>
-        {activeIdentities.map((a, i) =>
-          <Card key={i} variant='outlined' className={classes.root}>
-            <Grid container spacing={2}>
-              <Grid item xs={10}>
-                {a.name} - {a.email} - {a.githubId}
-              </Grid>
-              <Grid item xs={2}>
-                <Box textAlign='right' m={1}>
-                  <Link href='#' onClick={removeUser(a)}>
-                    <DeleteIcon></DeleteIcon>
-                  </Link>
-                </Box>
-              </Grid>
+        <Grid container spacing={2}>
+          {activeIdentities.map((a, i) =>
+            <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
+              <IdentityCard key={i} user={a} callback={removeUser} type={'default'}/>
             </Grid>
-          </Card>
-        )}
+          )}
+        </Grid>
       </Grid>
       <Grid item xs={12}>
         <h2>Update Agreement:</h2>
-        {removedIdentities.map((a, i) =>
-          <Card key={i} variant='outlined' className={classes.removed}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                {a.name} - {a.email} - {a.githubId}
-              </Grid>
+        <Grid container spacing={2}>
+          {removedIdentities.map((a, i) =>
+            <Grid key={`container-removed-${i}`} item xs={12} sm={12} md={6} lg={4}>
+              <IdentityCard key={i} user={a} callback={undoRemove} type={'removed'}/>
             </Grid>
-          </Card>
-        )}
-        {addedIdentities.map((a, i) =>
-          <Card key={i} variant='outlined' className={classes.added}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                {a.name} - {a.email} - {a.githubId}
-              </Grid>
+          )}
+          {addedIdentities.map((a, i) =>
+            <Grid key={`container-added-${i}`} item xs={12} sm={12} md={6} lg={4}>
+              <IdentityCard key={i} user={a} callback={undoAdd} type={'added'}/>
             </Grid>
-          </Card>
-        )}
+          )}
+        </Grid>
         <Card variant='outlined' className={classes.root}>
-          {/*<AddendumForm key='new' user={props.user} agreementId={props.agreementId} callback={addendumAdded}/>*/}
           <UserForm callback={userAdded}/>
         </Card>
       </Grid>
