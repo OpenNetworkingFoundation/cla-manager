@@ -5,7 +5,7 @@ export const IdentityType = {
 }
 
 function validateEmail (email) {
-  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   return re.test(String(email).toLowerCase())
 }
 
@@ -22,7 +22,6 @@ export class Identity {
    */
 
   constructor (type, name, value) {
-
     if (Identity.enumTypes().indexOf(type) === -1) {
       throw TypeError(`Type ${type} is not valid, must be one of ${Identity.enumTypes()}`)
     }
