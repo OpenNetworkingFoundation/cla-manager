@@ -4,7 +4,8 @@ import { Identity, IdentityType } from '../lib/common/model/identity'
 
 const Cla = require('../lib/cla')
 const idJohnEmail = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev').toJson()
-const idEmmaEmail = new Identity(IdentityType.EMAIL, 'Emma', 'emma@onf.dev').toJson()
+const idEmmaEmail = new Identity(IdentityType.EMAIL, 'Emma', 'EMMA@onf.DEV').toJson()
+const idEmmaEmailNormalized = new Identity(IdentityType.EMAIL, 'Emma', 'emma@onf.dev').toJson()
 const idEmmaGithub = new Identity(IdentityType.GITHUB, 'Emma', 'emma').toJson()
 const idGigiEmail = new Identity(IdentityType.EMAIL, 'Gigi', 'gigi@onf.dev').toJson()
 const idGigiGithub = new Identity(IdentityType.GITHUB, 'Gigi', 'gigi').toJson()
@@ -76,7 +77,8 @@ describe('Cla lib', () => {
     // Verify agreement
     whitelistDoc = (await whitelistRef.get()).data()
     expect(whitelistDoc.email).toContain(idJohnEmail.value)
-    expect(whitelistDoc.email).toContain(idEmmaEmail.value)
+    expect(whitelistDoc.email).toContain(idEmmaEmailNormalized.value)
+    expect(whitelistDoc.email).not.toContain(idEmmaEmail.value)
     expect(whitelistDoc.github).toContain(idEmmaGithub.value)
 
     // Add addendum
@@ -85,7 +87,7 @@ describe('Cla lib', () => {
     expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
     // Verify agreement
     whitelistDoc = (await whitelistRef.get()).data()
-    expect(whitelistDoc.email).not.toContain(idEmmaEmail.value)
+    expect(whitelistDoc.email).not.toContain(idEmmaEmailNormalized.value)
     expect(whitelistDoc.github).not.toContain(idEmmaGithub.value)
     expect(whitelistDoc.email).toContain(idGigiEmail.value)
     expect(whitelistDoc.github).toContain(idGigiGithub.value)

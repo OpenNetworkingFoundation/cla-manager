@@ -1,3 +1,5 @@
+import { IdentityType } from './common/model/identity'
+
 module.exports = Cla
 
 /**
@@ -19,6 +21,14 @@ function Cla (db) {
       }
       return d
     }, {})
+  }
+
+  function normalize (identity) {
+    const newIdentity = { ...identity }
+    if (identity.type === IdentityType.EMAIL) {
+      newIdentity.value = newIdentity.value.toLowerCase()
+    }
+    return newIdentity
   }
 
   /**
@@ -49,10 +59,10 @@ function Cla (db) {
               // append it to the results to always pass the tests.
               .concat([newAddendumDoc])
               .forEach(function (addendum) {
-                addendum.added.forEach(identity => {
+                addendum.added.map(normalize).forEach(identity => {
                   getSet(whitelist, identity.type).add(identity.value)
                 })
-                addendum.removed.forEach(identity => {
+                addendum.removed.map(normalize).forEach(identity => {
                   getSet(whitelist, identity.type).delete(identity.value)
                 })
               })
