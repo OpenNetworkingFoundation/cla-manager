@@ -1,5 +1,3 @@
-import { IdentityType } from './common/model/identity'
-
 module.exports = Cla
 
 /**
@@ -7,36 +5,22 @@ module.exports = Cla
  * @param db {FirebaseFirestore.Firestore}
  */
 function Cla (db) {
-  function getSet (whitelist, typ) {
-    if (!Object.prototype.hasOwnProperty.call(whitelist, typ)) {
-      whitelist[typ] = new Set()
-    }
-    return whitelist[typ]
-  }
-
-  function toJson (whitelist) {
-    return Object.keys(whitelist).reduce((d, k) => {
-      if (whitelist[k] instanceof Set) {
-        d[k] = Array.from(whitelist[k])
-      }
-      return d
-    }, {})
-  }
-
-  function normalize (identity) {
+  /**
+   * Returns a string that uniquely identifies the given identity object.
+   * @param identity {{type: string, value: string}}
+   * @returns {string|boolean}
+   */
+  function identityKey (identity) {
     if (!identity) {
       return false
     }
     if (!Object.prototype.hasOwnProperty.call(identity, 'type') ||
       !Object.prototype.hasOwnProperty.call(identity, 'value')) {
-      console.warn('Identity objects must have at least a type, and a value')
+      console.warn('Identity must have at least a type, and a value')
       return false
     }
-    const newIdentity = { ...identity }
-    if (identity.type === IdentityType.EMAIL) {
-      newIdentity.value = newIdentity.value.toLowerCase()
-    }
-    return newIdentity
+    const lcValue = identity.value.toLowerCase()
+    return `${identity.type}:${lcValue}`
   }
 
   /**
@@ -57,27 +41,27 @@ function Cla (db) {
           .where('agreementId', '==', agreementId)
           .orderBy('dateSigned')
           .get().then(function (query) {
-            const whitelist = {
-              agreementId: agreementId,
-              lastUpdated: new Date()
-            }
+            const whitelist = new Set()
             query.docs.map(s => s.data())
               // When using the firestore emulator, query results don't always
               // include the latest writes, such as the new addendum. We manually
               // append it to the results to always pass the tests.
               .concat([newAddendumDoc])
               .forEach(function (addendum) {
-                addendum.added.map(normalize).forEach(identity => {
-                  getSet(whitelist, identity.type).add(identity.value)
+                addendum.added.map(identityKey).forEach(val => {
+                  whitelist.add(val)
                 })
-                addendum.removed.map(normalize).forEach(identity => {
-                  getSet(whitelist, identity.type).delete(identity.value)
+                addendum.removed.map(identityKey).forEach(val => {
+                  whitelist.delete(val)
                 })
               })
             // Store the whitelist using the same ID as the agreement.
             return db.collection('whitelists')
               .doc(agreementId)
-              .set(toJson(whitelist))
+              .set({
+                lastUpdated: new Date(),
+                values: Array.from(whitelist)
+              })
           })
       })
       .then(function () {
@@ -87,28 +71,67 @@ function Cla (db) {
 
   /**
    * Given an identity it returns a boolean promise indicating whether the
-   * identity is whitelisted, or not.
-   * @param identity {Object}
+   * identity is whitelisted or not.
+   * @param identity {{..., type: string, value: string}}
    * @returns {Promise<boolean>}
    */
   async function isIdentityWhitelisted (identity) {
-    identity = normalize(identity)
+    return checkIdentities([identity]).then(r => r.allWhitelisted)
+  }
 
-    if (!identity) {
-      console.log('identity was not provided')
-      return false
+  /**
+   * Promises and object describing whether all given identities are
+   * whitelisted, or not.
+   * @param identities {{..., type: string, value: string}[]}
+   * @returns {Promise<{allWhitelisted: boolean, missingIdentities: string[]}>}
+   */
+  async function checkIdentities (identities) {
+    if (!Array.isArray(identities) || !identities.length) {
+      console.warn('undefined or empty identities')
+      return Promise.resolve({
+        allWhitelisted: false,
+        missingIdentities: []
+      })
     }
 
-    return db.collection('whitelists')
-      .where(identity.type.toString(), 'array-contains', identity.value)
-      .get().then(query => {
-        // If not empty, we found at least one whitelist entry with the given
-        // identity.
-        return !query.empty
+    // Normalize to keys to simplify DB queries.
+    const identityKeys = identities.map(identityKey)
+    const allValidIdentities = identityKeys.reduce(
+      (r, v) => r && Boolean(v), true)
+
+    if (!allValidIdentities) {
+      return Promise.resolve({
+        allWhitelisted: false,
+        missingIdentities: []
       })
-      .catch(error => {
-        console.log(error)
-        return false
+    }
+
+    // Each unique identity gets its own query. We could use `array-contains-in`
+    // and reduce the number of queries, but we need to manage its limitations:
+    // https://firebase.google.com/docs/firestore/query-data/queries#query_limitations
+    const uniqueIdentities = Array.from(new Set(identityKeys))
+    const queries = uniqueIdentities.map((identity) => db
+      .collection('whitelists')
+      .where('values', 'array-contains', identity)
+      .get().then(function (query) {
+        return {
+          identity: identity,
+          whitelisted: !query.empty
+        }
+      }))
+
+    return Promise.all(queries)
+      .then(result => {
+        const missing = result.reduce((m, query) => {
+          if (!query.whitelisted) {
+            m.push(query.identity)
+          }
+          return m
+        }, [])
+        return {
+          allWhitelisted: missing.length === 0,
+          missingIdentities: missing
+        }
       })
   }
 
@@ -130,7 +153,8 @@ function Cla (db) {
 
   return {
     updateWhitelist: updateWhitelist,
-    isIdentityWhitelisted: isIdentityWhitelisted
+    isIdentityWhitelisted: isIdentityWhitelisted,
+    checkIdentities: checkIdentities
   }
 }
 
