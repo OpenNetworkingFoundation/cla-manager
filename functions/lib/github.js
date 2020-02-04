@@ -1,5 +1,3 @@
-import { Identity, IdentityType } from './common/model/identity'
-
 const App = require('@octokit/app')
 const Octokit = require('@octokit/rest')
 const WebhooksApi = require('@octokit/webhooks')
@@ -107,7 +105,7 @@ function Github (appId, privateKey, secret, clalib) {
   async function getPrIdentities (pr, ghClient) {
     // We need a CLA in file for the PR author (github ID), as well as for all
     // the identities associated with all commits of this PR.
-    const identities = [new Identity(IdentityType.GITHUB, null, pr.user.login)]
+    const identities = [{ type: 'github', value: pr.user.login }]
     const responses = await ghClient.paginate.iterator(`GET ${pr.commits_url}`)
     for await (const response of responses) {
       response.data.map(commit => getCommitIdentities(commit))
@@ -127,14 +125,14 @@ function Github (appId, privateKey, secret, clalib) {
     console.log(ref)
 
     const identities = [
-      new Identity(IdentityType.GITHUB, null, commit.author.login),
-      new Identity(IdentityType.EMAIL, null, commit.commit.author.email)
+      { type: 'github', value: commit.author.login },
+      { type: 'email', value: commit.commit.author.email }
     ]
 
     if (commit.committer.login !== 'web-flow') {
       identities.push(...[
-        new Identity(IdentityType.GITHUB, null, commit.committer.login),
-        new Identity(IdentityType.EMAIL, null, commit.commit.committer.email)
+        { type: 'github', value: commit.committer.login },
+        { type: 'email', value: commit.commit.committer.email }
       ])
     }
 

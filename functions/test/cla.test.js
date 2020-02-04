@@ -1,14 +1,14 @@
 import { addAndGetSnapshot, setupDbAdmin, teardownDb } from './helpers'
 import { assertFails, assertSucceeds } from '@firebase/testing'
-import { Identity, IdentityType } from '../lib/common/model/identity'
 
 const Cla = require('../lib/cla')
-const idJohnEmail = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev').toJson()
-const idEmmaEmail = new Identity(IdentityType.EMAIL, 'Emma', 'EMMA@onf.DEV').toJson()
-const sameAsIdEmmaEmail = new Identity(IdentityType.EMAIL, 'Emma', 'emma@onf.dev').toJson()
-const idEmmaGithub = new Identity(IdentityType.GITHUB, 'Emma', 'emma').toJson()
-const idGigiEmail = new Identity(IdentityType.EMAIL, 'Gigi', 'gigi@onf.dev').toJson()
-const idGigiGithub = new Identity(IdentityType.GITHUB, 'Gigi', 'gigi').toJson()
+
+const idJohnEmail = { type: 'email', name: 'John', value: 'john@onf.dev' }
+const idEmmaEmail = { type: 'email', name: 'Emma', value: 'EMMA@onf.DEV' }
+const sameAsIdEmmaEmail = { type: 'email', name: 'Emma', value: 'emma@onf.dev' }
+const idEmmaGithub = { type: 'github', name: 'Emma', value: 'emma' }
+const idGigiEmail = { type: 'email', name: 'Gigi', value: 'gigi@onf.dev' }
+const idGigiGithub = { type: 'github', name: 'Gigi', value: 'gigi' }
 
 const agreementId = 'the-agreement'
 
