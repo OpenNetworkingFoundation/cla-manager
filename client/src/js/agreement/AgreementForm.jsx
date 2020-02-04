@@ -7,10 +7,10 @@ import Button from '@material-ui/core/Button'
 import AgreementDisplay from './AgreementDisplay'
 import AddendumContainer from '../addendum/AddendumContainer'
 import { FirebaseApp } from '../../common/app/app'
-import { User } from '../../common/model/user'
 import { Agreement, AgreementType } from '../../common/model/agreement'
 import Alert from '@material-ui/lab/Alert'
 import { useHistory } from 'react-router-dom'
+import { Identity, IdentityType } from '../../common/model/identity'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,7 +50,8 @@ function AgreementForm (props) {
   const handleSubmit = (evt) => {
     evt.preventDefault()
 
-    const signer = new User(
+    const signer = new Identity(
+      IdentityType.EMAIL,
       name,
       FirebaseApp.auth().currentUser.email
     )
@@ -63,8 +64,7 @@ function AgreementForm (props) {
         'TODO, add agreement body',
         signer
       )
-    }
-    else if (props.agreementType === AgreementType.CORPORATE) {
+    } else if (props.agreementType === AgreementType.CORPORATE) {
       agreement = new Agreement(
         props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
         'TODO, add agreement body',
@@ -127,11 +127,11 @@ function AgreementForm (props) {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <h2>AgreementForm</h2>
-          <AgreementDisplay />
+          <AgreementDisplay/>
         </Grid>
       </Grid>
       {agreementId ? null : form}
-      {agreementId ? <AddendumContainer user={props.user} agreementId={agreementId} /> : null}
+      {agreementId ? <AddendumContainer user={props.user} agreementId={agreementId}/> : null}
     </Paper>
   )
 }
