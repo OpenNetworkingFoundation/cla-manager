@@ -14,8 +14,7 @@ function Cla (db) {
     if (!identity) {
       return false
     }
-    if (!Object.prototype.hasOwnProperty.call(identity, 'type') ||
-      !Object.prototype.hasOwnProperty.call(identity, 'value')) {
+    if (!('type' in identity) || !('value' in identity)) {
       console.warn('Identity must have at least a type, and a value')
       return false
     }
@@ -26,12 +25,12 @@ function Cla (db) {
   /**
    * Given a snapshot of a newly created addendum, updates the whitelist in the
    * parent agreement by replying all addendums in chronological order.
-   * @param {DocumentSnapshot} snapshot of a new addendum
-   * @returns {Promise}
+   * @param {DocumentSnapshot} addendumSnapshot of a new addendum
+   * @returns {Promise<WriteResult>}
    */
-  async function updateWhitelist (snapshot) {
-    const newAddendumDoc = snapshot.data()
-    const agreementId = newAddendumDoc.agreementId
+  async function updateWhitelist (addendumSnapshot) {
+    const newAddendum = addendumSnapshot.data()
+    const agreementId = newAddendum.agreementId
     return db.collection('agreements').doc(agreementId).get()
       .then(agreement => {
         if (!agreement.exists) {
@@ -40,32 +39,40 @@ function Cla (db) {
         return db.collection('addendums')
           .where('agreementId', '==', agreementId)
           .orderBy('dateSigned')
-          .get().then(function (query) {
-            const whitelist = new Set()
-            query.docs.map(s => s.data())
-              // When using the firestore emulator, query results don't always
-              // include the latest writes, such as the new addendum. We manually
-              // append it to the results to always pass the tests.
-              .concat([newAddendumDoc])
-              .forEach(function (addendum) {
-                addendum.added.map(identityKey).forEach(val => {
-                  whitelist.add(val)
-                })
-                addendum.removed.map(identityKey).forEach(val => {
-                  whitelist.delete(val)
-                })
-              })
-            // Store the whitelist using the same ID as the agreement.
-            return db.collection('whitelists')
-              .doc(agreementId)
-              .set({
-                lastUpdated: new Date(),
-                values: Array.from(whitelist)
-              })
+          .get()
+      })
+      .then(addendumQuery => {
+        return addendumQuery.docs.map(s => s.data())
+          // When using the firestore emulator, query results don't always
+          // include the latest writes, such as the new addendum. We manually
+          // append it to the results to always pass the tests.
+          .concat([newAddendum])
+          .reduce((whitelist, addendum) => {
+            addendum.added.map(identityKey).forEach(val => {
+              whitelist.add(val)
+            })
+            addendum.removed.map(identityKey).forEach(val => {
+              whitelist.delete(val)
+            })
+            return whitelist
+          }, new Set())
+      })
+      .then(whitelist => {
+        // Store the whitelist using the same ID as the agreement.
+        return db.collection('whitelists')
+          .doc(agreementId)
+          .set({
+            lastUpdated: new Date(),
+            values: Array.from(whitelist)
           })
       })
-      .then(function () {
-        console.debug('Whitelist updated!', agreementId)
+      .then(writeResult => {
+        console.debug(`Successfully updated whitelist for agreement ${agreementId} `)
+        return writeResult
+      })
+      .catch(error => {
+        console.debug(`Error while updating whitelist for agreement ${agreementId}`, error)
+        return Promise.reject(error)
       })
   }
 
