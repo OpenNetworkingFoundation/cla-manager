@@ -1,80 +1,24 @@
 import DB from '../db/db'
 
-import { Agreement, AgreementType, AgreementCollection } from './agreement'
-import { User } from './user'
-import { Addendum, AddendumCollection, AddendumType } from './addendum'
+import FirestoreMock from '../test_helpers/firestore.mock'
 
-jest.mock('../db/db', () => jest.fn())
+import { Agreement, AgreementType } from './agreement'
+import { Addendum, AddendumType } from './addendum'
+import { Identity, IdentityType } from './identity'
 
-const signer = new User('John', 'john@onf.dev', 'john')
-const user1 = new User('Felix', 'felix@onf.dev', 'felix')
-const user2 = new User('Martha', 'martha@onf.dev', 'martha')
-const user3 = new User('Felipe', 'felipe@onf.dev', 'felipe')
-
-const mockOnSnapshot = jest.fn((success) => {
-  // TODO return toJson
-  // TODO mock errors too
-  return success([])
-})
-
-const mockAgreementAdd = jest.fn(() => {
-  return Promise.resolve({ id: 'test-id' })
-})
-
-const mockAgreementWhere = jest.fn(() => {
-  return {
-    onSnapshot: mockOnSnapshot
-  }
-})
-
-const mockAddendumGet = jest.fn(() => {
-  const addendums = {
-    docs: [
-      { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
-      { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
-    ]
-  }
-  return Promise.resolve(addendums)
-})
-
-const mockAddendumOrderBy = jest.fn(() => {
-  return {
-    get: mockAddendumGet
-  }
-})
-
-const mockAddendumWhere = jest.fn(() => {
-  return {
-    orderBy: mockAddendumOrderBy
-  }
-})
-
-const mockCollection = jest.fn((collection) => {
-  if (collection === AgreementCollection) {
-    return {
-      add: mockAgreementAdd,
-      where: mockAgreementWhere
-    }
-  } else if (collection === AddendumCollection) {
-    return {
-      where: mockAddendumWhere
-    }
-  }
-})
-
-const mockConnection = jest.fn(() => {
-  return {
-    collection: mockCollection
-  }
-})
-
-DB.connection = mockConnection
+const signer = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev')
+const user1 = new Identity(IdentityType.EMAIL, 'Felix', 'felix@onf.dev')
+const user2 = new Identity(IdentityType.EMAIL, 'Martha', 'martha@onf.dev')
+const user3 = new Identity(IdentityType.EMAIL, 'Felipe', 'felipe@onf.dev')
 
 describe('The Agreement model', () => {
   let individualAgreement, corporateAgreement
+  const firestoreMock = new FirestoreMock()
 
   beforeEach(() => {
-    DB.mockClear()
+    const DBSpy = jest.spyOn(DB, 'connection').mockImplementation(() => firestoreMock)
+    DBSpy.mockClear()
+    firestoreMock.reset()
 
     individualAgreement = new Agreement(
       AgreementType.INDIVIDUAL,
@@ -140,23 +84,36 @@ describe('The Agreement model', () => {
   })
 
   describe('the save method', () => {
-    it('should store a individualAgreement in the database', () => {
+    it('should store a individualAgreement in the database', (done) => {
+      firestoreMock.mockAddReturn = { id: 'test-id' }
       individualAgreement.save()
-      expect(DB.connection).toHaveBeenCalledTimes(1)
-      expect(mockCollection).toBeCalledWith('agreements')
-      expect(mockAgreementAdd).toBeCalledWith({
-        body: 'TODO, add agreement body',
-        signer: individualAgreement.signer.toJson(),
-        type: individualAgreement.type,
-        dateSigned: individualAgreement.dateSigned
-      })
+        .then(res => {
+          expect(DB.connection).toHaveBeenCalledTimes(1)
+          expect(firestoreMock.mockCollection).toBeCalledWith('agreements')
+          expect(firestoreMock.mockAdd).toBeCalledWith({
+            body: 'TODO, add agreement body',
+            signer: individualAgreement.signer.toJson(),
+            type: individualAgreement.type,
+            dateSigned: individualAgreement.dateSigned
+          })
+          expect(res.id).toEqual('test-id')
+          done()
+        })
+        .catch(done)
     })
   })
 
   describe('the getAddendums method', () => {
     it('should return a list of addendums', (done) => {
+      firestoreMock.mockGetReturn = {
+        docs: [
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
+        ]
+      }
       individualAgreement.getAddendums()
         .then(res => {
+          expect(firestoreMock.mockWhere).toBeCalledWith('agreementId', '==', null)
           expect(res.docs.length).toEqual(2)
           expect(res.docs[0].data().added.length).toEqual(2)
           expect(res.docs[0].data().removed.length).toEqual(0)
@@ -170,6 +127,12 @@ describe('The Agreement model', () => {
 
   describe('the getActiveUser method', () => {
     it('should return a list of valid users for an agreement ', (done) => {
+      firestoreMock.mockGetReturn = {
+        docs: [
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
+        ]
+      }
       individualAgreement.getActiveUser()
         .then(res => {
           expect(res.length).toEqual(2)
@@ -184,11 +147,13 @@ describe('The Agreement model', () => {
 
   describe('the subscriber method', () => {
     it('should get a list of models from the DB', (done) => {
+      firestoreMock.mockOnSnaptshotSuccess = []
       const email = 'info@onf.org'
       Agreement.subscribe(
         email,
         res => {
-          expect(mockAgreementWhere).toBeCalledWith('signer.email', '==', email)
+          expect(firestoreMock.mockWhere).toBeCalledWith('signer.type', '==', 'email')
+          expect(firestoreMock.mockWhere).toBeCalledWith('signer.value', '==', 'info@onf.org')
           expect(res).toEqual([])
           done()
         },

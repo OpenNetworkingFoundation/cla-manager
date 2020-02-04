@@ -1,21 +1,21 @@
 import { Addendum, AddendumType } from './addendum'
-import { User } from './user'
+import { Identity, IdentityType } from './identity'
 
 describe('The Addendum model', () => {
   let model
   let signer
-  let contributor1
-  let contributor2
+  let contributor1, contributor2, contributor3
   beforeEach(() => {
-    signer = new User('John', 'john@onf.dev', 'john-onf')
-    contributor1 = new User('Emma', 'emma@onf.dev', 'emma-onf')
-    contributor2 = new User('Gigi', 'gigi@onf.dev', 'gigi-onf')
+    signer = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev')
+    contributor1 = new Identity(IdentityType.EMAIL, 'Emma', 'emma@onf.dev')
+    contributor2 = new Identity(IdentityType.EMAIL, 'Gigi', 'gigi@onf.dev')
+    contributor3 = new Identity(IdentityType.GITHUB, 'Alex', 'alex3000')
 
     model = new Addendum(
       AddendumType.CONTRIBUTOR,
       'aabb',
       signer,
-      [contributor1],
+      [contributor1, contributor3],
       [contributor2]
     )
   })
@@ -23,7 +23,7 @@ describe('The Addendum model', () => {
     expect(model.type).toEqual('contributor')
     expect(model.agreementId).toEqual('aabb')
     expect(model.signer).toEqual(signer)
-    expect(model.added).toEqual([contributor1])
+    expect(model.added).toEqual([contributor1, contributor3])
     expect(model.removed).toEqual([contributor2])
     expect(model.dateSigned instanceof Date).toBe(true)
   })

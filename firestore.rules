@@ -1,5 +1,5 @@
 function isSigner() {
-	return request.auth.token.email == resource.data.signer.email;
+	return request.auth.token.email == resource.data.signer.value;
 }
 
 function isAdmin() {
@@ -7,7 +7,7 @@ function isAdmin() {
 }
 
 function onWhitelist() {
-	return request.auth.token.email == resource.data.signer.email || isAdmin();
+	return request.auth.token.email == resource.data.signer.value || isAdmin();
 }
 
 service cloud.firestore {
@@ -15,7 +15,7 @@ service cloud.firestore {
     match /agreements/{cla} {
       allow read: if request.auth != null && onWhitelist();
       allow update: if request.auth != null && isAdmin();
-      allow create: if request.auth != null && request.auth.token.email == request.resource.data.signer.email;
+      allow create: if request.auth != null && request.auth.token.email == request.resource.data.signer.value;
       allow delete: if request.auth != null && isSigner();
     }
     match /addendums/{addendumId} {

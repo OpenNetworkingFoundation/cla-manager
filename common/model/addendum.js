@@ -27,9 +27,9 @@ class addendum {
    * @param {string} id global identifier
    * @param {AddendumType} type type of addendum
    * @param {string} agreementId ID of the agreement to which this addendum applies
-   * @param {User} signer signer  of the addendum
-   * @param {User[]} added array of users added by the addendum
-   * @param {User[]} removed array of users removed by the addendum
+   * @param {Identity} signer signer  of the addendum
+   * @param {Identity[]} added array of users added by the addendum
+   * @param {Identity[]} removed array of users removed by the addendum
    */
   constructor (type, agreementId, signer, added, removed) {
     this._agreementId = agreementId
