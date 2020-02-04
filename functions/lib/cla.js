@@ -24,6 +24,14 @@ function Cla (db) {
   }
 
   function normalize (identity) {
+    if (!identity) {
+      return false
+    }
+    if (!Object.prototype.hasOwnProperty.call(identity, 'type') ||
+      !Object.prototype.hasOwnProperty.call(identity, 'value')) {
+      console.warn('Identity objects must have at least a type, and a value')
+      return false
+    }
     const newIdentity = { ...identity }
     if (identity.type === IdentityType.EMAIL) {
       newIdentity.value = newIdentity.value.toLowerCase()
@@ -77,74 +85,31 @@ function Cla (db) {
       })
   }
 
-  async function isClaSigned (user, ref) {
-    if (!user || !user.email) {
-      console.log('email is not provided')
+  /**
+   * Given an identity it returns a boolean promise indicating whether the
+   * identity is whitelisted, or not.
+   * @param identity {Object}
+   * @returns {Promise<boolean>}
+   */
+  async function isIdentityWhitelisted (identity) {
+    identity = normalize(identity)
+
+    if (!identity) {
+      console.log('identity was not provided')
       return false
     }
 
-    const email = user.email.toLowerCase()
-
-    try {
-      const claRef = db.collection('clas')
-      const clasByEmail = claRef.where('whitelist', 'array-contains', email)
-      let snapshot = await clasByEmail.get()
-
-      // Check if there is any CLA that signed for this email
-      let signed = !snapshot.empty
-
-      // TODO just for debugging
-      //  snapshot.forEach(doc => {
-      //      console.log(doc.id, ' => ', doc.toJson().whitelist);
-      //  })
-
-      // If there is no CLA signed by email, then check by domain
-      if (!signed) {
-        const domain = email.substring(email.lastIndexOf('@') + 1)
-        const clasByDomain = claRef.where('domain', '==', domain)
-        snapshot = await clasByDomain.get()
-
-        // TODO just for debugging
-        //                snapshot.forEach(doc => {
-        //                    console.log(doc.id, ' => ', doc.toJson().domain , ' - ', doc.toJson().blacklist);
-        //                })
-
-        // Check that the email is not in the blacklist
-        signed = !snapshot.empty && snapshot.docs
-          .map(cla => cla.data().blacklist)
-          .filter(blacklist => blacklist.indexOf(email) === -1)
-          .length > 0
-      }
-
-      if (!signed && ref) {
-        // store the PR for later :)
-        var prRef = db.collection('failedPRs').doc(email)
-
-        // Uncomment to initialize the doc.
-        // sfDocRef.set({ population: 0 });
-
-        await db.runTransaction(transaction => {
-          // This code may get re-run multiple times if there are conflicts.
-          return transaction.get(prRef).then(doc => {
-            if (!doc.exists) {
-              return transaction.set(prRef, { refs: [ref] })
-            }
-            const newRefs = doc.data().refs.push(ref)
-            return transaction.update(prRef, { refs: newRefs })
-          })
-        }).then(() => {
-          console.log('Transaction successfully committed!')
-        }).catch(error => {
-          console.log('Transaction failed: ', error)
-          throw error
-        })
-      }
-
-      return signed
-    } catch (err) {
-      console.log('Error getting CLAs', err)
-      throw err
-    }
+    return db.collection('whitelists')
+      .where(identity.type.toString(), 'array-contains', identity.value)
+      .get().then(query => {
+        // If not empty, we found at least one whitelist entry with the given
+        // identity.
+        return !query.empty
+      })
+      .catch(error => {
+        console.log(error)
+        return false
+      })
   }
 
   // unused
@@ -165,7 +130,7 @@ function Cla (db) {
 
   return {
     updateWhitelist: updateWhitelist,
-    isClaSigned: isClaSigned
+    isIdentityWhitelisted: isIdentityWhitelisted
   }
 }
 

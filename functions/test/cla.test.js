@@ -69,28 +69,26 @@ describe('Cla lib', () => {
   it('should update whitelist', async () => {
     // Add agreement
     expect(await assertSucceeds(agreementRef.set(agreement)))
-
-    // Add addendum 1 (which adds identity2 and identity3)
+    // Add addendum 1
     addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum1)
     // Update whitelist
     expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
     // Verify agreement
-    whitelistDoc = (await whitelistRef.get()).data()
-    expect(whitelistDoc.email).toContain(idJohnEmail.value)
-    expect(whitelistDoc.email).toContain(idEmmaEmailNormalized.value)
-    expect(whitelistDoc.email).not.toContain(idEmmaEmail.value)
-    expect(whitelistDoc.github).toContain(idEmmaGithub.value)
+    expect(await cla.isIdentityWhitelisted(idJohnEmail)).toBeTruthy()
+    expect(await cla.isIdentityWhitelisted(idEmmaEmailNormalized)).toBeTruthy()
+    expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBeTruthy()
+    expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBeTruthy()
 
     // Add addendum
     addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum2)
     // Update whitelist
     expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
     // Verify agreement
-    whitelistDoc = (await whitelistRef.get()).data()
-    expect(whitelistDoc.email).not.toContain(idEmmaEmailNormalized.value)
-    expect(whitelistDoc.github).not.toContain(idEmmaGithub.value)
-    expect(whitelistDoc.email).toContain(idGigiEmail.value)
-    expect(whitelistDoc.github).toContain(idGigiGithub.value)
+    expect(await cla.isIdentityWhitelisted(idEmmaEmailNormalized)).toBeFalsy()
+    expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBeFalsy()
+    expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBeFalsy()
+    expect(await cla.isIdentityWhitelisted(idGigiEmail)).toBeTruthy()
+    expect(await cla.isIdentityWhitelisted(idGigiGithub)).toBeTruthy()
 
     // Add addendum
     addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum3)
@@ -103,11 +101,17 @@ describe('Cla lib', () => {
   })
 
   it('should NOT be possible to update the whitelist for a non-existing agreement', async () => {
-    // Add addendum 1 (which adds identity2 and identity3)
+    // Add mock addendum referencing a non-existing agreement
     const mockAddendum = { ...addendum1 }
-    mockAddendum.agreementId = 'foo'
+    mockAddendum.agreementId = 'i-dont-exist'
     const mockSnapshot = await addAndGetSnapshot(addendumsRef, mockAddendum)
     // Update whitelist
     expect(await assertFails(cla.updateWhitelist(mockSnapshot)))
+  })
+
+  it('should fail checking an invalid identity', async () => {
+    expect(await cla.isIdentityWhitelisted(null)).toBeFalsy()
+    expect(await cla.isIdentityWhitelisted({ foo: 'bar' })).toBeFalsy()
+    expect(await cla.isIdentityWhitelisted({ type: 'foo', value: 'bar' })).toBeFalsy()
   })
 })
