@@ -1,3 +1,5 @@
+import { Identity, IdentityType } from './common/model/identity'
+
 const App = require('@octokit/app')
 const Octokit = require('@octokit/rest')
 const WebhooksApi = require('@octokit/webhooks')
@@ -12,22 +14,16 @@ const WebhooksApi = require('@octokit/webhooks')
 
 module.exports = Github
 
-function Github (options) {
-  options = options || {}
-  //  const log = Object.assign({
-  //    'debug': () => {},
-  //    'info': () => {},
-  //    'warn': console.warn,
-  //    'error': console.error
-  //  }, options && options.log)
-  const id = options.id
-  const privateKey = options.cert
-  const secret = options.secret
-  const claClient = options.cla
-  //  if (!appId) throw 'app id is not defined in options'
-  //  if (!privateKey) throw 'cert is not defined in options'
-
-  const ghApp = new App({ id, privateKey })
+/**
+ *
+ * @param appId {number}
+ * @param privateKey {string}
+ * @param secret {string}
+ * @param clalib {Cla}
+ * @constructor
+ */
+function Github (appId, privateKey, secret, clalib) {
+  const ghApp = new App({ id: appId, privateKey: privateKey })
   // const jwt = app.getSignedJsonWebToken() // global app token
   const ghWebhooks = new WebhooksApi(secret ? { secret } : {})
 
@@ -39,70 +35,88 @@ function Github (options) {
     console.log(`Error occured in "${error.event.name} handler: ${error.stack}"`)
   })
 
-  ghWebhooks.on(['pull_request.opened', 'pull_request.synchronize'], async context => {
-    const pr = context.payload.pull_request
+  ghWebhooks.on(
+    [
+      'pull_request.opened',
+      'pull_request.synchronize'
+    ], async context => {
+      // TODO: check repo owner and discard if it's not managed by ONF
+      const pr = context.payload.pull_request
+      const owner = pr.base.repo.owner.login
+      const repo = pr.base.repo.name
+      const prNum = pr.number
+      const eventType = context.payload.action
+      const numCommits = pr.commits
 
-    const owner = pr.base.repo.owner.login
-    const repo = pr.base.repo.name
-    const prNum = pr.number
-    const eventType = context.payload.action
-    const numCommits = pr.commits
+      console.log(`Pull Request: ${owner}/${repo}/${prNum}, type ${eventType}, ${numCommits} commits`)
 
-    console.log(`Pull Request: ${owner}/${repo}/${prNum}, type ${eventType}, ${numCommits} commits`)
+      const installationId = context.payload.installation.id
+      const installationAccessToken = await ghApp.getInstallationAccessToken({ installationId })
 
-    // TODO if numCommits <= 250, use the commits_url or pull request list
-    //  commits API else, use the repo commits API; can be an error for now
-    if (numCommits > 250) {
-      throw new Error('number of commits exceeds the 250 commit limit')
-    }
+      const ghClient = new Octokit({
+        auth: installationAccessToken // jwt,
+        // log: reqLogger //FIXME
+      })
 
-    const installationId = context.payload.installation.id
-    const installationAccessToken = await ghApp.getInstallationAccessToken({ installationId })
+      const status = {
+        owner: owner,
+        repo: repo,
+        context: 'clam',
+        sha: pr.head.sha
+      }
 
-    const ghClient = new Octokit({
-      auth: installationAccessToken // jwt,
-      // log: reqLogger //FIXME
+      // TODO if numCommits <= 250, use the commits_url or pull request list
+      //  commits API else, use the repo commits API; can be an error for now
+      if (numCommits > 250) {
+        // Should post a status to the PR
+        status.state = 'failure'
+        status.target_url = 'https://sign.the.cla'
+        status.description = 'Cannot evaluate CLA for this PR. ' +
+          'Number of commits exceeds the 250 commit limit. ' +
+          'Please contact contact support@opennetworking.org'
+        return ghClient.repos.createStatus(status)
+      }
+
+      // We need a CLA in file for the PR author (github ID), as well as for all
+      // the identities associated with all commits of this PR.
+      const identities = getPrIdentities(pr, ghClient)
+
+      return clalib.checkIdentities(identities).then(result => {
+        if (result.allWhitelisted) {
+          console.log('cla is signed for all commits')
+          status.state = 'success'
+          status.description = 'All good! We have a CLA in file for all contributors in this PR.'
+        } else {
+          let msg
+          if (result.missingIdentities.length) {
+            msg = 'We could not find a CLA for the following identities: ' +
+              result.missingIdentities +
+              '. You will need to sign one before we can merge your PR.'
+          } else {
+            msg = 'We were not able to verify the CLA for this PR. ' +
+              'If the problem persists please contact support@opennetworking.org'
+          }
+          status.state = 'failure'
+          status.target_url = 'https://sign.the.cla'
+          status.description = msg
+        }
+        return ghClient.repos.createStatus(status)
+      })
     })
 
-    const responses = ghClient.paginate.iterator(`GET ${pr.commits_url}`)
-    let allSigned
+  async function getPrIdentities (pr, ghClient) {
+    // We need a CLA in file for the PR author (github ID), as well as for all
+    // the identities associated with all commits of this PR.
+    const identities = [new Identity(IdentityType.GITHUB, null, pr.user.login)]
+    const responses = await ghClient.paginate.iterator(`GET ${pr.commits_url}`)
     for await (const response of responses) {
-      const commits = response.data
-      allSigned = await commits
-        .map(async commit => isClaSigned(commit))
-        .reduce((r, v) => (r && v), true)
-        // TODO for debugging
-        //  commits.forEach(async commit => {
-        //      const signed = await isClaSigned(commit)
-        //      console.log(`sha: ${commit.sha},
-        //          author: ${commit.commit.author.name}/${commit.commit.author.email}/${commit.author.login},
-        //          committer: ${commit.commit.committer.name}/${commit.commit.committer.email}/${commit.committer.login}
-        //          signed: ${signed}`)
-        //  })
-        // TODO end debugging
-      if (!allSigned) break // no need to continue; we found an unsigned commit
+      response.data.map(commit => getCommitIdentities(commit))
+        .forEach(x => identities.push(...x))
     }
+    return identities
+  }
 
-    const status = {
-      owner: owner,
-      repo: repo,
-      context: 'cla-manager',
-      sha: pr.head.sha
-    }
-    if (allSigned) {
-      console.log('cla is signed for all commits')
-      status.state = 'success'
-      status.description = 'CLA is signed'
-    } else {
-      console.log('cla is not signed for all commits')
-      status.state = 'failure'
-      status.target_url = 'https://sign.the.cla'
-      status.description = 'CLA is not signed'
-    }
-    return ghClient.repos.createStatus(status)
-  })
-
-  async function isClaSigned (commit) {
+  function getCommitIdentities (commit) {
     // FIXME this is a hack for storing PR toJson
     const match = commit.url.match(/repos\/([^/]+)\/([^/]+)/)
     const ref = {
@@ -112,33 +126,19 @@ function Github (options) {
     }
     console.log(ref)
 
-    const author = {
-      email: commit.commit.author.email,
-      githubId: commit.author.login
+    const identities = [
+      new Identity(IdentityType.GITHUB, null, commit.author.login),
+      new Identity(IdentityType.EMAIL, null, commit.commit.author.email)
+    ]
+
+    if (commit.committer.login !== 'web-flow') {
+      identities.push(...[
+        new Identity(IdentityType.GITHUB, null, commit.committer.login),
+        new Identity(IdentityType.EMAIL, null, commit.commit.committer.email)
+      ])
     }
 
-    let committer
-    if (commit.committer.login === 'web-flow') {
-      // the commit was performed via the Github UI by the author
-      committer = author
-    } else {
-      committer = {
-        email: commit.commit.committer.email,
-        githubId: commit.committer.login
-      }
-    }
-
-    let signed = await claClient.isClaSigned(author, ref)
-    if (!signed || author === committer) {
-      return signed
-    }
-
-    // Make sure the committer has also signed a CLA if different than the author
-    if (author.email !== committer.email || author.githubId !== committer.githubId) {
-      signed = signed && await claClient.isClaSigned(committer, ref)
-    }
-
-    return signed
+    return identities
   }
 
   // function recheckPrsForEmails (emails) {
@@ -161,7 +161,9 @@ function Github (options) {
 
   return {
     receive: ghWebhooks.receive,
-    handler: ghWebhooks.middleware
+    handler: ghWebhooks.middleware,
+    getPrIdentities: getPrIdentities,
+    getCommitIdentities: getCommitIdentities
     // recheckPrsForEmails
   }
 }

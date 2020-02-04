@@ -6,14 +6,12 @@ const db = admin.firestore()
 const Github = require('./lib/github')
 const Cla = require('./lib/cla')
 
-const cla = new Cla(db)
-
-const github = new Github({
-  id: functions.config().github.app_id,
-  cert: functions.config().github.key,
-  secret: functions.config().github.secret,
-  cla: cla
-})
+const clalib = new Cla(db)
+const github = new Github(
+  functions.config().github.app_id,
+  functions.config().github.key,
+  functions.config().github.secret,
+  clalib)
 
 exports.githubWebook = functions.https.onRequest(github.handler)
 
@@ -44,4 +42,4 @@ exports.githubWebook = functions.https.onRequest(github.handler)
  */
 exports.updateWhitelist = functions.firestore
   .document('/addendums/{id}')
-  .onCreate(cla.updateWhitelist)
+  .onCreate(clalib.updateWhitelist)
