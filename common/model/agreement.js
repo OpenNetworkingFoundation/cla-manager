@@ -1,6 +1,6 @@
 import DB from '../db/db'
 import { Addendum } from './addendum'
-import { User } from './user'
+import { Identity, IdentityType } from './identity'
 
 const agreementCollection = 'agreements'
 
@@ -29,7 +29,7 @@ class agreement {
    * agreement, if {@link type} is {@link agreementType.CORPORATE}, otherwise
    * {@code null}
    * @param {string} body the agreement text body
-   * @param {user} signer the signer of the agreement
+   * @param {Identity} signer the signer of the agreement
    * @param {string|null} organization organization covered by the
    */
   constructor (type, body, signer, organization = null) {
@@ -38,7 +38,7 @@ class agreement {
 
     this._type = type
     this._body = body
-    // TODO validate that signer is of type User
+    // TODO validate that signer is of type Identity
     this._signer = signer
 
     // TODO validate that type is of type AgreementType
@@ -92,7 +92,7 @@ class agreement {
 
   /**
    * Returns the signer.
-   * @returns {User}
+   * @returns {Identity}
    */
   get signer () {
     return this._signer
@@ -145,8 +145,8 @@ class agreement {
   }
 
   /**
-   * Returns a list of User that are valid on this Agreement
-   * @returns {Promise<User[]>}
+   * Returns a list of Identity that are valid on this Agreement
+   * @returns {Promise<Identity[]>}
    */
   getActiveUser () {
     return this.getAddendums()
@@ -157,8 +157,8 @@ class agreement {
             Array.from(users).some(existingUser => {
               if (
                 existingUser.name === removedUser.name &&
-                existingUser.email === removedUser.email &&
-                existingUser.githubId === removedUser.githubId
+                existingUser.value === removedUser.value &&
+                existingUser.type === removedUser.type
               ) {
                 users.delete(existingUser)
                 return true
@@ -177,7 +177,7 @@ class agreement {
    */
   static fromDocumentSnapshot (doc) {
     const data = doc.data()
-    const signer = new User(data.signer.name, data.signer.email)
+    const signer = new Identity(IdentityType.EMAIL, data.signer.name, data.signer.value)
     let a
     if (data.type === AgreementType.INDIVIDUAL) {
       a = new Agreement(data.type, data.body, signer)
@@ -190,7 +190,8 @@ class agreement {
 
   static subscribe (email, successCb, errorCb) {
     return DB.connection().collection(agreementCollection)
-      .where('signer.email', '==', email)
+      .where('signer.type', '==', IdentityType.EMAIL)
+      .where('signer.value', '==', email)
       .onSnapshot(successCb, errorCb)
   }
 
