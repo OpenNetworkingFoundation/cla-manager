@@ -25,12 +25,12 @@ function Github (appId, privateKey, secret, clalib) {
   // const jwt = app.getSignedJsonWebToken() // global app token
   const ghWebhooks = new WebhooksApi(secret ? { secret } : {})
 
-  ghWebhooks.on('*', ({ id, name, payload }) => {
-    console.log(name, 'event received')
+  ghWebhooks.on('*', (event) => {
+    console.log('event received', event)
   })
 
   ghWebhooks.on('error', (error) => {
-    console.log(`Error occured in "${error.event.name} handler: ${error.stack}"`)
+    console.log('error occurred', error)
   })
 
   ghWebhooks.on(
