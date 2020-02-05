@@ -17,7 +17,7 @@
     "deploy": "npx firebase deploy --only functions",
     "logs": "npx firebase functions:log",
     "pretest": "npm run lint",
-    "test": "npx firebase emulators:exec --only firestore 'test/run.sh'"
+    "test": "npx firebase emulators:exec --only firestore 'jest'"
   },
   "dependencies": {
     "@octokit/app": "^2.2.5",
