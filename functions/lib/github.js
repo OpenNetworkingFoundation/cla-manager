@@ -45,8 +45,8 @@ function Github (appId, privateKey, secret, db) {
             installationId: context.payload.installation.id
           },
           identities: null,
-          lastRunStatus: null,
-          lastRunOn: null,
+          lastStatus: null,
+          lastProcessedOn: null,
           processedCount: 0
         })
         .catch(error => {
@@ -73,10 +73,11 @@ function Github (appId, privateKey, secret, db) {
     req.lastStatus = {
       owner: pr.base.repo.owner.login,
       repo: pr.base.repo.name,
-      context: 'cla-validation',
+      context: 'onf/cla: validation',
       sha: pr.head.sha,
       target_url: 'https://cla.opennetworking.org',
       description: null, // Max 140 characters
+      comment: null,
       state: null
     }
     req.lastProcessedOn = new Date()
@@ -111,11 +112,15 @@ function Github (appId, privateKey, secret, db) {
             req.identities.map(util.identityObj))
           if (checkResult.allWhitelisted) {
             req.lastStatus.state = 'success'
-            req.lastStatus.description = 'All good! We have a CLA in file for all contributors in this PR.'
+            req.lastStatus.description = 'all good!'
           } else {
             if (checkResult.missingIdentities.length) {
               req.lastStatus.state = 'failure'
-              req.lastStatus.description = 'We could not find a CLA for all or some of the identities'
+              req.lastStatus.description = 'we could not find a CLA for all or some of the identities'
+              req.lastStatus.comment =
+                'We could not find a CLA for the following identities: ' +
+                checkResult.missingIdentities.join(', ') +
+                '. You will need to sign one before we can accept this contribution.'
             } else {
               req.lastStatus.state = 'error'
               req.lastStatus.description = 'whitelist verification failed but missing identities is empty'
@@ -142,8 +147,8 @@ function Github (appId, privateKey, secret, db) {
     }
 
     // If any error occurred, improve description shown to user.
-    if (req.lastStatus.state === 'error') {
-      req.lastStatus.description =
+    if (req.lastStatus.state === 'error' && !req.lastStatus.comment) {
+      req.lastStatus.comment =
         `Unable to verify CLA: ${req.lastStatus.description}. ` +
         'If the problem persists, please contact support@opennetworking.org.'
     }
@@ -151,7 +156,7 @@ function Github (appId, privateKey, secret, db) {
     // Post status to Github.
     try {
       const octoResponse = await octokit.repos.createStatus(req.lastStatus)
-      req.lastStatus.octoAck = octoResponse.status === 200
+      req.lastStatus.octoAck = octoResponse.status === 201
       req.lastStatus.octoResponse = {
         status: octoResponse.status,
         data: octoResponse.data
@@ -159,6 +164,23 @@ function Github (appId, privateKey, secret, db) {
     } catch (e) {
       req.lastStatus.octoAck = false
       req.lastStatus.octoError = JSON.parse(JSON.stringify(e))
+    }
+
+    // If error or failure, post comment
+    if (req.lastStatus.state !== 'success') {
+      try {
+        const octoResponse = await octokit.issues.createComment({
+          owner: pr.base.repo.owner.login,
+          repo: pr.base.repo.name,
+          issue_number: pr.number,
+          body: req.lastStatus.comment
+        })
+        if (octoResponse.status !== 201) {
+          console.error(octoResponse.data)
+        }
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     // Finally, update request in the db.

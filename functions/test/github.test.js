@@ -29,12 +29,24 @@ const mockRequest = {
 const mockIdentities = ['github:bocon13', 'email:bocon@opennetworking.org']
 
 const statusUri = '/repos/bocon13/cla-test/statuses/2129e453f6d652badfb353c510a3669873a15f7c'
+const commentsUri = '/repos/bocon13/cla-test/issues/3/comments'
 
 const appId = 123
 
 const projectId = 'github-test-' + new Date()
 
 nock.disableNetConnect()
+
+function expectComment () {
+  nock('https://api.github.com')
+    .post(commentsUri,
+      (req) => {
+        console.log(`COMMENT => ${req.body}`)
+        expect(req.body.length).toBeGreaterThan(0)
+        return true
+      })
+    .reply(201)
+}
 
 describe('Github lib', () => {
   let db
@@ -67,11 +79,11 @@ describe('Github lib', () => {
     // Return a token for fake application (id=555)
     nock('https://api.github.com')
       .post('/app/installations/555/access_tokens')
-      .reply(200, { token: 'test' })
+      .reply(201, { token: 'test' })
     // Return the list of commits for PR #3
     nock('https://api.github.com')
       .get('/repos/bocon13/cla-test/pulls/3/commits')
-      .reply(200, commits)
+      .reply(201, commits)
   })
 
   test('PR identities should be extracted', async () => {
@@ -103,7 +115,8 @@ describe('Github lib', () => {
           expect(body.state).toEqual('failure')
           return true
         })
-      .reply(200)
+      .reply(201)
+    expectComment()
     const snapshot = await addAndGetSnapshot(requestsRef, mockRequest)
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
@@ -111,7 +124,7 @@ describe('Github lib', () => {
     expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
     expect(updatedRequest.processedCount).toBe(1)
-    expect.assertions(5)
+    expect.assertions(6)
   })
 
   test('PR request should fail CLA validation if only some identities are not whitelisted', async () => {
@@ -125,14 +138,15 @@ describe('Github lib', () => {
           expect(body.state).toEqual('failure')
           return true
         })
-      .reply(200)
+      .reply(201)
+    expectComment()
     const snapshot = await addAndGetSnapshot(requestsRef, mockRequest)
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
     expect(updatedRequest.lastStatus.state).toBe('failure')
     expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(4)
+    expect.assertions(5)
   })
 
   test('PR request should be successfully validated', async () => {
@@ -146,7 +160,7 @@ describe('Github lib', () => {
           expect(body.state).toEqual('success')
           return true
         })
-      .reply(200)
+      .reply(201)
     const snapshot = await addAndGetSnapshot(requestsRef, mockRequest)
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
@@ -179,7 +193,8 @@ describe('Github lib', () => {
           expect(body.description).toContain('250')
           return true
         })
-      .reply(200)
+      .reply(201)
+    expectComment()
     const hugeRequest = JSON.parse(JSON.stringify(mockRequest))
     hugeRequest.payload = hugePayload
     const snapshot = await addAndGetSnapshot(requestsRef, hugeRequest)
@@ -188,7 +203,7 @@ describe('Github lib', () => {
     expect(updatedRequest.lastStatus.state).toBe('error')
     expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(5)
+    expect.assertions(6)
   })
 
   test('PR request should fail if identities are empty', async () => {
@@ -200,7 +215,8 @@ describe('Github lib', () => {
           expect(body.description).toContain('empty')
           return true
         })
-      .reply(200)
+      .reply(201)
+    expectComment()
     const req = JSON.parse(JSON.stringify(mockRequest))
     req.identities = []
     const snapshot = await addAndGetSnapshot(requestsRef, req)
@@ -209,6 +225,6 @@ describe('Github lib', () => {
     expect(updatedRequest.lastStatus.state).toBe('error')
     expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(5)
+    expect.assertions(6)
   })
 })
