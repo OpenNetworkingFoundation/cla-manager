@@ -108,9 +108,10 @@ describe('Github lib', () => {
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
     expect(updatedRequest.lastStatus.state).toBe('failure')
+    expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
     expect(updatedRequest.processedCount).toBe(1)
-    expect.assertions(4)
+    expect.assertions(5)
   })
 
   test('PR request should fail CLA validation if only some identities are not whitelisted', async () => {
@@ -122,8 +123,6 @@ describe('Github lib', () => {
       .post(statusUri,
         (body) => {
           expect(body.state).toEqual('failure')
-          // The missing one should be mentioned in the status.
-          expect(body.description).toContain(mockIdentities[1])
           return true
         })
       .reply(200)
@@ -131,6 +130,7 @@ describe('Github lib', () => {
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
     expect(updatedRequest.lastStatus.state).toBe('failure')
+    expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
     expect.assertions(4)
   })
@@ -151,8 +151,9 @@ describe('Github lib', () => {
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
     expect(updatedRequest.lastStatus.state).toBe('success')
+    expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(3)
+    expect.assertions(4)
   })
 
   test('PR request should be updated when posting github status fails', async () => {
@@ -185,8 +186,9 @@ describe('Github lib', () => {
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
     expect(updatedRequest.lastStatus.state).toBe('error')
+    expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(4)
+    expect.assertions(5)
   })
 
   test('PR request should fail if identities are empty', async () => {
@@ -205,7 +207,8 @@ describe('Github lib', () => {
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
     expect(updatedRequest.lastStatus.state).toBe('error')
+    expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
     expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(4)
+    expect.assertions(5)
   })
 })
