@@ -1,0 +1,36 @@
+import { identityKey, identityObj } from '../lib/util'
+
+describe('Util lib', () => {
+  it('should produce valid identity keys and objects', async () => {
+    expect(identityKey({ type: 'foo', value: 'bar' }))
+      .toEqual('foo:bar')
+    expect(identityKey({ type: 'foo', value: 'BAR' }))
+      .toEqual('foo:bar')
+    expect(identityKey({ type: 'foo', value: 'bar', fubar: 'fubar' }))
+      .toEqual('foo:bar')
+    expect(identityObj('foo:bar'))
+      .toMatchObject({ type: 'foo', value: 'bar' })
+    expect(identityObj('foo:bar:bar'))
+      .toMatchObject({ type: 'foo', value: 'bar:bar' })
+
+    expect(() => identityKey())
+      .toThrow(Error)
+    expect(() => identityKey({}))
+      .toThrow(Error)
+    expect(() => identityKey({ type: 'foo', bar: 'bar' }))
+      .toThrow(Error)
+    expect(() => identityKey({ foo: 'foo', value: 'bar' }))
+      .toThrow(Error)
+    expect(() => identityKey({ type: 'foo', bar: 'bar' }))
+      .toThrow(Error)
+
+    expect(() => identityObj())
+      .toThrow(Error)
+    expect(() => identityObj(''))
+      .toThrow(Error)
+    expect(() => identityObj({ an: 'object' }))
+      .toThrow(Error)
+    expect(() => identityObj('noseparator'))
+      .toThrow(Error)
+  })
+})
