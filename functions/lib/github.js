@@ -44,7 +44,7 @@ function Github (appId, privateKey, secret, db) {
           app: {
             installationId: context.payload.installation.id
           },
-          identities: null,
+          identity: `github:${pr.user.login}`,
           lastStatus: null,
           lastProcessedOn: null,
           processedCount: 0
@@ -83,74 +83,36 @@ function Github (appId, privateKey, secret, db) {
     req.lastProcessedOn = new Date()
     req.processedCount = req.processedCount + 1
 
-    // Extract identities (if it's the first we process this request)
-    if (!req.identities) {
-      if (pr.commits > 250) {
-        // TODO if numCommits <= 250, use the commits_url or pull request list
-        //  commits API else, use the repo commits API; can be an error for now
-        req.lastStatus.state = 'error'
-        req.lastStatus.description = 'number of commits exceed the 250 limit'
+    // Check whitelist.
+    const cla = Cla(db)
+    try {
+      if (await cla.isIdentityWhitelisted(util.identityObj(req.identity))) {
+        req.lastStatus.state = 'success'
+        req.lastStatus.description = `All good! We have a CLA in file for @${pr.user.login}`
       } else {
-        try {
-          req.identities = await getPrIdentities(pr, octokit)
-        } catch (error) {
-          console.error(error)
-          req.lastStatus.state = 'error'
-          req.lastStatus.description = 'internal error'
-        }
+        req.lastStatus.state = 'failure'
+        req.lastStatus.description = `We don't have a CLA in file for @${pr.user.login}`
+        req.lastStatus.comment = `Hi @${pr.user.login}, ` +
+          'this is the ONF bot 🤖 I\'m glad you want to contribute to ' +
+          'our projects! However, before accepting your contribution, ' +
+          'we need to ask you to sign a Contributor License Agreement ' +
+          '(CLA). You can do it online, it will take only few minutes:' +
+          '\n\n✒️ 👉 https://cla.opennetworking.org\n\n' +
+          'After signing, make sure to add your Github user ID ' +
+          `\`${pr.user.login}\` to the agreement.`
       }
-    }
-
-    // If we managed to extract identities (state is not error), verify that all
-    // identities are whitelisted.
-    if (!req.lastStatus.state) {
-      if (Array.isArray(req.identities) && req.identities.length > 0) {
-        // Check whitelist.
-        const cla = Cla(db)
-        try {
-          const checkResult = await cla.checkIdentities(
-            req.identities.map(util.identityObj))
-          if (checkResult.allWhitelisted) {
-            req.lastStatus.state = 'success'
-            req.lastStatus.description = 'all good!'
-          } else {
-            if (checkResult.missingIdentities.length) {
-              req.lastStatus.state = 'failure'
-              req.lastStatus.description = 'we could not find a CLA for all or some of the identities'
-              req.lastStatus.comment =
-                'We could not find a CLA for the following identities: ' +
-                checkResult.missingIdentities.join(', ') +
-                '. You will need to sign one before we can accept this contribution.'
-            } else {
-              req.lastStatus.state = 'error'
-              req.lastStatus.description = 'whitelist verification failed but missing identities is empty'
-            }
-          }
-        } catch (error) {
-          console.error(error)
-          req.lastStatus.state = 'error'
-          req.lastStatus.description = 'cannot check whitelist'
-        }
-      } else if (Array.isArray(req.identities)) {
-        req.lastStatus.state = 'error'
-        req.lastStatus.description = 'empty identities'
-      } else {
-        req.lastStatus.state = 'error'
-        req.lastStatus.description = 'invalid identities'
-      }
-    }
-
-    // We should have a state to report by now.
-    if (!req.lastStatus.state) {
+    } catch (error) {
+      console.error(error)
       req.lastStatus.state = 'error'
-      req.lastStatus.description = 'internal error'
+      req.lastStatus.description = 'cannot check whitelist'
     }
 
-    // If any error occurred, improve description shown to user.
+    // If any error occurred, improve user experience by posting a comment.
     if (req.lastStatus.state === 'error' && !req.lastStatus.comment) {
       req.lastStatus.comment =
         `Unable to verify CLA: ${req.lastStatus.description}. ` +
-        'If the problem persists, please contact support@opennetworking.org.'
+        'If the problem persists, please contact support@opennetworking.org ' +
+        ` (\`support-id: ${requestSnapshot.id}\`)`
     }
 
     // Post status to Github.
@@ -191,37 +153,26 @@ function Github (appId, privateKey, secret, db) {
       })
   }
 
-  async function getPrIdentities (pr, octokit) {
-    // We need a CLA in file for the PR author (github ID), as well as for all
-    // the identities associated with all commits of this PR.
-    const identities = [`github:${pr.user.login}`]
-    const responses = await octokit.paginate.iterator(`GET ${pr.commits_url}`)
-    for await (const response of responses) {
-      response.data.map(commit => getCommitIdentities(commit))
-        .forEach(x => identities.push(...x))
-    }
-    return Array.from(new Set(identities))
-  }
-
-  function getCommitIdentities (commit) {
-    const identities = [
-      `github:${commit.author.login}`,
-      `email:${commit.commit.author.email}`
-    ]
-    if (commit.committer.login !== 'web-flow') {
-      identities.push(...[
-        `github:${commit.committer.login}`,
-        `email:${commit.commit.committer.email}`
-      ])
-    }
-    return Array.from(new Set(identities))
-  }
+  // We agreeed to validate just the PR author. No need to extract identities.
+  // async function getPrIdentities (pr, octokit) {
+  //   // We need a CLA in file for the PR author (github ID), as well as for
+  // all // the identities associated with all commits of this PR. const
+  // identities = [`github:${pr.user.login}`] const responses = await
+  // octokit.paginate.iterator(`GET ${pr.commits_url}`) for await (const
+  // response of responses) { response.data.map(commit =>
+  // getCommitIdentities(commit)) .forEach(x => identities.push(...x)) } return
+  // Array.from(new Set(identities)) }  function getCommitIdentities (commit) {
+  // const identities = [ `github:${commit.author.login}`,
+  // `email:${commit.commit.author.email}` ] if (commit.committer.login !==
+  // 'web-flow') { identities.push(...[ `github:${commit.committer.login}`,
+  // `email:${commit.commit.committer.email}` ]) } return Array.from(new
+  // Set(identities)) }
 
   return {
     receive: ghWebhooks.receive,
     handler: ghWebhooks.middleware,
-    processRequest: processRequest,
-    getPrIdentities: getPrIdentities,
-    getCommitIdentities: getCommitIdentities
+    processRequest: processRequest
+    // getPrIdentities: getPrIdentities,
+    // getCommitIdentities: getCommitIdentities
   }
 }
