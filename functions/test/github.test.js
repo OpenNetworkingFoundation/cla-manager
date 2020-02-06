@@ -4,14 +4,14 @@ const nock = require('nock')
 const fs = require('fs')
 const path = require('path')
 
-const Octokit = require('@octokit/rest')
+// const Octokit = require('@octokit/rest')
 
 // Requiring our app implementation
 const Github = require('../lib/github')
 
 // Requiring our fixtures
 const payload = require('./fixtures/pull_request.opened')
-const hugePayload = require('./fixtures/pull_request.opened.huge')
+//  const hugePayload = require('./fixtures/pull_request.opened.huge')
 const commits = require('./fixtures/commits')
 
 const mockRequest = {
@@ -20,13 +20,11 @@ const mockRequest = {
   event: 'pull_request.opened',
   payload: payload,
   type: 'github',
-  identities: null,
-  lastRunStatus: null,
-  lastRunOn: null,
+  identity: 'github:bocon13',
   processedCount: 0
 }
 
-const mockIdentities = ['github:bocon13', 'email:bocon@opennetworking.org']
+// const mockIdentities = ['github:bocon13', 'email:bocon@opennetworking.org']
 
 const statusUri = '/repos/bocon13/cla-test/statuses/2129e453f6d652badfb353c510a3669873a15f7c'
 const commentsUri = '/repos/bocon13/cla-test/issues/3/comments'
@@ -86,26 +84,26 @@ describe('Github lib', () => {
       .reply(201, commits)
   })
 
-  test('PR identities should be extracted', async () => {
-    const octokit = new Octokit({ auth: 'accesstoken' })
-    const identities = await github.getPrIdentities(payload.pull_request, octokit)
-    expect(identities.length).toBe(2)
-    expect(identities[0]).toBe(mockIdentities[0])
-    expect(identities[1]).toBe(mockIdentities[1])
-    expect(true)
-  })
-
-  test('Commit identities should be extracted', async () => {
-    const identities = github.getCommitIdentities(commits[0])
-    expect(identities.length).toBe(2)
-    expect(identities[0]).toBe(mockIdentities[0])
-    expect(identities[1]).toBe(mockIdentities[1])
-  })
+  // test('PR identities should be extracted', async () => {
+  //   const octokit = new Octokit({ auth: 'accesstoken' })
+  //   const identities = await github.getPrIdentities(payload.pull_request, octokit)
+  //   expect(identities.length).toBe(2)
+  //   expect(identities[0]).toBe(mockIdentities[0])
+  //   expect(identities[1]).toBe(mockIdentities[1])
+  //   expect(true)
+  // })
+  //
+  // test('Commit identities should be extracted', async () => {
+  //   const identities = github.getCommitIdentities(commits[0])
+  //   expect(identities.length).toBe(2)
+  //   expect(identities[0]).toBe(mockIdentities[0])
+  //   expect(identities[1]).toBe(mockIdentities[1])
+  // })
 
   test('PR request should be stored in the db after a pull request event', async () => {
     await github.receive({ name: 'pull_request', payload })
     const request = (await requestsRef.get()).docs[0].data()
-    expect(request).toMatchObject(request)
+    expect(request).toMatchObject(mockRequest)
   })
 
   test('PR request should fail validation', async () => {
@@ -127,32 +125,32 @@ describe('Github lib', () => {
     expect.assertions(6)
   })
 
-  test('PR request should fail CLA validation if only some identities are not whitelisted', async () => {
-    // Only one of the requested entities is in the db.
-    await db.collection('whitelists').add({
-      values: mockIdentities[0]
-    })
-    nock('https://api.github.com')
-      .post(statusUri,
-        (body) => {
-          expect(body.state).toEqual('failure')
-          return true
-        })
-      .reply(201)
-    expectComment()
-    const snapshot = await addAndGetSnapshot(requestsRef, mockRequest)
-    await github.processRequest(snapshot)
-    const updatedRequest = (await snapshot.ref.get()).data()
-    expect(updatedRequest.lastStatus.state).toBe('failure')
-    expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
-    expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(5)
-  })
+  // test('PR request should fail CLA validation if only some identities are not whitelisted', async () => {
+  //   // Only one of the requested entities is in the db.
+  //   await db.collection('whitelists').add({
+  //     values: mockIdentities[0]
+  //   })
+  //   nock('https://api.github.com')
+  //     .post(statusUri,
+  //       (body) => {
+  //         expect(body.state).toEqual('failure')
+  //         return true
+  //       })
+  //     .reply(201)
+  //   expectComment()
+  //   const snapshot = await addAndGetSnapshot(requestsRef, mockRequest)
+  //   await github.processRequest(snapshot)
+  //   const updatedRequest = (await snapshot.ref.get()).data()
+  //   expect(updatedRequest.lastStatus.state).toBe('failure')
+  //   expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
+  //   expect(updatedRequest.lastStatus.octoAck).toBe(true)
+  //   expect.assertions(5)
+  // })
 
   test('PR request should be successfully validated', async () => {
     // All requested identities are in the whitelist.
     await db.collection('whitelists').add({
-      values: mockIdentities
+      values: [mockRequest.identity]
     })
     nock('https://api.github.com')
       .post(statusUri,
@@ -184,27 +182,27 @@ describe('Github lib', () => {
     expect(updatedRequest.lastStatus.octoError.status).toBe(404)
   })
 
-  test('PR request should error if it exceeds the commit limit', async () => {
-    nock('https://api.github.com')
-      .post(statusUri,
-        (body) => {
-          expect(body.state).toEqual('error')
-          // The user should see mention of the limit.
-          expect(body.description).toContain('250')
-          return true
-        })
-      .reply(201)
-    expectComment()
-    const hugeRequest = JSON.parse(JSON.stringify(mockRequest))
-    hugeRequest.payload = hugePayload
-    const snapshot = await addAndGetSnapshot(requestsRef, hugeRequest)
-    await github.processRequest(snapshot)
-    const updatedRequest = (await snapshot.ref.get()).data()
-    expect(updatedRequest.lastStatus.state).toBe('error')
-    expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
-    expect(updatedRequest.lastStatus.octoAck).toBe(true)
-    expect.assertions(6)
-  })
+  // test('PR request should error if it exceeds the commit limit', async () => {
+  //   nock('https://api.github.com')
+  //     .post(statusUri,
+  //       (body) => {
+  //         expect(body.state).toEqual('error')
+  //         // The user should see mention of the limit.
+  //         expect(body.description).toContain('250')
+  //         return true
+  //       })
+  //     .reply(201)
+  //   expectComment()
+  //   const hugeRequest = JSON.parse(JSON.stringify(mockRequest))
+  //   hugeRequest.payload = hugePayload
+  //   const snapshot = await addAndGetSnapshot(requestsRef, hugeRequest)
+  //   await github.processRequest(snapshot)
+  //   const updatedRequest = (await snapshot.ref.get()).data()
+  //   expect(updatedRequest.lastStatus.state).toBe('error')
+  //   expect(updatedRequest.lastStatus.description.length).toBeLessThanOrEqual(140)
+  //   expect(updatedRequest.lastStatus.octoAck).toBe(true)
+  //   expect.assertions(6)
+  // })
 
   test('PR request should fail if identities are empty', async () => {
     nock('https://api.github.com')
@@ -212,13 +210,13 @@ describe('Github lib', () => {
         (body) => {
           expect(body.state).toEqual('error')
           // The user should see mention of the issue.
-          expect(body.description).toContain('empty')
+          expect(body.description).toContain('cannot check whitelist')
           return true
         })
       .reply(201)
     expectComment()
     const req = JSON.parse(JSON.stringify(mockRequest))
-    req.identities = []
+    req.identity = null
     const snapshot = await addAndGetSnapshot(requestsRef, req)
     await github.processRequest(snapshot)
     const updatedRequest = (await snapshot.ref.get()).data()
