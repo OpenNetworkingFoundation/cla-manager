@@ -47,7 +47,7 @@ describe('Github lib', () => {
     requestsRef = db.collection('requests')
     fs.readFile(path.join(__dirname, 'fixtures/mock-cert.pem'), (err, cert) => {
       if (err) return done(err)
-      mockCert = cert
+      mockCert = cert.toString()
       return done()
     })
   })
