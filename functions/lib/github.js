@@ -76,7 +76,7 @@ function Github (appId, privateKey, secret, db) {
       context: 'cla-validation',
       sha: pr.head.sha,
       target_url: 'https://cla.opennetworking.org',
-      description: null,
+      description: null, // Max 140 characters
       state: null
     }
     req.lastProcessedOn = new Date()
@@ -115,10 +115,7 @@ function Github (appId, privateKey, secret, db) {
           } else {
             if (checkResult.missingIdentities.length) {
               req.lastStatus.state = 'failure'
-              req.lastStatus.description =
-                'We could not find a CLA for the following identities: ' +
-                checkResult.missingIdentities.join(', ') +
-                '. You will need to sign one before we can accept this contribution.'
+              req.lastStatus.description = 'We could not find a CLA for all or some of the identities'
             } else {
               req.lastStatus.state = 'error'
               req.lastStatus.description = 'whitelist verification failed but missing identities is empty'
@@ -147,7 +144,7 @@ function Github (appId, privateKey, secret, db) {
     // If any error occurred, improve description shown to user.
     if (req.lastStatus.state === 'error') {
       req.lastStatus.description =
-        `We were unable to verify the CLA: ${req.lastStatus.description}. ` +
+        `Unable to verify CLA: ${req.lastStatus.description}. ` +
         'If the problem persists, please contact support@opennetworking.org.'
     }
 
