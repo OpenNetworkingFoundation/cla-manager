@@ -17,7 +17,7 @@ module.exports = Github
 function Github (appId, privateKey, secret, db) {
   const ghApp = new App({
     id: appId,
-    // Key is passed aa firebase config string with new lines encoded as "\n".
+    // Key is passed as a firebase config string with new lines encoded as "\n".
     // We need to replace "\n" with actual new line characters.
     privateKey: privateKey.replace(/\\n/g, '\n')
   })
