@@ -1,8 +1,8 @@
 {
 	"action": "opened",
-	"number": 4,
+	"number": 3,
 	"pull_request": {
-		"number": 4,
+		"number": 3,
 		"state": "open",
 		"locked": false,
 		"title": "Update README.md",
