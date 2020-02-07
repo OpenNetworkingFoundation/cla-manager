@@ -38,7 +38,7 @@ describe('Github lib', () => {
   let mockEvent
   let payload
 
-  beforeAll((done) => {
+  beforeAll(async (done) => {
     fs.readFile(path.join(__dirname, 'fixtures/mock-cert.pem'), (err, cert) => {
       if (err) return done(err)
       mockCert = cert.toString()

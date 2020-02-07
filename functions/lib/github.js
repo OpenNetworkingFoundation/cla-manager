@@ -182,8 +182,13 @@ function Github (appId, privateKey, secret, db) {
           commentData.comment_id = commentId
           return octokit.issues.deleteComment(commentData)
         }
+        return Promise.resolve()
       })
       .then(response => {
+        if (!response) {
+          // We didn't post any comment
+          return Promise.resolve()
+        }
         // Update comment ID in contribution doc
         let commentId
         switch (response.status) {
