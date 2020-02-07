@@ -4,7 +4,12 @@ The `ref-update` script runs as a gerrit hooks:
 
 https://gerrit.googlesource.com/plugins/hooks/+/master/src/main/resources/Documentation/hooks.md
 
-When run, it queries the CLA server based on the email address given.
+When run, it queries the CLA server using the email address as a parameter,
+which returns a JSON blob that looks like:
+
+```json
+{"status":"success|failure","message":"message text"}
+```
 
 If the CLA is signed, it exits with success.
 
@@ -13,7 +18,6 @@ Gerrit will send to the user.
 
 It also handles common error cases (can't contact server, invalid response,
 etc.)
-
 
 ## Deploying the ref-update script
 

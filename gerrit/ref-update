@@ -30,12 +30,13 @@ import sys
 import urllib.request
 
 # Edit this variable with the URL of the CLA manager instance
-CLA_MANAGER_URL = "https://cla-manager.example/check-cla"
+CLA_MANAGER_URL = "https://cla-manager/gerritWebhook"
 
 # Set this to False when testing a deployment to prevent exit(1)
 ENFORCING = True
 
 # create shared logger
+logging.basicConfig()
 logger = logging.getLogger('ref-update')
 
 
@@ -57,7 +58,8 @@ def parse_gerrit_args():
 
     parser.add_argument("--project", help="Gerrit project")
     parser.add_argument("--refname", help="Gerrit reference name")
-    parser.add_argument("--uploader", help="Uploader name and email address")
+    parser.add_argument("--uploader", help="Uploader name and email address",
+                        required=True)
     parser.add_argument("--uploader-username", help="Uploader username")
     parser.add_argument("--oldrev", help="Hash of the parent commit")
     parser.add_argument("--newrev", help="Hash of the new commit")
@@ -95,8 +97,9 @@ def request_cla_status(cla_manager_url, uploader_email):
     # If an error occurs, fail
     status = False
 
-    # build the URL
-    url = "%s/email=%s" % (cla_manager_url, uploader_email)
+    # build the URL for the request
+    url = "%s?email=%s" % (cla_manager_url, uploader_email)
+    logger.debug("URL requested: '%s'" % url)
 
     request = urllib.request.Request(url)
 
@@ -126,6 +129,7 @@ def check_cla_response(jsondata):
     '''
     # fail by default (on error)
     status = False
+    message = ""
 
     try:
         data = json.loads(jsondata)
@@ -134,10 +138,16 @@ def check_cla_response(jsondata):
         logger.exception(message)
     else:
         logger.debug("JSON decoded: %s" % data)
-        if all(key in data for key in ("signed", "message")):
-            if data["signed"]:
+        if all(key in data for key in ("status", "message")):
+            if data["status"] == "success":
                 status = True
-            message = data["message"]
+            elif data["status"] == "failure":
+                message = data["message"]
+            else:
+                # error state, print the message
+                logger.debug("Status is not 'success' or 'failure': '%s'" %
+                             status)
+                message = data["message"]
         else:
             message = "JSON didn't contain keys: 'status' and 'message'"
 
@@ -160,8 +170,10 @@ def output_status(status, message):
 
 # main function that calls other functions
 if __name__ == "__main__":
+
     args = parse_gerrit_args()
 
+    # only print log messages if debugging
     if args.debug:
         logger.setLevel(logging.DEBUG)
     else:

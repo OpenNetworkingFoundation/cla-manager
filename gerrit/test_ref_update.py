@@ -92,7 +92,7 @@ class refupdate_test(unittest.TestCase):
 
         cm = MagicMock()
         cm.getcode.return_value = 200
-        cm.read.return_value = '{ "signed": true, "message": "foo@bar.com signed the CLA" }'
+        cm.read.return_value = '{ "status": "success", "message": "foo@bar.com signed the CLA" }'
         cm.__enter__.return_value = cm
         mock_urlopen.return_value = cm
         (status, message) = refupdate.request_cla_status(cla_url, addr)
@@ -108,7 +108,7 @@ class refupdate_test(unittest.TestCase):
 
         cm = MagicMock()
         cm.getcode.return_value = 200
-        cm.read.return_value = '{ "signed": false, "message": "foo@bar.com needs to sign the CLA" }'
+        cm.read.return_value = '{ "status": "failure", "message": "foo@bar.com needs to sign the CLA" }'
         cm.__enter__.return_value = cm
         mock_urlopen.return_value = cm
 
@@ -148,7 +148,7 @@ class refupdate_test(unittest.TestCase):
         '''
         Pass CLA with positive JSON input
         '''
-        jsondata = '{ "signed": true, "message": "foo@bar.com signed the CLA" }'
+        jsondata = '{ "status": "success", "message": "foo@bar.com signed the CLA" }'
 
         (status, message) = refupdate.check_cla_response(jsondata)
         self.assertTrue(status)
@@ -157,11 +157,21 @@ class refupdate_test(unittest.TestCase):
         '''
         Fail CLA using negative JSON input
         '''
-        jsondata = '{ "signed": false, "message": "foo@bar.com needs to sign the CLA" }'
+        jsondata = '{ "status": "failure", "message": "foo@bar.com needs to sign the CLA" }'
 
         (status, message) = refupdate.check_cla_response(jsondata)
         self.assertFalse(status)
         self.assertEqual(message, "foo@bar.com needs to sign the CLA")
+
+    def test_check_cla_response_error(self):
+        '''
+        Error on CLA backend
+        '''
+        jsondata = '{ "status": "error", "message": "An error has occurred" }'
+
+        (status, message) = refupdate.check_cla_response(jsondata)
+        self.assertFalse(status)
+        self.assertEqual(message, "An error has occurred")
 
     def test_check_cla_response_invalid_json1(self):
         '''
@@ -177,7 +187,7 @@ class refupdate_test(unittest.TestCase):
         '''
         Fail when JSON that doesn't contain correct keys
         '''
-        jsondata = '{ "signed": true }'
+        jsondata = '{ "status": "success" }'
 
         (status, message) = refupdate.check_cla_response(jsondata)
         self.assertFalse(status)
