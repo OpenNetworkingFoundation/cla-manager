@@ -1,167 +1,202 @@
+const util = require('./util')
+const Cla = require('./cla')
 const App = require('@octokit/app')
-const Octokit = require('@octokit/rest')
+const { Octokit } = require('@octokit/rest')
 const WebhooksApi = require('@octokit/webhooks')
-
-// const debug = false
-// const reqLogger = {
-//  debug: debug ? () => {} : console.log,
-//  info: debug ? () => {} : console.log,
-//  warn: console.warn,
-//  error: console.error
-// }
+const sha1 = require('sha1')
 
 module.exports = Github
 
 /**
- *
+ * Github-related functions.
  * @param appId {number}
  * @param privateKey {string}
  * @param secret {string}
- * @param clalib {Cla}
+ * @param db {FirebaseFirestore.Firestore}
  * @constructor
  */
-function Github (appId, privateKey, secret, clalib) {
-  const ghApp = new App({ id: appId, privateKey: privateKey })
+function Github (appId, privateKey, secret, db) {
+  const ghApp = new App({
+    id: appId,
+    // Key is passed as a firebase config string with new lines encoded as "\n".
+    // We need to replace "\n" with actual new line characters.
+    privateKey: privateKey.replace(/\\n/g, '\n')
+  })
   // const jwt = app.getSignedJsonWebToken() // global app token
   const ghWebhooks = new WebhooksApi(secret ? { secret } : {})
-
-  ghWebhooks.on('*', ({ id, name, payload }) => {
-    console.log(name, 'event received')
-  })
-
-  ghWebhooks.on('error', (error) => {
-    console.log(`Error occured in "${error.event.name} handler: ${error.stack}"`)
-  })
 
   ghWebhooks.on(
     [
       'pull_request.opened',
-      'pull_request.synchronize'
-    ], async context => {
+      'pull_request.reopened',
+      'pull_request.synchronize',
+      'pull_request.closed'
+    ], context => {
+      // Store event int the db. We'll process it later.
       // TODO: check repo owner and discard if it's not managed by ONF
       const pr = context.payload.pull_request
-      const owner = pr.base.repo.owner.login
-      const repo = pr.base.repo.name
-      const prNum = pr.number
-      const eventType = context.payload.action
-      const numCommits = pr.commits
+      const contributionKey = `github.com/${pr.base.repo.full_name}/pull/${pr.number}`
+      const contributionId = sha1(contributionKey)
+      const contributionRef = db.collection('contributions').doc(contributionId)
+      const action = context.payload.action
 
-      console.log(`Pull Request: ${owner}/${repo}/${prNum}, type ${eventType}, ${numCommits} commits`)
-
-      const installationId = context.payload.installation.id
-      const installationAccessToken = await ghApp.getInstallationAccessToken({ installationId })
-
-      const ghClient = new Octokit({
-        auth: installationAccessToken // jwt,
-        // log: reqLogger //FIXME
-      })
-
-      const status = {
-        owner: owner,
-        repo: repo,
-        context: 'clam',
-        sha: pr.head.sha
+      let contribPromise
+      if (action === 'opened' || action === 'reopened') {
+        contribPromise = contributionRef.set({
+          key: contributionKey,
+          provider: 'github',
+          project: pr.base.repo.full_name,
+          type: 'pull_request'
+        })
+      } else {
+        // if synchronize, we should already have a doc in the DB.
+        contribPromise = Promise.resolve()
       }
 
-      // TODO if numCommits <= 250, use the commits_url or pull request list
-      //  commits API else, use the repo commits API; can be an error for now
-      if (numCommits > 250) {
-        // Should post a status to the PR
-        status.state = 'failure'
-        status.target_url = 'https://sign.the.cla'
-        status.description = 'Cannot evaluate CLA for this PR. ' +
-          'Number of commits exceeds the 250 commit limit. ' +
-          'Please contact contact support@opennetworking.org'
-        return ghClient.repos.createStatus(status)
+      if (action !== 'closed') {
+        // Store payload in db and process later.
+        return contribPromise
+          .then(async () => db.collection('events').add({
+            contributionId: contributionId,
+            contributionKey: contributionKey,
+            provider: 'github',
+            type: 'pull_request.' + action,
+            payload: context.payload,
+            createdOn: new Date()
+          }))
+          .catch(console.error)
+      } else {
+        // Delete contribution doc.
+        return contributionRef.delete()
+          .catch(console.error)
       }
-
-      // We need a CLA in file for the PR author (github ID), as well as for all
-      // the identities associated with all commits of this PR.
-      const identities = getPrIdentities(pr, ghClient)
-
-      return clalib.checkIdentities(identities).then(result => {
-        if (result.allWhitelisted) {
-          console.log('cla is signed for all commits')
-          status.state = 'success'
-          status.description = 'All good! We have a CLA in file for all contributors in this PR.'
-        } else {
-          let msg
-          if (result.missingIdentities.length) {
-            msg = 'We could not find a CLA for the following identities: ' +
-              result.missingIdentities +
-              '. You will need to sign one before we can merge your PR.'
-          } else {
-            msg = 'We were not able to verify the CLA for this PR. ' +
-              'If the problem persists please contact support@opennetworking.org'
-          }
-          status.state = 'failure'
-          status.target_url = 'https://sign.the.cla'
-          status.description = msg
-        }
-        return ghClient.repos.createStatus(status)
-      })
     })
 
-  async function getPrIdentities (pr, ghClient) {
-    // We need a CLA in file for the PR author (github ID), as well as for all
-    // the identities associated with all commits of this PR.
-    const identities = [{ type: 'github', value: pr.user.login }]
-    const responses = await ghClient.paginate.iterator(`GET ${pr.commits_url}`)
-    for await (const response of responses) {
-      response.data.map(commit => getCommitIdentities(commit))
-        .forEach(x => identities.push(...x))
+  /**
+   * Process an event from the database.
+   * @param eventSnapshot {DocumentSnapshot}
+   * @returns {Promise}
+   */
+  async function processEvent (eventSnapshot) {
+    const event = eventSnapshot.data()
+
+    console.log(`eventId=${eventSnapshot.id}, contributionKey=${event.contributionKey}, event=${event.type}`)
+
+    const pr = event.payload.pull_request
+    const installationId = event.payload.installation.id
+    const accessToken = await ghApp.getInstallationAccessToken({ installationId })
+    const octokit = new Octokit({ auth: accessToken })
+
+    // Info to post to GitHub.
+    const status = {
+      state: null, // error, failure, success
+      description: null, // max 140 characters
+      comment: null // pull request comment
     }
-    return identities
+
+    // Check whitelist
+    event.identity = `github:${pr.user.login}`
+    try {
+      if (await Cla(db).isIdentityWhitelisted(util.identityObj(event.identity))) {
+        status.state = 'success'
+        status.description = `All good! We have a CLA in file for @${pr.user.login}`
+      } else {
+        status.state = 'failure'
+        status.description = `We don't have a CLA in file for @${pr.user.login}`
+        status.comment = `Hi @${pr.user.login}, ` +
+          'this is the ONF bot 🤖 I\'m glad you want to contribute to ' +
+          'our projects! However, before accepting your contribution, ' +
+          'we need to ask you to sign a Contributor License Agreement ' +
+          '(CLA). You can do it online, it will take only few minutes:' +
+          '\n\n✒️ 👉 https://cla.opennetworking.org\n\n' +
+          'After signing, make sure to add your Github user ID ' +
+          `\`${pr.user.login}\` to the agreement.`
+      }
+    } catch (error) {
+      console.error(error)
+      status.state = 'error'
+      status.description = 'cannot check whitelist'
+    }
+
+    // If any error occurred, improve user experience by posting a comment.
+    if (status.state === 'error' && !status.comment) {
+      status.comment =
+        `Unable to verify CLA: ${status.description}. ` +
+        'If the problem persists, please contact support@opennetworking.org ' +
+        ` (\`support-id: ${eventSnapshot.id}\`)`
+    }
+
+    // Post status to Github and update event in the DB
+    const statusPromise = octokit.repos
+      .createStatus({
+        owner: pr.base.repo.owner.login,
+        repo: pr.base.repo.name,
+        context: 'onf/cla',
+        sha: pr.head.sha,
+        target_url: 'https://cla.opennetworking.org',
+        description: status.description,
+        state: status.state
+      })
+      .then(() => {
+        status.githubAck = true
+      })
+      .catch(error => {
+        status.githubAck = false
+        status.githubError = JSON.parse(JSON.stringify(error))
+      })
+      .then(() => {
+        event.status = status
+        return eventSnapshot.ref.update(event)
+      })
+      .catch(console.error)
+
+    const contribRef = db.collection('contributions')
+      .doc(event.contributionId)
+    const commentPromise = contribRef.get()
+      .then(snapshot => {
+        // Retrieve existing comment_id (if any)
+        if (!snapshot.exists) {
+          console.error(`Missing contribution ${event.contributionId} in DB`)
+          return null
+        } else {
+          return snapshot.data().githubCommentId
+        }
+      })
+      .then(commentId => {
+        const commentData = {
+          owner: pr.base.repo.owner.login,
+          repo: pr.base.repo.name,
+          issue_number: pr.number
+        }
+        if (status.comment) {
+          // Create or update existing comment.
+          commentData.body = status.comment
+          if (commentId) {
+            commentData.comment_id = commentId
+            return octokit.issues.updateComment(commentData)
+          } else {
+            return octokit.issues.createComment(commentData)
+              .then(response => contribRef.update({
+                githubCommentId: response.data.id
+              }))
+          }
+        } else if (commentId) {
+          // Delete existing comment.
+          commentData.comment_id = commentId
+          return octokit.issues.deleteComment(commentData)
+            .then(() => contribRef.update({
+              githubCommentId: null
+            }))
+        }
+      })
+      .catch(console.error)
+
+    return Promise.all([statusPromise, commentPromise])
   }
-
-  function getCommitIdentities (commit) {
-    // FIXME this is a hack for storing PR toJson
-    const match = commit.url.match(/repos\/([^/]+)\/([^/]+)/)
-    const ref = {
-      owner: match[1],
-      repo: match[2],
-      sha: commit.sha
-    }
-    console.log(ref)
-
-    const identities = [
-      { type: 'github', value: commit.author.login },
-      { type: 'email', value: commit.commit.author.email }
-    ]
-
-    if (commit.committer.login !== 'web-flow') {
-      identities.push(...[
-        { type: 'github', value: commit.committer.login },
-        { type: 'email', value: commit.commit.committer.email }
-      ])
-    }
-
-    return identities
-  }
-
-  // function recheckPrsForEmails (emails) {
-  //   console.log('rechecking:', emails)
-  //   return Promise.all(emails.map(async email => {
-  //     const refs = await claClient.getPrsForEmail(email)
-  //     return refs.map(ref => {
-  //       // FIXME This is a Hack that won't work if there is more than one commit
-  //       return client.repos.createStatus({
-  //         owner: ref.owner,
-  //         repo: ref.repo,
-  //         sha: ref.sha,
-  //         context: 'cla-manager',
-  //         state: 'success',
-  //         description: 'CLA is signed'
-  //       })
-  //     })
-  //   }))
-  // }
 
   return {
     receive: ghWebhooks.receive,
     handler: ghWebhooks.middleware,
-    getPrIdentities: getPrIdentities,
-    getCommitIdentities: getCommitIdentities
-    // recheckPrsForEmails
+    processEvent: processEvent
   }
 }

@@ -1,14 +1,17 @@
 const firebase = require('@firebase/testing')
 
 /**
- * Returns a firestore instance that can be accessed as the user defined in the given auth object, optionally
- * pre-populated with the given data.
+ * Returns a firestore instance that can be accessed as the user defined in the
+ * given auth object, optionally pre-populated with the given data.
  * @param {{ uid: String, email: String }} auth identifiers
  * @param data {Object|null}
+ * @param projectId {string|null}
  * @returns {Promise<FirebaseFirestore.Firestore>}
  */
-module.exports.setupDb = async (auth, data) => {
-  const projectId = `test-${Date.now()}`
+module.exports.setupDb = async (auth, data, projectId = null) => {
+  if (!projectId) {
+    projectId = `test-${Date.now()}`
+  }
   let app
   if (auth) {
     app = await firebase.initializeTestApp({
@@ -44,12 +47,26 @@ module.exports.setupDb = async (auth, data) => {
 }
 
 /**
- * Returns a firestore instance that can be accessed as admin, optionally populated with the given data object.
+ * Returns a firestore instance that can be accessed as admin, optionally
+ * populated with the given data object.
  * @param {Object|null} data
+ * @param projectId {string|null}
  * @returns {Promise<FirebaseFirestore.Firestore>}
  */
-module.exports.setupDbAdmin = async (data) => {
+module.exports.setupDbAdmin = async (data, projectId = null) => {
   return module.exports.setupDb(null, data)
+}
+
+/**
+ * Clears all data associated with a particular project in the locally running
+ * Firestore instance. Use this method to clean-up after tests.
+ * @param projectId {string}
+ * @returns {Promise<void>}
+ */
+module.exports.clearDb = async (projectId) => {
+  return firebase.clearFirestoreData({
+    projectId: projectId
+  })
 }
 
 module.exports.teardownDb = async () => {
@@ -58,6 +75,10 @@ module.exports.teardownDb = async () => {
 
 module.exports.addAndGetSnapshot = async (collectionRef, document) => {
   return collectionRef.add(document).then(res => res.get())
+}
+
+module.exports.setAndGetSnapshot = async (collectionRef, document, id) => {
+  return collectionRef.doc(id).set(document).then(() => collectionRef.doc(id).get())
 }
 
 expect.extend({
