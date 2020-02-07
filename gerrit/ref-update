@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+
+# Copyright 2019-present Open Networking Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# Gerrit ref-update hook for cla-manager
+#
+# Gerrit Hook Documentation:
+# https://gerrit.googlesource.com/plugins/hooks/+/master/src/main/resources/Documentation/hooks.md
+
+from __future__ import absolute_import
+
+import argparse
+import json
+import logging
+import re
+import sys
+import urllib.request
+
+# Edit this variable with the URL of the CLA manager instance
+CLA_MANAGER_URL = "https://cla-manager.example/check-cla"
+
+# Set this to False when testing a deployment to prevent exit(1)
+ENFORCING = True
+
+# create shared logger
+logger = logging.getLogger('ref-update')
+
+
+def parse_gerrit_args():
+    '''
+    Arguments supplied by Gerrit are:
+        --project <project name>
+        --refname <refname>
+        --uploader <uploader>
+        --uploader-username <username>
+        --oldrev <sha1>
+        --newrev <sha1>
+
+    Arguments added for manual testing:
+        --debug
+    '''
+
+    parser = argparse.ArgumentParser(description="Gerrit hook for cla-manager project")
+
+    parser.add_argument("--project", help="Gerrit project")
+    parser.add_argument("--refname", help="Gerrit reference name")
+    parser.add_argument("--uploader", help="Uploader name and email address")
+    parser.add_argument("--uploader-username", help="Uploader username")
+    parser.add_argument("--oldrev", help="Hash of the parent commit")
+    parser.add_argument("--newrev", help="Hash of the new commit")
+    parser.add_argument("--debug", help="Print additional debugging information",
+                        action="store_true")
+
+    return parser.parse_args()
+
+
+def uploader_email(uploader):
+    '''
+    Given the uploader string from Gerrit, return an email address
+    '''
+    # python stdlib email.utils.parseaddr doesn't support this format
+
+    if re.fullmatch(r'^[\w ]+\([^@]+@[^@]+\.[^@]+\)$', uploader):
+        # email is in the form: "Foo Bar (foo@bar.baz)"
+        (name, after) = uploader.split("(", 1)
+        (addr, extra) = after.split(")", 1)
+
+    elif re.fullmatch(r'^[^@]+@[^@]+\.[^@]+$', uploader):
+        # email is  the bare address: "foo@bar.baz"
+        addr = uploader
+    else:
+        output_status(False, "Problem with email address: '%s'" % uploader)
+
+    logger.debug("Email address: '%s'", addr)
+    return addr
+
+
+def request_cla_status(cla_manager_url, uploader_email):
+    '''
+    given an uploader email address request CLA status for that email
+    '''
+    # If an error occurs, fail
+    status = False
+
+    # build the URL
+    url = "%s/email=%s" % (cla_manager_url, uploader_email)
+
+    request = urllib.request.Request(url)
+
+    # docs:
+    #  https://docs.python.org/3/library/urllib.request.html#examples
+    #  https://docs.python.org/3/howto/urllib2.html
+    try:
+        response = urllib.request.urlopen(request)
+    except urllib.error.HTTPError:
+        message = "Server encountered an HTTPError at URL: '%s'" % url
+        logger.exception(message)
+    except urllib.error.URLError:
+        message = "An URLError occurred at URL: '%s'" % url
+        logger.exception(message)
+    else:
+        # docs: https://docs.python.org/3/library/json.html
+        jsondata = response.read()
+        logger.debug("API response: %s", jsondata)
+        (status, message) = check_cla_response(jsondata)
+
+    return (status, message)
+
+
+def check_cla_response(jsondata):
+    '''
+    Decode JSON returned from CLA manager, parse response
+    '''
+    # fail by default (on error)
+    status = False
+
+    try:
+        data = json.loads(jsondata)
+    except json.decoder.JSONDecodeError:
+        message = "Unable to decode JSON"
+        logger.exception(message)
+    else:
+        logger.debug("JSON decoded: %s" % data)
+        if all(key in data for key in ("signed", "message")):
+            if data["signed"]:
+                status = True
+            message = data["message"]
+        else:
+            message = "JSON didn't contain keys: 'status' and 'message'"
+
+    return(status, message)
+
+
+def output_status(status, message):
+
+    # CLA not signed, print a message
+    if not status:
+        print(message)
+
+        # only fail if in enforcing mode
+        if ENFORCING:
+            sys.exit(1)
+
+    # CLA signed, print nothing
+    sys.exit(0)
+
+
+# main function that calls other functions
+if __name__ == "__main__":
+    args = parse_gerrit_args()
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.CRITICAL)
+
+    up_email = uploader_email(args.uploader)
+
+    (status, message) = request_cla_status(CLA_MANAGER_URL, up_email)
+    output_status(status, message)
