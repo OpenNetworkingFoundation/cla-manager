@@ -8,7 +8,7 @@ When run, it queries the CLA server using the email address as a parameter,
 which returns a JSON blob that looks like:
 
 ```json
-{"status":"success|failure","message":"message text"}
+{"status":"success|failure|error","message":"message text"}
 ```
 
 If the CLA is signed, it exits with success.
