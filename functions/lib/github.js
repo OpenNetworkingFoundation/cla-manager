@@ -176,22 +176,36 @@ function Github (appId, privateKey, secret, db) {
             return octokit.issues.updateComment(commentData)
           } else {
             return octokit.issues.createComment(commentData)
-              .then(response => contribRef.update({
-                githubCommentId: response.data.id
-              }))
           }
         } else if (commentId) {
           // Delete existing comment.
           commentData.comment_id = commentId
           return octokit.issues.deleteComment(commentData)
-            .then(() => contribRef.update({
-              githubCommentId: null
-            }))
         }
+      })
+      .then(response => {
+        // Update comment ID in contribution doc
+        let commentId
+        switch (response.status) {
+          case 201:
+            // Comment created
+            commentId = response.data.id
+            break
+          case 204:
+            // Comment deleted
+            commentId = null
+            break
+          default:
+            return Promise.resolve()
+        }
+        return contribRef.update({
+          githubCommentId: commentId
+        })
       })
       .catch(console.error)
 
     return Promise.all([statusPromise, commentPromise])
+      .catch(console.error)
   }
 
   return {
