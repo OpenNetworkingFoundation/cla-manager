@@ -30,7 +30,7 @@ import sys
 import urllib.request
 
 # Edit this variable with the URL of the CLA manager instance
-CLA_MANAGER_URL = "https://cla-manager/gerritWebhook"
+CLA_MANAGER_URL = "https://cla-manager/gerritEndpoint"
 
 # Set this to False when testing a deployment to prevent exit(1)
 ENFORCING = True
