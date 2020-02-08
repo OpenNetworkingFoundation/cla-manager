@@ -1,3 +1,5 @@
+const util = require('./util')
+
 module.exports = Cla
 
 /**
@@ -5,23 +7,6 @@ module.exports = Cla
  * @param db {FirebaseFirestore.Firestore}
  */
 function Cla (db) {
-  /**
-   * Returns a string that uniquely identifies the given identity object.
-   * @param identity {{type: string, value: string}}
-   * @returns {string|boolean}
-   */
-  function identityKey (identity) {
-    if (!identity) {
-      return false
-    }
-    if (!('type' in identity) || !('value' in identity)) {
-      console.warn('Identity must have at least a type, and a value')
-      return false
-    }
-    const lcValue = identity.value.toLowerCase()
-    return `${identity.type}:${lcValue}`
-  }
-
   /**
    * Given a snapshot of a newly created addendum, updates the whitelist in the
    * parent agreement by replying all addendums in chronological order.
@@ -48,10 +33,10 @@ function Cla (db) {
           // append it to the results to always pass the tests.
           .concat([newAddendum])
           .reduce((whitelist, addendum) => {
-            addendum.added.map(identityKey).forEach(val => {
+            addendum.added.map(util.identityKey).forEach(val => {
               whitelist.add(val)
             })
-            addendum.removed.map(identityKey).forEach(val => {
+            addendum.removed.map(util.identityKey).forEach(val => {
               whitelist.delete(val)
             })
             return whitelist
@@ -101,12 +86,12 @@ function Cla (db) {
       })
     }
 
-    // Normalize to keys to simplify DB queries.
-    const identityKeys = identities.map(identityKey)
-    const allValidIdentities = identityKeys.reduce(
-      (r, v) => r && Boolean(v), true)
-
-    if (!allValidIdentities) {
+    // Normalize keys to simplify DB queries.
+    let identityKeys
+    try {
+      identityKeys = identities.map(util.identityKey)
+    } catch (e) {
+      console.warn(e)
       return Promise.resolve({
         allWhitelisted: false,
         missingIdentities: []
@@ -142,42 +127,9 @@ function Cla (db) {
       })
   }
 
-  // unused
-  // async function getPrsForEmail (email) {
-  //   if (!email) {
-  //     console.log('email is not provided')
-  //     return false
-  //   }
-  //   const doc = await firestore.collection('failedPRs').doc(email).get()
-  //   if (pr.exists) {
-  //     console.log('PR toJson:', doc.toJson())
-  //     return doc.toJson().refs
-  //   }
-  //   // doc.toJson() will be undefined in this case
-  //   console.log('No outstanding PR')
-  //   return []
-  // }
-
   return {
     updateWhitelist: updateWhitelist,
     isIdentityWhitelisted: isIdentityWhitelisted,
     checkIdentities: checkIdentities
   }
 }
-
-//
-// async function setup() {
-//
-/// /    var claRef = firestore.collection('clas');
-/// /
-/// /    Promise.all([
-/// /        await firestore.collection('clas').add({
-/// /          admins: ['bocon@opennetworking.org'],
-/// /          whitelist: ['bocon@opennetworking.org'],
-/// /          blacklist: [], // not in whitelist
-/// /          domain: 'opennetworking.org' // must be one of the admin's domains
-/// /        }).then(ref => {
-/// /          console.log('Added document with ID: ', ref.id);
-/// /        })
-/// /    ])
-// }
