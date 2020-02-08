@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
-import { Card, Grid, Button } from '@material-ui/core'
+import { Card, Grid, Button, Box } from '@material-ui/core'
 import { Agreement } from '../../common/model/agreement'
 import UserForm from '../user/UserForm'
 import IdentityCard from './IdentityCard'
+import * as _ from 'lodash'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -81,27 +82,24 @@ function AddendumContainer (props) {
     return (evt) => {
       evt.preventDefault()
       setRemovedIdentities(removedIdentities => [user, ...removedIdentities])
-      const l = activeIdentities.reduce((identities, i) => {
-        if (user !== i) {
-          identities.push(i)
-        }
-        return identities
-      }, [])
-      setActiveIdentities(l)
+      _.remove(activeIdentities, user)
+      setActiveIdentities(activeIdentities)
     }
   }
 
   const undoRemove = (user) => {
     return (evt) => {
       evt.preventDefault()
-      alert('Undo remove Unimplemented')
+      _.remove(removedIdentities, user)
+      setRemovedIdentities(removedIdentities)
+      setActiveIdentities(activeIdentities => [user, ...activeIdentities])
     }
   }
 
   const undoAdd = (user) => {
     return (evt) => {
       evt.preventDefault()
-      alert('Undo Add Unimplemented')
+      setAddedIdentities(_.without(addedIdentities, user))
     }
   }
 
@@ -109,6 +107,7 @@ function AddendumContainer (props) {
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <h2>Active identities for this agreement:</h2>
+        <Box>here is a list of identities that are authorized to contribute code under this agreement</Box>
         <Grid container spacing={2}>
           {activeIdentities.map((a, i) =>
             <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
@@ -118,8 +117,14 @@ function AddendumContainer (props) {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <h2>Update Agreement:</h2>
         <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Box>
+              <h2>Update Agreement:</h2>
+              You can modify the people allowed to contribute code under this agreement by adding or removing them from it. <br/>
+              Make sure to click on &quot;Sign Addendum&quot; below
+            </Box>
+          </Grid>
           {removedIdentities.map((a, i) =>
             <Grid key={`container-removed-${i}`} item xs={12} sm={12} md={6} lg={4}>
               <IdentityCard key={i} user={a} callback={undoRemove} type={'removed'}/>
@@ -140,7 +145,7 @@ function AddendumContainer (props) {
               color='primary'
               disabled={addedIdentities.length === 0 && removedIdentities.length === 0}
               onClick={createAddendum}>
-        Save changes
+        Sign Addendum
       </Button>
     </Grid>
   )

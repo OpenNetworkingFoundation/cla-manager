@@ -3,14 +3,9 @@ import React, { useState } from 'react'
 import { FirebaseApp } from '../common/app/app'
 
 import { makeStyles } from '@material-ui/core/styles'
-import TextField from '@material-ui/core/TextField'
-import Button from '@material-ui/core/Button'
-import Icon from '@material-ui/core/Icon'
-import Container from '@material-ui/core/Container'
-import CssBaseline from '@material-ui/core/CssBaseline'
-import Avatar from '@material-ui/core/Avatar'
-import Typography from '@material-ui/core/Typography'
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import { TextField, Grid, Button, Container, Box } from '@material-ui/core'
+import { Alert } from '@material-ui/lab';
+import SendIcon from '@material-ui/icons/Send'
 
 const useStyles = makeStyles(theme => ({
   '@global': {
@@ -18,33 +13,23 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: theme.palette.common.white
     }
   },
-  paper: {
-    marginTop: theme.spacing(8),
+  root: {
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
+    flexGrow: 1,
+    height: '100%'
   },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main
+  mainGrid: {
+    margin: 'auto',
+    'text-align': 'center'
   },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-    textAlign: 'center'
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2)
-  },
-  sendIcon: {
-    marginLeft: theme.spacing(1)
-  },
-  resultMessage: {}
+  button: {
+    'margin-top': theme.spacing(2)
+  }
 }))
 
 export default function SignIn () {
   // eslint-disable-next-line
-    const [errorCode, setErrorCode] = useState(null);
+  const [errorCode, setErrorCode] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
 
@@ -66,8 +51,7 @@ export default function SignIn () {
       // Save the email locally so you don’t need to ask the user for it again if they open
       // the link on the same device.
       window.localStorage.setItem('emailForSignIn', email)
-      // The link was successfully sent. Inform the user.
-      alert('An email was sent to ' + email + '. Please use the link in the email to sign-in.')
+
       // Re-enable the sign-in button.
       setSuccessMessage('Email sent. Check your inbox.')
       setErrorCode(null)
@@ -87,48 +71,63 @@ export default function SignIn () {
   }
 
   return (
-    <Container component='main' maxWidth='xs'>
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component='h1' variant='h5'>
-                    Sign in
-        </Typography>
-        <form
-          className={classes.form}
-          onSubmit={(e) => e.preventDefault()}
-          noValidate
-        >
-          <TextField
-            variant='outlined'
-            margin='normal'
-            required
-            fullWidth
-            id='email'
-            label='Email Address'
-            name='email'
-            autoComplete='email'
-            autoFocus
-          />
-          <Button
-            className={classes.submit}
-            variant='contained'
-            color='primary'
-            // className={classes.button}
-            onClick={signIn}
+    <Container component='main' maxWidth='xs' className={classes.root} height="100%">
+      <Grid
+        container
+        direction="row"
+        justify="center"
+        alignItems="center"
+        spacing={2}
+        className={classes.mainGrid}
+      >
+        <Grid item xs={12}>
+          <img alt='ONF LOGO' src={process.env.PUBLIC_URL + '/assets/onf-logo.jpg'}/>
+        </Grid>
+        <Grid item xs={12}>
+          <Box>
+            <h1>CLA Manager</h1>
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            noValidate
           >
-                         Send Sign In Link
-            {/* This Button uses a Font Icon, see the installation instructions in the docs. */}
-            <Icon className={classes.sendIcon}>send</Icon>
-          </Button>
-          <div className={classes.resultMessage}>
-            {errorMessage}
-            {successMessage}
-          </div>
-        </form>
-      </div>
+            <TextField
+              variant='outlined'
+              margin='normal'
+              required
+              fullWidth
+              id='email'
+              label='Email Address'
+              name='email'
+              autoComplete='email'
+              autoFocus
+            />
+            <p>
+              If you are already registered, please enter the email address you used to register with the ONF CLA portal.
+              Click the button to receive a link to view your ONF CLA information.
+              <br/><br/>
+              If you have not yet registered, please enter the email address you wish to use to register with the ONF CLA Portal.
+              Click the button to receive a link to complete the registration process.
+            </p>
+            <Button
+              className={classes.button}
+              variant='contained'
+              color='primary'
+              size='large'
+              onClick={signIn}
+              endIcon={<SendIcon/>}
+            >
+              Send Sign In Link
+            </Button>
+          </form>
+        </Grid>
+        <Grid item xs={12}>
+          {successMessage ? <Alert severity="success">{successMessage}</Alert> : null }
+          {errorMessage ? <Alert severity="success">{errorMessage}</Alert> : null }
+        </Grid>
+      </Grid>
     </Container>
   )
 }
@@ -179,5 +178,5 @@ export async function HandleSignInLink (fn) {
       }
     }
   }
-  fn(<SignIn />)
+  fn(<SignIn/>)
 }
