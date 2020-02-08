@@ -2,6 +2,7 @@ const admin = require('firebase-admin')
 const functions = require('firebase-functions')
 const Github = require('./lib/github')
 const Cla = require('./lib/cla')
+const _ = require('lodash')
 
 admin.initializeApp(functions.config().firebase)
 const db = admin.firestore()
@@ -12,6 +13,26 @@ const github = new Github(
   functions.config().github.key,
   functions.config().github.secret,
   db)
+
+/**
+ * Handles the given event snapshot. The implementation is expected to update
+ * the status of the contribution (e.g., PR) on the provider (e.g. Github), and
+ * wait for an ack. Event documents should be updated in the DB with an
+ * indication if the ack was successful or if any error occurred.
+ * @param eventSnapshot
+ * @returns {Promise}
+ */
+const processEvent = async (eventSnapshot) => {
+  const event = eventSnapshot.data()
+  if (!('provider' in event)) {
+    return Promise.reject(new Error('missing provider key in request'))
+  }
+  if (event.provider === 'github') {
+    return github.processEvent(eventSnapshot)
+  } else {
+    return Promise.reject(new Error(`unknown request type ${event.type}`))
+  }
+}
 
 /**
  * When a new addendum is created, update the whitelists collection with the
@@ -30,27 +51,44 @@ exports.githubWebook = functions.https.onRequest(github.handler)
 
 /**
  * When a new CLA validation event is created, e.g. by the GitHub webhook,
- * process it. The implementation is expected to update the status of the
- * contribution (e.g., GitHub PR) in the corresponding server and wait for an
- * ack. Event documents should be updated in the DB with an indication if the
- * ack was successful or if any error occurred.
+ * process it.
  */
 exports.handleEvent = functions.firestore
   .document('/events/{id}')
-  .onCreate(snapshot => {
-    const event = snapshot.data()
-    if (!('provider' in event)) {
-      return Promise.reject(new Error('missing provider key in request'))
-    }
-    if (event.provider === 'github') {
-      return github.processEvent(snapshot)
-    } else {
-      return Promise.reject(new Error(`unknown request type ${event.type}`))
-    }
-  })
+  .onCreate(processEvent)
 
 // TODO: implement cronjob function to periodically clean up acknowledged and
 //  outdated events.
 
-// TODO: implement logic to re-process any pending event every time the
-//  whitelists collection is updated.
+/**
+ * When a whitelist is updated, check for events in state failure that match the
+ * added identities and re-process them.
+ */
+exports.handleWhitelistUpdate = functions.firestore
+  .document('/whitelists/{id}')
+  .onWrite(snapshot => {
+    const oldWhitelist = snapshot.before.data()
+    const newWhitelist = snapshot.after.data()
+    if (!newWhitelist) {
+      return Promise.resolve()
+    }
+    let addedIdentities
+    if (!oldWhitelist) {
+      addedIdentities = newWhitelist.values
+    } else {
+      addedIdentities = _.difference(newWhitelist.values, oldWhitelist.values)
+    }
+    // Find all events with identity the added one and state 'failure'.
+    // Firestore limits query operator 'in' to maximum 10 logical OR operations.
+    // As such, we split identities in many arrays, each one with max
+    // length 10.
+    return Promise.all(_.chunk(addedIdentities, 10)
+      .map(identitiesChunk => {
+        return db.collection('events')
+          .where('status.state', '==', 'failure')
+          .where('identity', 'in', identitiesChunk)
+          .get().then(query => {
+            return Promise.all(query.docs.map(processEvent))
+          })
+      })).catch(console.error)
+  })
