@@ -1,6 +1,7 @@
 const admin = require('firebase-admin')
 const functions = require('firebase-functions')
 const Github = require('./lib/github')
+const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
 
 admin.initializeApp(functions.config().firebase)
@@ -12,6 +13,7 @@ const github = new Github(
   functions.config().github.key,
   functions.config().github.secret,
   db)
+const gerrit = new Gerrit(db)
 
 /**
  * When a new addendum is created, update the whitelists collection with the
@@ -54,3 +56,9 @@ exports.handleEvent = functions.firestore
 
 // TODO: implement logic to re-process any pending event every time the
 //  whitelists collection is updated.
+
+/**
+ * Handles calls from the Gerrit hook.
+ * @type {HttpsFunction}
+ */
+exports.gerritEndpoint = functions.https.onRequest(gerrit.app)
