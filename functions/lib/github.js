@@ -156,7 +156,7 @@ function Github (appId, privateKey, secret, db) {
       .then(snapshot => {
         // Retrieve existing comment_id (if any)
         if (!snapshot.exists) {
-          console.error(`Missing contribution ${event.contributionId} in DB`)
+          console.warn(`Missing contribution ${event.contributionId} in DB`)
           return null
         } else {
           return snapshot.data().githubCommentId
