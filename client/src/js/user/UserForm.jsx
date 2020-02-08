@@ -7,11 +7,14 @@ import { Identity, IdentityType } from '../../common/model/identity'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
 
+
 const useStyles = makeStyles(theme => ({
   textField: {
     marginBottom: theme.spacing(2)
   }
 }))
+
+
 
 function UserForm (props) {
 
@@ -34,7 +37,7 @@ function UserForm (props) {
   return (
     <ValidatorForm onSubmit={handleSubmit}>
       <Grid container spacing={2}>
-        <Grid item xs={10}>
+        <Grid item xs={12} md={10}>
           <ButtonGroup
             className={classes.textField}
             fullWidth
@@ -90,7 +93,7 @@ function UserForm (props) {
             /> : null
           }
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={12} md={2}>
           <Button
             fullWidth
             type="submit"

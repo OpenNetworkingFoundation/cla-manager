@@ -81,7 +81,7 @@ export default function SignIn () {
         className={classes.mainGrid}
       >
         <Grid item xs={12}>
-          <img src={process.env.PUBLIC_URL + '/assets/onf-logo.jpg'}/>
+          <img alt='ONF LOGO' src={process.env.PUBLIC_URL + '/assets/onf-logo.jpg'}/>
         </Grid>
         <Grid item xs={12}>
           <Box>
