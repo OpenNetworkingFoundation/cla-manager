@@ -104,7 +104,13 @@ export default function SignIn () {
               autoComplete='email'
               autoFocus
             />
-            <p>Welcome to the Contributor Management tool. If you intend to sing a corporate agreement, please login with your corporate email</p>
+            <p>
+              If you are already registered, please enter the email address you used to register with the ONF CLA portal.
+              Click the button to receive a link to view your ONF CLA information.
+              <br/><br/>
+              If you have not yet registered, please enter the email address you wish to use to register with the ONF CLA Portal.
+              Click the button to receive a link to complete the registration process.
+            </p>
             <Button
               className={classes.button}
               variant='contained'

@@ -117,12 +117,14 @@ function AddendumContainer (props) {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <h2>Update Agreement:</h2>
-        <Box>
-          You can modify the people allowed to contribute code under this agreement by adding or removing them from it. <br/>
-          Make sure to click on &quot;Sign Addendum&quot; below
-        </Box>
         <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Box>
+              <h2>Update Agreement:</h2>
+              You can modify the people allowed to contribute code under this agreement by adding or removing them from it. <br/>
+              Make sure to click on &quot;Sign Addendum&quot; below
+            </Box>
+          </Grid>
           {removedIdentities.map((a, i) =>
             <Grid key={`container-removed-${i}`} item xs={12} sm={12} md={6} lg={4}>
               <IdentityCard key={i} user={a} callback={undoRemove} type={'removed'}/>

@@ -9,12 +9,17 @@ import AddendumContainer from '../addendum/AddendumContainer'
 import { FirebaseApp } from '../../common/app/app'
 import { Agreement, AgreementType } from '../../common/model/agreement'
 import Alert from '@material-ui/lab/Alert'
-import { useHistory } from 'react-router-dom'
+import { useHistory, Link } from 'react-router-dom'
 import { Identity, IdentityType } from '../../common/model/identity'
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2)
+  },
+  back: {
+    'margin-top': theme.spacing(2),
+    'margin-bottom': theme.spacing(2)
   }
 }))
 
@@ -123,16 +128,29 @@ function AgreementForm (props) {
     </ValidatorForm>)
 
   return (
-    <Paper elevation={23} className={classes.root}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <h2>AgreementForm</h2>
-          <AgreementDisplay/>
+    <div>
+      <Paper elevation={23} className={classes.root}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <h2>AgreementForm</h2>
+            <AgreementDisplay/>
+          </Grid>
         </Grid>
-      </Grid>
-      {agreementId ? null : form}
-      {agreementId ? <AddendumContainer user={props.user} agreementId={agreementId}/> : null}
-    </Paper>
+        {agreementId ? null : form}
+        {agreementId ? <AddendumContainer user={props.user} agreementId={agreementId}/> : null}
+      </Paper>
+      <Link to="/">
+        <Button
+          className={classes.back}
+          variant='contained'
+          color='primary'
+          size='large'
+          endIcon={<KeyboardBackspaceIcon/>}
+        >
+          Back
+        </Button>
+      </Link>
+    </div>
   )
 }
 
