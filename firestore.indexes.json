@@ -13,6 +13,20 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status.state",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "identity",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
