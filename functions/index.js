@@ -1,6 +1,7 @@
 const admin = require('firebase-admin')
 const functions = require('firebase-functions')
 const Github = require('./lib/github')
+const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
 const _ = require('lodash')
 
@@ -13,6 +14,7 @@ const github = new Github(
   functions.config().github.key,
   functions.config().github.secret,
   db)
+const gerrit = new Gerrit(db)
 
 /**
  * Handles the given event snapshot. The implementation is expected to update
@@ -59,6 +61,12 @@ exports.handleEvent = functions.firestore
 
 // TODO: implement cronjob function to periodically clean up acknowledged and
 //  outdated events.
+
+/**
+ * Handles calls from the Gerrit hook.
+ * @type {HttpsFunction}
+ */
+exports.gerritEndpoint = functions.https.onRequest(gerrit.app)
 
 /**
  * When a whitelist is updated, check for events in state failure that match the
