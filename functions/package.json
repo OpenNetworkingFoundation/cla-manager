@@ -23,6 +23,7 @@
     "@octokit/app": "^2.2.5",
     "@octokit/rest": "^16.43.0",
     "@octokit/webhooks": "^6.3.2",
+    "express": "^4.17.1",
     "firebase-admin": "^8.9.2",
     "firebase-functions": "^3.3.0",
     "lodash": "^4.17.15",
@@ -44,6 +45,7 @@
     "firebase-functions-test": "^0.1.6",
     "jest": "^25.1.0",
     "nock": "^10.0.0",
+    "request-promise": "^4.2.5",
     "smee-client": "^1.0.2"
   },
   "engines": {
