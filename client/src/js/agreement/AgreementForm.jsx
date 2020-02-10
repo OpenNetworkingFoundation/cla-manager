@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Box, Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
@@ -8,13 +8,17 @@ import AgreementDisplay from './AgreementDisplay'
 import AddendumContainer from '../addendum/AddendumContainer'
 import { FirebaseApp } from '../../common/app/app'
 import { Agreement, AgreementType } from '../../common/model/agreement'
-import Alert from '@material-ui/lab/Alert'
+import { Alert, Skeleton } from '@material-ui/lab'
 import { useHistory } from 'react-router-dom'
 import { Identity, IdentityType } from '../../common/model/identity'
+import { ClaText } from '../cla/ClaText'
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2)
+  },
+  skeleton: {
+    backgroundColor: theme.palette.grey['400']
   }
 }))
 
@@ -29,6 +33,20 @@ function AgreementForm (props) {
   const [name, setName] = useState('')
   const [orgName, setOrgName] = useState('')
   const [error, setError] = useState(null)
+  const [agreement, setAgreement] = useState({})
+  const [loader, setLoading] = useState(agreementId !== undefined)
+  console.log(agreementId !== undefined, agreementId)
+
+  useEffect(() => {
+    if (props.agreementId) {
+      Agreement.get(props.agreementId)
+        .then(res => {
+          setAgreement(res.toJson())
+          setLoading(false)
+        })
+        .catch(console.error)
+    }
+  }, [props.agreementId])
 
   let organizationTextValidator = null
 
@@ -61,13 +79,13 @@ function AgreementForm (props) {
     if (props.agreementType === AgreementType.INDIVIDUAL) {
       agreement = new Agreement(
         props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
-        'TODO, add agreement body',
+        ClaText,
         signer
       )
     } else if (props.agreementType === AgreementType.CORPORATE) {
       agreement = new Agreement(
         props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
-        'TODO, add agreement body',
+        ClaText,
         signer,
         orgName
       )
@@ -124,16 +142,26 @@ function AgreementForm (props) {
 
   return (
     <div>
-      <Paper elevation={23} className={classes.root}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <h2>AgreementForm</h2>
-            <AgreementDisplay/>
+      {loader ?
+        <Paper elevation={23} className={classes.root}>
+          <Skeleton className={classes.skeleton} variant='text'/>
+          <Skeleton className={classes.skeleton} variant='text'/>
+          <Skeleton className={classes.skeleton} variant='circle' width={40} height={40} />
+          <Skeleton className={classes.skeleton} variant='text'/>
+          <Skeleton className={classes.skeleton} variant='rect' width={'100%'} height={118}/>
+        </Paper>
+        :
+        <Paper elevation={23} className={classes.root}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <h2>AgreementForm</h2>
+              <AgreementDisplay text={agreement.body}/>
+            </Grid>
           </Grid>
-        </Grid>
-        {agreementId ? null : form}
-        {agreementId ? <AddendumContainer user={props.user} agreementId={agreementId}/> : null}
-      </Paper>
+          {agreementId ? null : form}
+          {agreementId ? <AddendumContainer user={props.user} agreementId={agreementId}/> : null}
+        </Paper>
+      }
     </div>
   )
 }
