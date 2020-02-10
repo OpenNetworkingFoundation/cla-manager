@@ -22,12 +22,8 @@ function Gerrit (db) {
       })
     }
     return verifyEmail(req.query.email)
-      .then(result => {
-        return res.json({
-          status: result.status,
-          message: result.message
-        })
-      }).catch(error => {
+      .then(status => res.json(status))
+      .catch(error => {
         console.error(error)
         return res.json({
           status: 'error',
