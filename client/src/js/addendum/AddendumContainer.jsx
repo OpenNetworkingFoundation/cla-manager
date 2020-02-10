@@ -193,12 +193,12 @@ function AddendumContainer (props) {
           <DialogTitle id="alert-dialog-title">{'Use Google\'s location service?'}</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              You have unsaced changes, are you sure you want to leave?
+              You have unsaved changes, are you sure you want to leave?
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => confirmLeave(false)} color="primary">
-              No, stay and save my changes
+              No, continue editing
             </Button>
             <Button onClick={() => confirmLeave(true)} color="primary" autoFocus>
               Yes, leave
