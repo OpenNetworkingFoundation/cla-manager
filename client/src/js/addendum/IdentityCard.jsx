@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Box, Card, Grid, Link, Typography, CardContent } from '@material-ui/core'
+import { Box, Card, Grid, Link, Typography, CardContent, IconButton } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
 import GitHubIcon from '@material-ui/icons/GitHub'
@@ -15,12 +15,12 @@ const useStyles = makeStyles(theme => ({
   removed: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.error.light
+    borderColor: theme.palette.error.light
   },
   added: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.success.light
+    borderColor: theme.palette.success.light
   }
 }))
 
@@ -40,7 +40,7 @@ function IdentityCard (props) {
         </Grid>
         <Grid item xs={8}>
           <CardContent>
-            <Typography variant="h5" component="h2">
+            <Typography variant="h5" component="h5">
               {props.user.value}
             </Typography>
             <Typography className={classes.pos} color="textSecondary">
@@ -53,7 +53,9 @@ function IdentityCard (props) {
             <CardContent>
               <Box textAlign='right' m={1}>
                 <Link href='#' onClick={props.callback(props.user)}>
-                  <DeleteIcon></DeleteIcon>
+                  <IconButton size='small' color='primary'>
+                    <DeleteIcon></DeleteIcon>
+                  </IconButton>
                 </Link>
               </Box>
             </CardContent>

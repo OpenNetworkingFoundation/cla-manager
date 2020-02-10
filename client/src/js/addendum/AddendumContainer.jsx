@@ -2,11 +2,23 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
-import { Card, Grid, Button, Box } from '@material-ui/core'
+import {
+  Card,
+  Grid,
+  Button,
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from '@material-ui/core'
 import { Agreement } from '../../common/model/agreement'
 import UserForm from '../user/UserForm'
 import IdentityCard from './IdentityCard'
 import * as _ from 'lodash'
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
+import { useHistory, Link } from 'react-router-dom'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -19,11 +31,13 @@ const useStyles = makeStyles(theme => ({
  * Component which given an Agreement displays a list of associated addendums
  */
 function AddendumContainer (props) {
+  const history = useHistory()
   const classes = useStyles()
   const [addendums, setAddendums] = useState([])
   const [activeIdentities, setActiveIdentities] = useState([])
   const [addedIdentities, setAddedIdentities] = useState([])
   const [removedIdentities, setRemovedIdentities] = useState([])
+  const [openDialog, setOpenDialog] = useState(false)
 
   useEffect(() => {
     Addendum.get(props.agreementId)
@@ -103,6 +117,27 @@ function AddendumContainer (props) {
     }
   }
 
+  const confirmLeave = (val) => {
+    console.log(val)
+    if (val === false) {
+      setOpenDialog(false)
+      return
+    }
+    history.push('/')
+  }
+
+  const goBack = () => {
+    // NOTE we need to use a callback instead of a Link as we want to check
+    // that there are no unsaved changes
+
+    if (addedIdentities.length > 0 || removedIdentities.length > 0) {
+      setOpenDialog(true)
+      return
+    }
+
+    history.push('/')
+  }
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -121,7 +156,8 @@ function AddendumContainer (props) {
           <Grid item xs={12}>
             <Box>
               <h2>Update Agreement:</h2>
-              You can modify the people allowed to contribute code under this agreement by adding or removing them from it. <br/>
+              You can modify the people allowed to contribute code under this agreement by adding or removing them from
+              it. <br/>
               Make sure to click on &quot;Sign Addendum&quot; below
             </Box>
           </Grid>
@@ -140,13 +176,47 @@ function AddendumContainer (props) {
           <UserForm callback={userAdded}/>
         </Card>
       </Grid>
-      <Button fullWidth
-              variant='contained'
-              color='primary'
-              disabled={addedIdentities.length === 0 && removedIdentities.length === 0}
-              onClick={createAddendum}>
-        Sign Addendum
-      </Button>
+      <Grid item xs={12}>
+        <Button fullWidth
+                variant='contained'
+                color='primary'
+                disabled={addedIdentities.length === 0 && removedIdentities.length === 0}
+                onClick={createAddendum}>
+          Sign Addendum
+        </Button>
+      </Grid>
+      <Grid item xs={12}>
+        <Dialog
+          onClose={confirmLeave}
+          aria-labelledby="confirm-leave"
+          open={openDialog}>
+          <DialogTitle id="alert-dialog-title">{'Use Google\'s location service?'}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              You have unsaced changes, are you sure you want to leave?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => confirmLeave(false)} color="primary">
+              No, stay and save my changes
+            </Button>
+            <Button onClick={() => confirmLeave(true)} color="primary" autoFocus>
+              Yes, leave
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Link to="#" onClick={goBack}>
+          <Button
+            className={classes.back}
+            variant='contained'
+            color='primary'
+            size='large'
+            endIcon={<KeyboardBackspaceIcon/>}
+          >
+            Back
+          </Button>
+        </Link>
+      </Grid>
     </Grid>
   )
 }
