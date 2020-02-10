@@ -9,17 +9,12 @@ import AddendumContainer from '../addendum/AddendumContainer'
 import { FirebaseApp } from '../../common/app/app'
 import { Agreement, AgreementType } from '../../common/model/agreement'
 import Alert from '@material-ui/lab/Alert'
-import { useHistory, Link } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { Identity, IdentityType } from '../../common/model/identity'
-import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2)
-  },
-  back: {
-    'margin-top': theme.spacing(2),
-    'margin-bottom': theme.spacing(2)
   }
 }))
 
@@ -139,17 +134,6 @@ function AgreementForm (props) {
         {agreementId ? null : form}
         {agreementId ? <AddendumContainer user={props.user} agreementId={agreementId}/> : null}
       </Paper>
-      <Link to="/">
-        <Button
-          className={classes.back}
-          variant='contained'
-          color='primary'
-          size='large'
-          endIcon={<KeyboardBackspaceIcon/>}
-        >
-          Back
-        </Button>
-      </Link>
     </div>
   )
 }
