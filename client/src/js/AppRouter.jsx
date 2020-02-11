@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom'
 import Header from './helpers/Header'
 import Home from './Home'
 import { Container } from '@material-ui/core'
-import AgreementForm from './agreement/AgreementForm'
+import AgreementContainer from './agreement/AgreementContainer'
 import SignCheck from './helpers/SignCheck'
 
 class AppRouter extends React.Component {
@@ -58,7 +58,7 @@ class AppRouter extends React.Component {
             />
             <Route
               path='/view/:id' render={props => (
-                <AgreementForm user={user} agreementId={props.match.params.id} />
+                <AgreementContainer user={user} agreementId={props.match.params.id} />
               )}
             />
           </Container>

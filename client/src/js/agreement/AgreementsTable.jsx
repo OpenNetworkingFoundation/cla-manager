@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
  * associated to a given user.
  */
 
-function AgreementsContainer (props) {
+function AgreementsTable (props) {
   const classes = useStyles()
   // If this table has no toJson, no need to show it.
   if (props.data.length === 0) {
@@ -56,11 +56,11 @@ function AgreementsContainer (props) {
   )
 }
 
-AgreementsContainer.propTypes = {
+AgreementsTable.propTypes = {
   header: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   columnTitles: PropTypes.arrayOf(PropTypes.string).isRequired,
   columnIds: PropTypes.arrayOf(PropTypes.string).isRequired
 }
 
-export default AgreementsContainer
+export default AgreementsTable
