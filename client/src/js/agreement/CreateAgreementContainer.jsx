@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 /**
  * Input widget which lets a user sign a new agreement.
  */
-function NewAgreementContainer () {
+function CreateAgreementContainer () {
   const classes = useStyles()
   return (
     <Paper elevation={23} className={classes.root}>
@@ -47,4 +47,4 @@ function NewAgreementContainer () {
   )
 }
 
-export default NewAgreementContainer
+export default CreateAgreementContainer

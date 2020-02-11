@@ -31,8 +31,9 @@ class agreement {
    * @param {string} body the agreement text body
    * @param {Identity} signer the signer of the agreement
    * @param {string|null} organization organization covered by the
+   * @param {string|null} organizationAddress organization address
    */
-  constructor (type, body, signer, organization = null) {
+  constructor (type, body, signer, organization = null, organizationAddress = null) {
     this._id = null
     this._dateSigned = new Date()
 
@@ -41,13 +42,17 @@ class agreement {
     // TODO validate that signer is of type Identity
     this._signer = signer
 
-    // TODO validate that type is of type AgreementType
-    // TODO if type is CORPORATE make sure organization is filled
     if (type === AgreementType.CORPORATE && organization == null) {
       throw TypeError(`Agreement.type is ${type} and organization is missing`)
     }
+
+    if (type === AgreementType.CORPORATE && organizationAddress == null) {
+      throw TypeError(`Agreement.type is ${type} and organizationAddress is missing`)
+    }
+
     // organization is an optional parameter, defaults to null
-    this._organization = organization
+    this._organization = organization // TODO start using the Organization model for this
+    this._organizationAddress = organizationAddress
   }
 
   /**
@@ -76,10 +81,18 @@ class agreement {
 
   /**
    * Returns the organization.
-   * @returns {Organization}
+   * @returns {string}
    */
   get organization () {
     return this._organization
+  }
+
+  /**
+   * Returns the organization address.
+   * @returns {string}
+   */
+  get organizationAddress () {
+    return this._organizationAddress
   }
 
   /**
@@ -119,6 +132,7 @@ class agreement {
     }
     if (this._type === AgreementType.CORPORATE) {
       json.organization = this._organization
+      json.organizationAddress = this._organizationAddress
     }
     return json
   }
@@ -182,7 +196,7 @@ class agreement {
     if (data.type === AgreementType.INDIVIDUAL) {
       a = new Agreement(data.type, data.body, signer)
     } else if (data.type === AgreementType.CORPORATE) {
-      a = new Agreement(data.type, data.body, signer, data.organization)
+      a = new Agreement(data.type, data.body, signer, data.organization, data.organizationAddress)
     }
     a.id = doc.id
     return a

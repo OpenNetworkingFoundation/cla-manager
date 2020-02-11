@@ -3,8 +3,8 @@ import { FirebaseApp } from '../common/app/app'
 import Grid from '@material-ui/core/Grid'
 import Link from '@material-ui/core/Link'
 
-import AgreementsContainer from './helpers/AgreementsContainer'
-import NewAgreementContainer from './helpers/NewAgreementContainer'
+import AgreementsTable from './agreement/AgreementsTable'
+import CreateAgreementContainer from './agreement/CreateAgreementContainer'
 
 import { Agreement, AgreementType } from '../common/model/agreement'
 import { Button } from '@material-ui/core'
@@ -95,7 +95,6 @@ export default class Home extends React.Component {
         }
       })
 
-      console.info(institutionCLATable)
       this.setState({
         individualCLATable: individualCLATable.sort((a, b) => a.date - b.date),
         institutionCLATable: institutionCLATable.sort((a, b) => a.date - b.date)
@@ -115,12 +114,12 @@ export default class Home extends React.Component {
       <main>
         {this.props.user && (
           <Grid container style={style}>
-            <NewAgreementContainer />
+            <CreateAgreementContainer />
           </Grid>
         )}
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <AgreementsContainer
+            <AgreementsTable
               header='Individual Agreements'
               description='Individual agreements we have on file for you:'
               columnTitles={['Name', 'Date Signed', 'Manage']}
@@ -129,7 +128,7 @@ export default class Home extends React.Component {
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AgreementsContainer
+            <AgreementsTable
               header='Institutional Agreements'
               description='Institutional agreements we have on file for you:'
               columnTitles={['Organization', 'Signer', 'Date Signed', 'View / Manage']}

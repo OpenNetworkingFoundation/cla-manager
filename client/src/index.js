@@ -10,7 +10,6 @@ import { HandleDevError } from './js/DevError'
 
 if (!process.env.REACT_APP_FIREBASE_ENV || !process.env.REACT_APP_FIREBASE_API_KEY) {
   console.error('Environments var missing! Please refer to the README file')
-  // TODO render a stupid component
   // eslint-disable-next-line react/no-render-return-value
   HandleDevError(c => ReactDOM.render(c, document.getElementById('root')))
 }

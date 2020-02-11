@@ -30,7 +30,8 @@ describe('The Agreement model', () => {
       AgreementType.CORPORATE,
       'TODO, add agreement body',
       signer,
-      'ONF'
+      'ONF',
+      '1000 El Camino Real, 94025 Menlo Park (CA)'
     )
   })
 
@@ -48,6 +49,7 @@ describe('The Agreement model', () => {
     expect(corporateAgreement.signer.email).toEqual(signer.email)
     expect(corporateAgreement.signer.name).toEqual(signer.name)
     expect(corporateAgreement.organization).toEqual('ONF')
+    expect(corporateAgreement.organizationAddress).toEqual('1000 El Camino Real, 94025 Menlo Park (CA)')
   })
 
   it('should not instantiate the class for CORPORATE if organization is missing', function () {
@@ -80,6 +82,7 @@ describe('The Agreement model', () => {
       expect(json.signer.email).toEqual(signer.email)
       expect(json.signer.name).toEqual(signer.name)
       expect(json.organization).toBe('ONF')
+      expect(json.organizationAddress).toEqual('1000 El Camino Real, 94025 Menlo Park (CA)')
     })
   })
 
