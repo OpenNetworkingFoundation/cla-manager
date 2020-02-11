@@ -4,7 +4,17 @@ const rp = require('request-promise')
 const Gerrit = require('../lib/gerrit')
 
 const port = 57586
-const url = 'http://localhost:' + port
+const httpUser = 'admin'
+const httpPassword = 'supersecret'
+const rpConf = {
+  uri: 'http://localhost:' + port,
+  json: true,
+  auth: {
+    user: httpUser,
+    pass: httpPassword,
+    sendImmediately: true
+  }
+}
 
 describe('Gerrit lib', () => {
   let db
@@ -13,7 +23,7 @@ describe('Gerrit lib', () => {
 
   beforeAll(async (done) => {
     db = await setupDbAdmin(null, 'gerrit-test')
-    app = Gerrit(db).app
+    app = Gerrit(db, httpUser, httpPassword).app
     server = app.listen(port, () => {
       // console.log('App listening on port ' + port)
       done()
@@ -25,7 +35,7 @@ describe('Gerrit lib', () => {
   })
 
   it('should return error is no email param is provided', async () => {
-    return rp({ uri: url, json: true }).then((response) => {
+    return rp(rpConf).then((response) => {
       expect(response.status).toBe('error')
       expect(response.message).toContain('missing email')
     })
@@ -33,9 +43,8 @@ describe('Gerrit lib', () => {
 
   it('should return failure if a non-whitelisted identity is passed', async () => {
     return rp({
-      uri: url,
-      qs: { email: 'foo@bar.com' },
-      json: true
+      ...rpConf,
+      qs: { email: 'foo@bar.com' }
     }).then((response) => {
       expect(response.status).toBe('failure')
       expect(response.message).toContain('we need to ask you to sign a' +
@@ -48,9 +57,8 @@ describe('Gerrit lib', () => {
       values: ['email:foo@bar.com']
     })
     return rp({
-      uri: url,
-      qs: { email: 'foo@bar.com' },
-      json: true
+      ...rpConf,
+      qs: { email: 'foo@bar.com' }
     }).then((response) => {
       expect(response.status).toBe('success')
       expect(response.message).toBeFalsy()
@@ -61,9 +69,8 @@ describe('Gerrit lib', () => {
     // Kill db prematurely
     await teardownDb()
     return rp({
-      uri: url,
-      qs: { email: 'foo@bar.com' },
-      json: true
+      ...rpConf,
+      qs: { email: 'foo@bar.com' }
     }).then((response) => {
       expect(response.status).toBe('error')
       expect(response.message).toContain('Internal error, unable to verify CLA')
