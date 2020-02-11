@@ -80,8 +80,8 @@ of which you become aware that would make these representations inaccurate in an
 `
 
 export const ClaTextCorporate = `
-Open Networking Foundation
-Institutional Contributor License Agreement ("Agreement")
+# Open Networking Foundation
+## Institutional Contributor License Agreement ("Agreement")
 
 
 Thank you for your interest in the Open Networking Foundation (“ONF”).  In order to clarify the intellectual property 
@@ -92,39 +92,6 @@ own Contributions for any other purpose.
 
 This version of the Agreement allows an entity (the "Institution") to submit Contributions to ONF, to authorize 
 Contributions submitted by its designated employees to ONF, and to grant copyright and patent licenses thereto.
-
-Please read this document carefully before signing and keep a copy for your records.
-
-Institution name:    
-
-                ______________________________________________________
-
-Institution address:
-
-                ______________________________________________________
-
-                ______________________________________________________
-
-Primary Contact:
-
-                ______________________________________________________
-
-E-Mail:   
-
-                ______________________________________________________
-
-Telephone:
-
-                ______________________________________________________ 
-
-
-E-Mail:  
-   
-                ______________________________________________________
-   
-Telephone:
-
-                ______________________________________________________ 
 
 You accept and agree to the following terms and conditions for Your Contributions submitted to ONF. Except for the 
 license granted herein to ONF and recipients of software distributed by ONF, You reserve all right, title, and interest 
@@ -137,7 +104,6 @@ The Institution and all other entities that control, are controlled by, or are u
 are considered to be a single “Contributor.”  For the purposes of this definition, "control" means (i) the power, direct
 or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership 
 of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
-
 "Contribution" shall mean the code, documentation, use cases, or other works of authorship, including any modifications 
 or additions to an existing work, that are intentionally submitted by You to ONF for inclusion in, or documentation of,
 any of the open source software projects established, owned, or managed by ONF (the "Work"). For the purposes of this
@@ -206,6 +172,10 @@ Date:
 Name: 
   
                 ______________________________________________________
+                
+Telephone:
+
+                ______________________________________________________ 
   
 Title: 
 

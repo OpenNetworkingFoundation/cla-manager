@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import AgreementForm from '../agreement/AgreementForm'
+import AgreementContainer from '../agreement/AgreementContainer'
 import { AgreementType } from '../../common/model/agreement'
 import { Paper, Grid, Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
@@ -36,14 +36,15 @@ function EmailBody (props) {
 function SignCheck (props) {
   const classes = useStyles()
   const [allowedToSign, setAllowedToSign] = useState(undefined)
+  
   if (props.agreementType === AgreementType.INDIVIDUAL) {
-    return <AgreementForm agreementType={props.agreementType} user={props.user}/>
+    return <AgreementContainer agreementType={props.agreementType} user={props.user}/>
   }
 
   if (allowedToSign === false) {
     return <EmailBody/>
   } else if (allowedToSign === true) {
-    return <AgreementForm agreementType={props.agreementType} user={props.user}/>
+    return <AgreementContainer agreementType={props.agreementType} user={props.user}/>
   }
 
   return (

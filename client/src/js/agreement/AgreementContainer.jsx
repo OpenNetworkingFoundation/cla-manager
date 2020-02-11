@@ -19,29 +19,39 @@ const useStyles = makeStyles(theme => ({
   },
   skeleton: {
     backgroundColor: theme.palette.grey['400']
+  },
+  formField: {
+    marginBottom: theme.spacing(2)
   }
 }))
 
 /**
  * Component which displays an Agreement, both for creation and update.
  */
-function AgreementForm (props) {
+function AgreementContainer (props) {
   const history = useHistory()
   const agreementId = props.agreementId
 
   const classes = useStyles()
-  const [name, setName] = useState('')
-  const [orgName, setOrgName] = useState('')
+
+  // component state
   const [error, setError] = useState(null)
   const [agreement, setAgreement] = useState({})
   const [loader, setLoading] = useState(agreementId !== undefined)
+
+  // form values
+  const [name, setName] = useState('')
+  const [orgName, setOrgName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [signerTitle, setSignerTitle] = useState('')
+  const [orgAddress, setOrgAddress] = useState('')
 
   useEffect(() => {
     if (props.agreementId) {
       // if there is an agreementId, go and download it
       Agreement.get(props.agreementId)
         .then(res => {
-          setAgreement(res.toJson())
+          setAgreement(res)
           setLoading(false)
         })
         .catch(console.error)
@@ -50,25 +60,62 @@ function AgreementForm (props) {
       if (props.agreementType === AgreementType.CORPORATE) {
         setAgreement({ body: ClaTextCorporate })
       } else if (props.agreementType === AgreementType.INDIVIDUAL) {
-        setAgreement({body: ClaTextIndividual})
+        setAgreement({ body: ClaTextIndividual })
       }
     }
-  }, [props.agreementId])
+  }, [props.agreementType, props.agreementId])
 
   let organizationTextValidator = null
 
   if (props.agreementType === AgreementType.CORPORATE) {
     organizationTextValidator = (
-      <TextValidator
-        fullWidth
-        label='Organization Name'
-        name='orgName'
-        value={orgName}
-        onChange={e => setOrgName(e.target.value)}
-        validators={['required']}
-        errorMessages={['You must enter the company name']}
-        variant='outlined'
-      />
+      <div>
+        <TextValidator
+          fullWidth
+          label='Phone Number'
+          name='phoneNumber'
+          value={phoneNumber}
+          onChange={e => setPhoneNumber(e.target.value)}
+          validators={['required', 'matchRegexp:^[0-9]+$']}
+          errorMessages={['You must enter the company phone number', 'Please enter numbers only']}
+          variant='outlined'
+          className={classes.formField}
+        />
+        <TextValidator
+          fullWidth
+          label='Title'
+          name='signerTitle'
+          value={signerTitle}
+          onChange={e => setSignerTitle(e.target.value)}
+          validators={['required']}
+          errorMessages={['You must enter the company title']}
+          variant='outlined'
+          className={classes.formField}
+        />
+        <TextValidator
+          fullWidth
+          label='Organization Name'
+          name='orgName'
+          value={orgName}
+          onChange={e => setOrgName(e.target.value)}
+          validators={['required']}
+          errorMessages={['You must enter the company name']}
+          variant='outlined'
+          className={classes.formField}
+        />
+        <TextValidator
+          fullWidth
+          label='Organization Address'
+          name='orgAddress'
+          value={orgAddress}
+          onChange={e => setOrgAddress(e.target.value)}
+          validators={['required']}
+          errorMessages={['You must enter the company address']}
+          variant='outlined'
+          className={classes.formField}
+        />
+
+      </div>
     )
   }
 
@@ -81,20 +128,24 @@ function AgreementForm (props) {
       FirebaseApp.auth().currentUser.email
     )
 
+    signer.title = signerTitle
+    signer.phoneNumber = phoneNumber
+
     let agreement = null
 
     if (props.agreementType === AgreementType.INDIVIDUAL) {
       agreement = new Agreement(
-        props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
+        AgreementType.INDIVIDUAL,
         ClaTextIndividual,
         signer
       )
     } else if (props.agreementType === AgreementType.CORPORATE) {
       agreement = new Agreement(
-        props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
+        AgreementType.CORPORATE,
         ClaTextCorporate,
         signer,
-        orgName
+        orgName,
+        orgAddress
       )
     }
 
@@ -118,8 +169,7 @@ function AgreementForm (props) {
         <Grid item xs={12}>
           {error ? <Alert severity='error'>{error}</Alert> : null}
         </Grid>
-        <Grid item xs={12} md={6}>
-          {organizationTextValidator}
+        <Grid item xs={12} md={10}>
           <TextValidator
             fullWidth
             label='Full Name'
@@ -129,9 +179,11 @@ function AgreementForm (props) {
             validators={['required']}
             errorMessages={['You must enter your name']}
             variant='outlined'
+            className={classes.formField}
           />
+          {organizationTextValidator}
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={2}>
           <Box textAlign='right' m={1}>
             <Button
               type='submit'
@@ -172,10 +224,10 @@ function AgreementForm (props) {
   )
 }
 
-AgreementForm.propTypes = {
+AgreementContainer.propTypes = {
   user: PropTypes.object.isRequired,
   agreementType: PropTypes.string,
   agreementId: PropTypes.string
 }
 
-export default AgreementForm
+export default AgreementContainer
