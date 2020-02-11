@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Card } from '@material-ui/core'
-import { ClaText } from '../cla/ClaText'
+import ReactMarkdown from 'react-markdown'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -28,18 +28,13 @@ function AgreementDisplay (props) {
   const classes = useStyles()
   return (
     <Card variant='outlined' className={classes.root}>
-      {
-        props.text ?
-          <div className={classes.claContainer} dangerouslySetInnerHTML={{ __html: props.text }}/>
-          :
-          <div className={classes.claContainer} dangerouslySetInnerHTML={{ __html: ClaText }}/>
-      }
+      <ReactMarkdown source={props.text} />
     </Card>
   )
 }
 
 AgreementDisplay.propTypes = {
-  text: PropTypes.string
+  text: PropTypes.string.isRequired
 }
 
 export default AgreementDisplay

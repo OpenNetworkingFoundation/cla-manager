@@ -11,7 +11,7 @@ import { Agreement, AgreementType } from '../../common/model/agreement'
 import { Alert, Skeleton } from '@material-ui/lab'
 import { useHistory } from 'react-router-dom'
 import { Identity, IdentityType } from '../../common/model/identity'
-import { ClaText } from '../cla/ClaText'
+import { ClaTextCorporate, ClaTextIndividual } from '../cla/ClaText'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,16 +35,23 @@ function AgreementForm (props) {
   const [error, setError] = useState(null)
   const [agreement, setAgreement] = useState({})
   const [loader, setLoading] = useState(agreementId !== undefined)
-  console.log(agreementId !== undefined, agreementId)
 
   useEffect(() => {
     if (props.agreementId) {
+      // if there is an agreementId, go and download it
       Agreement.get(props.agreementId)
         .then(res => {
           setAgreement(res.toJson())
           setLoading(false)
         })
         .catch(console.error)
+    } else {
+      // set a default text
+      if (props.agreementType === AgreementType.CORPORATE) {
+        setAgreement({ body: ClaTextCorporate })
+      } else if (props.agreementType === AgreementType.INDIVIDUAL) {
+        setAgreement({body: ClaTextIndividual})
+      }
     }
   }, [props.agreementId])
 
@@ -79,13 +86,13 @@ function AgreementForm (props) {
     if (props.agreementType === AgreementType.INDIVIDUAL) {
       agreement = new Agreement(
         props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
-        ClaText,
+        ClaTextIndividual,
         signer
       )
     } else if (props.agreementType === AgreementType.CORPORATE) {
       agreement = new Agreement(
         props.agreementType === AgreementType.INDIVIDUAL ? AgreementType.INDIVIDUAL : AgreementType.CORPORATE,
-        ClaText,
+        ClaTextCorporate,
         signer,
         orgName
       )
@@ -96,7 +103,6 @@ function AgreementForm (props) {
         history.push(`/view/${res.id}`)
       })
       .catch(err => {
-        console.error(err)
         if (err.code === 'permission-denied') {
           setError('Permission denied, please try again later')
           return
@@ -146,7 +152,7 @@ function AgreementForm (props) {
         <Paper elevation={23} className={classes.root}>
           <Skeleton className={classes.skeleton} variant='text'/>
           <Skeleton className={classes.skeleton} variant='text'/>
-          <Skeleton className={classes.skeleton} variant='circle' width={40} height={40} />
+          <Skeleton className={classes.skeleton} variant='circle' width={40} height={40}/>
           <Skeleton className={classes.skeleton} variant='text'/>
           <Skeleton className={classes.skeleton} variant='rect' width={'100%'} height={118}/>
         </Paper>
