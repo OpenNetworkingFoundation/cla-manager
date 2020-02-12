@@ -4,7 +4,7 @@ import { Box, Card, Grid, Link, Typography, CardContent, IconButton } from '@mat
 import DeleteIcon from '@material-ui/icons/Delete'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
 import GitHubIcon from '@material-ui/icons/GitHub'
-import ClearIcon from '@material-ui/icons/Clear';
+import ClearIcon from '@material-ui/icons/Clear'
 import { makeStyles } from '@material-ui/core/styles'
 import { IdentityType } from '../../common/model/identity'
 
@@ -22,6 +22,31 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2),
     marginTop: theme.spacing(2),
     borderColor: theme.palette.success.light
+  },
+  identityContainer: {
+    position: 'relative',
+    '&:hover div': {
+      visibility: 'visible'
+    }
+  },
+  emailContainer: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    position: 'relative',
+  },
+  emailTooltip: {
+    visibility: 'hidden',
+    backgroundColor: 'black',
+    color: '#fff',
+    textAlign: 'center',
+    borderRadius: '6px',
+    padding: '5px',
+
+    /* Position the tooltip */
+    position: 'absolute',
+    top: '-10px',
+    zIndex: 1
   }
 }))
 
@@ -40,11 +65,12 @@ function IdentityCard (props) {
           </CardContent>
         </Grid>
         <Grid item xs={8}>
-          <CardContent>
+          <CardContent className={classes.identityContainer}>
+            <div className={classes.emailTooltip}>{props.user.value}</div>
             {props.type !== 'default' ? <Typography color="textSecondary" gutterBottom>
               {props.type.charAt(0).toUpperCase() + props.type.slice(1)}
-            </Typography> : null }
-            <Typography variant="h5" component="h5">
+            </Typography> : null}
+            <Typography variant="h5" component="h5" className={classes.emailContainer}>
               {props.user.value}
             </Typography>
             <Typography className={classes.pos} color="textSecondary">
