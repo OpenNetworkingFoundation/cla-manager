@@ -40,6 +40,8 @@ function Github (appId, privateKey, secret, db) {
       const contributionRef = db.collection('contributions').doc(contributionId)
       const action = context.payload.action
 
+      console.log(`contributionKey=${contributionKey}, event=pull_request.${action}, sha=${pr.head.sha}, contributionId=${contributionId}`)
+
       let contribPromise
       if (action === 'opened' || action === 'reopened') {
         contribPromise = contributionRef.set({
@@ -64,6 +66,9 @@ function Github (appId, privateKey, secret, db) {
             payload: context.payload,
             createdOn: new Date()
           }))
+          .then(result => {
+            console.log(`created event eventId=${result.id}`)
+          })
           .catch(console.error)
       } else {
         // Delete contribution doc.
