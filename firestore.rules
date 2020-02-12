@@ -11,7 +11,7 @@ function didSign() {
 // Note: CLAs and Addendums cannot be modified or deleted
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /agreements/{cla} {
+    match /agreements/{agreementId} {
       allow create: if request.auth != null && isSigner();
       allow read:   if request.auth != null && didSign(); //TODO (see below #2)
       allow update: if false;
