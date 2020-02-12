@@ -212,7 +212,6 @@ function AgreementContainer (props) {
         <Paper elevation={23} className={classes.root}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <h2>AgreementForm</h2>
               <AgreementDisplay text={agreement.body}/>
             </Grid>
           </Grid>
