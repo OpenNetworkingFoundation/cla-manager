@@ -3,6 +3,7 @@ const functions = require('firebase-functions')
 const Github = require('./lib/github')
 const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
+const Backup = require('./lib/backup.js')
 const _ = require('lodash')
 
 admin.initializeApp(functions.config().firebase)
@@ -15,6 +16,11 @@ const github = new Github(
   functions.config().github.secret,
   db)
 const gerrit = new Gerrit(db)
+
+const backup = new Backup(
+  functions.config().backup.bucket_name,
+  functions.config().backup.period
+)
 
 /**
  * Handles the given event snapshot. The implementation is expected to update
@@ -100,3 +106,5 @@ exports.handleWhitelistUpdate = functions.firestore
           })
       })).catch(console.error)
   })
+
+exports.scheduledFirestoreExport = backup
