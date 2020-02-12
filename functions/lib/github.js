@@ -99,10 +99,10 @@ function Github (appId, privateKey, secret, db) {
     try {
       if (await Cla(db).isIdentityWhitelisted(util.identityObj(event.identity))) {
         status.state = 'success'
-        status.description = `All good! We have a CLA in file for @${pr.user.login}`
+        status.description = `All good! We have a CLA on file for @${pr.user.login}`
       } else {
         status.state = 'failure'
-        status.description = `We don't have a CLA in file for @${pr.user.login}`
+        status.description = `We don't have a CLA on file for @${pr.user.login}`
         status.comment = `Hi @${pr.user.login}, ` +
           'this is the ONF bot 🤖 I\'m glad you want to contribute to ' +
           'our projects! However, before accepting your contribution, ' +
