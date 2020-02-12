@@ -1,6 +1,78 @@
-# CLAM (CLA Manager)
+# cla-manager (CLAM)
 
-For the client app look in the [./client](./client) folder.
-For the server functions look in the [./functions](./functions) folder.
+![CLAM logo](media/clam.png)
 
-For the common code look in the [./common](./common) folder.
+CLAM is a tool for managing Contributor License Agreements.
+
+It integrates with Github and Gerrit code hosting platforms.
+
+There are two supported types of CLAs:
+
+- Individual CLAs, when signing as an individual developer who holds the
+  copyright on their contributions
+
+- Institutional CLAs, which allows a nontechnical manager in another
+  organization to approve a CLA for multiple developers
+
+Code submitters are identified by their GitHub ID's or Email Addresses.
+
+If a user hasn't signed a CLA and submits code, they are directed to the CLAM
+website to sign a CLA. Authentication is handled by single-use links sent out
+via email.
+
+## Requirements
+
+CLAM's server side components are hosted on
+[Firebase](https://firebase.google.com/).
+
+A paid Firebase account must be used so it can make API calls to GitHub.
+
+## Navigating the code
+
+For the user-facing web app used to sign CLAs look in [./client](./client).
+
+For the server functions used to handle GitHub and Gerrit API interactions,
+look in [./functions](./functions).
+
+For the common code look in [./common](./common).
+
+For a [gerrit
+hook](https://gerrit.googlesource.com/plugins/hooks/+/master/src/main/resources/Documentation/hooks.md)
+to check licensing for gerrit, look in [./gerrit]. Unlike the rest of CLAM,
+this is written in Python 3, and has no dependencies outside the standard
+library.
+
+## Testing and development
+
+Automated tests are run prior to patchset acceptance using CircleCI - see the
+[./.circleci/config.yml](./.circleci/config.yml) for details.
+
+These tests can also be run locally on a developer machine by running: <FIXME>
+
+The whole site can be run on a developer machine using the [local firebase
+emulator]: https://firebase.google.com/docs/functions/local-emulator
+
+    firebase --project cla-manager emulators:start
+
+<FIXME>
+
+## Data lifecycle
+
+Backups happen to Google Cloud storage buckets.  These are generated on a
+timer, and also prior to each deployment.
+
+## Other CLA management tools to consider
+
+[easycla](https://github.com/communitybridge/easycla), which is Linux
+Foundation's tool, but is closely tied to their identity/authentication
+management platform and was (is?) undergoing a partial rewrite.  Much of the
+workflow used in CLAM inspired by [this easycla process
+diagram](https://github.com/communitybridge/easycla/tree/master/getting-started#how-does-it-work).
+
+[cla-assistant](https://github.com/cla-assistant), which can be publicly used
+without having to host an instance of the tool, but was insufficient for our
+purposes because it only supports individual CLAs.
+
+## License
+
+Apache 2.0
