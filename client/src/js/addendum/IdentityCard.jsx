@@ -4,6 +4,7 @@ import { Box, Card, Grid, Link, Typography, CardContent, IconButton } from '@mat
 import DeleteIcon from '@material-ui/icons/Delete'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
 import GitHubIcon from '@material-ui/icons/GitHub'
+import ClearIcon from '@material-ui/icons/Clear';
 import { makeStyles } from '@material-ui/core/styles'
 import { IdentityType } from '../../common/model/identity'
 
@@ -40,6 +41,9 @@ function IdentityCard (props) {
         </Grid>
         <Grid item xs={8}>
           <CardContent>
+            {props.type !== 'default' ? <Typography color="textSecondary" gutterBottom>
+              {props.type.charAt(0).toUpperCase() + props.type.slice(1)}
+            </Typography> : null }
             <Typography variant="h5" component="h5">
               {props.user.value}
             </Typography>
@@ -54,7 +58,8 @@ function IdentityCard (props) {
               <Box textAlign='right' m={1}>
                 <Link href='#' onClick={props.callback(props.user)}>
                   <IconButton size='small' color='primary'>
-                    <DeleteIcon></DeleteIcon>
+                    {props.type === 'default' ? <DeleteIcon/> : null}
+                    {props.type !== 'default' ? <ClearIcon/> : null}
                   </IconButton>
                 </Link>
               </Box>
