@@ -17,7 +17,11 @@ function Backup (bucketName, period) {
     return client.exportDocuments({
       name: databaseName,
       outputUriPrefix: bucket,
-      collectionIds: []
+      collectionIds: [
+        'whitelists',
+        'agreements',
+        'addendums'
+      ]
     })
       .then(responses => {
         const response = responses[0]
