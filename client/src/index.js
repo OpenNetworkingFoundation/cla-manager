@@ -42,7 +42,7 @@ FirebaseApp.auth().onAuthStateChanged((user) => {
     // eslint-disable-next-line react/no-render-return-value
     HandleSignInLink(c => ReactDOM.render(
       <ErrorBoundary>
-        c
+        {c}
       </ErrorBoundary>,
       document.getElementById('root')))
   }
