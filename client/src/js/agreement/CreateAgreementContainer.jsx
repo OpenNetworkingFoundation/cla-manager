@@ -31,7 +31,7 @@ function CreateAgreementContainer () {
         <Grid item xs={12} md={6} className={classes.cell}>
           <Link to={`/sign/${AgreementType.INDIVIDUAL}`}>
             <Button variant='contained' color='primary' size='large'>
-              Only Yourself
+              Only Yourself / Sign Individual CLA
             </Button>
           </Link>
         </Grid>
