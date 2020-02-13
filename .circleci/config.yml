@@ -79,6 +79,18 @@ jobs:
           root: ~/repo
           paths: .
 
+  backup:
+    docker:
+      - image: google/cloud-sdk
+    environment:
+    steps:
+      - run:
+          name: Backup Firestore
+          command: |
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${FIREBASE_PROJECT_ID}
+            gcloud firestore export gs://${GCLOUD_STORAGE_BUCKET}/before_${CIRCLE_SHA1} --collection-ids='addendums','whitelists','agreements'
+
   deploy:
     <<: *defaults
     environment:
@@ -107,9 +119,15 @@ workflows:
           requires:
             - test-node
             - test-py
-      - deploy:
+      - backup:
           requires:
             - build
+          filters:
+            branches:
+              only: master
+      - deploy:
+          requires:
+            - backup
           filters:
             branches:
               only: master
