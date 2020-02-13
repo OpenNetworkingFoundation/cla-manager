@@ -41,7 +41,7 @@ function AddendumContainer (props) {
   const [openDialog, setOpenDialog] = useState(false)
 
   useEffect(() => {
-    Addendum.get(props.agreementId)
+    Addendum.get(props.agreementId, props.user.email)
       .then(res => {
         // go from whatever Firebase returns to a real array
         // TODO consider to move this in the models

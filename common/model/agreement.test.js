@@ -116,6 +116,7 @@ describe('The Agreement model', () => {
       }
       individualAgreement.getAddendums()
         .then(res => {
+          expect(firestoreMock.mockWhere).toBeCalledWith('signer.value', '==', signer.value)
           expect(firestoreMock.mockWhere).toBeCalledWith('agreementId', '==', null)
           expect(res.docs.length).toEqual(2)
           expect(res.docs[0].data().added.length).toEqual(2)
