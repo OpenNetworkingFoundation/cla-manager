@@ -1,5 +1,5 @@
-export const ClaTextIndividual = `
-# Open Networking Foundation
+export const ClaTextIndividual =
+`# Open Networking Foundation
 ## Individual Contributor License Agreement (“Agreement”)
 
 Thank you for your interest in Open Networking Foundation (“ONF”). In order to
@@ -73,14 +73,14 @@ work that is not Your original creation, You may submit it to ONF separately fro
 Contribution, identifying the complete details of its source and of any license or other restriction
 (including, but not limited to, related patents, trademarks, and license agreements) of which you
 are personally aware, and conspicuously marking the work as “Submitted on behalf of a third-
-party: [named here]”.
+party: &#91;named here&#93;”.
 
 8. Required Notifications. You agree to notify ONF of any facts or circumstances
 of which you become aware that would make these representations inaccurate in any respect.
 `
 
-export const ClaTextCorporate = `
-# Open Networking Foundation
+export const ClaTextCorporate =
+`# Open Networking Foundation
 ## Institutional Contributor License Agreement ("Agreement")
 
 
@@ -150,7 +150,7 @@ MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE.
 creation, You may submit it to ONF separately from any Contribution, identifying the complete details of its source and
 of any license or other restriction (including, but not limited to, related patents, trademarks, and license agreements)
 of which you are personally aware, and conspicuously marking the work as "Submitted on behalf of a third-party:
-[named here]".
+&#91;named here&#93;".
 
 8. Required Notifications.  It is Your responsibility to notify ONF when any change is required to the list of
 designated employees authorized to submit Contributions on behalf of the Institution, or to the Institution's Primary
@@ -159,30 +159,20 @@ Contact or Alternate Contact.
 9. This Agreement Supersedes Prior Agreements.  If You have previously entered into an Institutional Contributor License
  Agreement with ONF related to any one or more open source software projects established, owned, or managed by ONF, this
  Agreement shall supersede and replace all such prior agreements.
-
-
-Please sign: 
-   
-                ______________________________________________________
-   
-Date:
-
-                ______________________________________________________ 
-
-Name: 
-  
-                ______________________________________________________
-                
-Telephone:
-
-                ______________________________________________________ 
-  
-Title: 
-
-                ______________________________________________________
-
-Name of Institution (also referred to as “You”): 
-
-                ______________________________________________________
-
 `
+export const ClaRequestCorporate =
+`Dear <boss, CTO, etc.>,
+
+I would like to contribute to one of Open Networking Foundation's projects, which requires a Contributor License
+Agreement (CLA).
+
+If we don't have a corporate CLA on file, could you please sign one? Then, can you please add my email address and
+Github ID to our CLA?
+
+https://cla.opennetworking.org/
+
+My Email used for contributions: _______
+My Github ID: _______
+
+Thanks!
+_______`
