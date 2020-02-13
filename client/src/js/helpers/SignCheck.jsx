@@ -28,7 +28,7 @@ function EmailBody (props) {
   return (
     <div>
       <h2>Please email the following to someone at your company who can sign the CLA:</h2>
-      <p><i>If you don&aspos;t know who that is you can start with your manager or director.</i></p>
+      <p><i>If you don't know who that is you can start with your manager or director.</i></p>
       <ReactMarkdown source={ClaRequestCorporate} />
     </div>
   )
@@ -53,7 +53,7 @@ function SignCheck (props) {
       <h2 className={classes.h2}>Are you authorized to sign legal agreements for your company?</h2>
       <p>
         Typically, this means you are an executive (e.g. CEO or CTO) or officer that is explicitly
-        authorized by your company&apos;s board.
+        authorized by your company's board.
       </p>
       <Grid container spacing={3} justify="center">
         <Grid item xs={12} md={6} className={classes.cell}>
