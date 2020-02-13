@@ -73,7 +73,7 @@ function UserForm (props) {
               value={value}
               onChange={e => setValue(e.target.value)}
               validators={['required', 'isEmail']}
-              errorMessages={['Enter the email of the user']}
+              errorMessages={['Enter the email address of the user']}
               variant='outlined'
             /> : null
           }
@@ -81,12 +81,12 @@ function UserForm (props) {
             <TextValidator
               className={classes.textField}
               fullWidth
-              label='GithuId'
+              label='GitHub ID'
               name='githubId'
               value={value}
               onChange={e => setValue(e.target.value)}
               validators={['required']}
-              errorMessages={['Enter the githubId of the user']}
+              errorMessages={['Enter the GitHub ID of the user']}
               variant='outlined'
             /> : null
           }
