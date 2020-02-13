@@ -105,7 +105,7 @@ export default function SignIn () {
               autoFocus
             />
             <p>
-              If you are already registered, please enter the email address you used to register with the ONF CLA portal.
+              If you are already registered, please enter the email address you used to register with the ONF CLA Portal.
               Click the button to receive a link to view your ONF CLA information.
               <br/><br/>
               If you have not yet registered, please enter the email address you wish to use to register with the ONF CLA Portal.
