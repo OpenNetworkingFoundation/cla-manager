@@ -33,6 +33,7 @@ const useStyles = makeStyles(theme => ({
 function AddendumContainer (props) {
   const history = useHistory()
   const classes = useStyles()
+  const [agreement, setAgreement] = useState({})
   const [addendums, setAddendums] = useState([])
   const [activeIdentities, setActiveIdentities] = useState([])
   const [addedIdentities, setAddedIdentities] = useState([])
@@ -58,6 +59,7 @@ function AddendumContainer (props) {
   useEffect(() => {
     Agreement.get(props.agreementId)
       .then(agreement => {
+        setAgreement(agreement)
         return agreement.getActiveUser()
       })
       .then((res) => {
@@ -67,8 +69,8 @@ function AddendumContainer (props) {
 
   const createAddendum = () => {
     const signer = {
-      name: 'name', // FIXME use real name
-      email: props.user.email
+      name: agreement.signer.name,
+      value: props.user.email
     }
 
     const addendum = new Addendum(
