@@ -9,6 +9,10 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "signer.value",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "dateSigned",
           "order": "ASCENDING"
         }
