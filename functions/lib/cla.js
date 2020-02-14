@@ -9,13 +9,24 @@ module.exports = Cla
 function Cla (db) {
   /**
    * Given a snapshot of a newly created addendum, updates the whitelist in the
-   * parent agreement by replying all addendums in chronological order.
-   * @param {DocumentSnapshot} addendumSnapshot of a new addendum
-   * @returns {Promise<WriteResult>}
+   * parent agreement by replying all addendums in chronological order. If
+   * snapshot is null, the implementation updates the whitelist for the
+   * given agreementId.
+   * @param addendumSnapshot {DocumentSnapshot|null} addendum snapshot
+   * @param agreementId {string|null} agreement ID (if snapshot is null)
+   * @returns {Promise}
    */
-  async function updateWhitelist (addendumSnapshot) {
-    const newAddendum = addendumSnapshot.data()
-    const agreementId = newAddendum.agreementId
+  async function updateWhitelist (addendumSnapshot, agreementId = null) {
+    let newAddendum
+    if (addendumSnapshot) {
+      newAddendum = addendumSnapshot.data()
+      agreementId = newAddendum.agreementId
+    } else if (!agreementId) {
+      throw new Error('Both addendumSnapshot and agreementId are null, which' +
+        ' whitelist should I update?')
+    } else {
+      newAddendum = null
+    }
     return db.collection('agreements').doc(agreementId).get()
       .then(agreement => {
         if (!agreement.exists) {
@@ -31,7 +42,7 @@ function Cla (db) {
           // When using the firestore emulator, query results don't always
           // include the latest writes, such as the new addendum. We manually
           // append it to the results to always pass the tests.
-          .concat([newAddendum])
+          .concat([newAddendum || { added: [], removed: [] }])
           .reduce((whitelist, addendum) => {
             addendum.added.map(util.identityKey).forEach(val => {
               whitelist.add(val)
