@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# unit tests for ref-update gerrit hook
+# unit tests for gerrit hook
 
 from __future__ import absolute_import
 
@@ -27,10 +27,10 @@ import urllib.request  # noqa: F401
 import urllib.error
 from unittest.mock import patch, MagicMock
 
-# load the ref-update script as a module, hard because it doesn't end in .py
+# load the script as a module, hard because it doesn't end in .py
 test_dir = os.path.dirname(os.path.realpath(__file__))
-mod_path = os.path.abspath(os.path.join(test_dir, "ref-update"))
-mod_name = "refupdate"
+mod_path = os.path.abspath(os.path.join(test_dir, "gerrit-hook"))
+mod_name = "gerrithook"
 
 importlib.util.spec_from_file_location(mod_name, mod_path)
 spec = importlib.util.spec_from_loader(
@@ -40,22 +40,22 @@ spec = importlib.util.spec_from_loader(
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 sys.modules[mod_name] = module
-import refupdate  # noqa: E402
+import gerrithook  # noqa: E402
 
 # set logging, using same logger as script
-logger = logging.getLogger('ref-update')
+logger = logging.getLogger('gerrit-hook')
 logger.setLevel(logging.DEBUG)
 
 
-class refupdate_test(unittest.TestCase):
+class gerrithook_test(unittest.TestCase):
 
     def test_uploader_email_good1(self):
         '''
         Pass with email that has fullname prefix as input
         '''
-        input_addr = "Foo Bar (foo@bar.baz)"
+        input_addr = "Foo Bar <foo@bar.baz>"
 
-        output = refupdate.uploader_email(input_addr)
+        output = gerrithook.uploader_email(input_addr)
         self.assertEqual(output, "foo@bar.baz")
 
     def test_uploader_email_good2(self):
@@ -64,7 +64,7 @@ class refupdate_test(unittest.TestCase):
         '''
         input_addr = "foo@bar.baz"
 
-        output = refupdate.uploader_email(input_addr)
+        output = gerrithook.uploader_email(input_addr)
         self.assertEqual(output, "foo@bar.baz")
 
     def test_uploader_email_invalid(self):
@@ -74,10 +74,10 @@ class refupdate_test(unittest.TestCase):
         input_addr = "not an email address"
 
         with self.assertRaises(SystemExit) as cm:
-            refupdate.uploader_email(input_addr)
+            gerrithook.uploader_email(input_addr)
 
         # check exit code depening on ENFORCING value
-        if refupdate.ENFORCING:
+        if gerrithook.ENFORCING:
             self.assertEqual(cm.exception.code, 1)
         else:
             self.assertEqual(cm.exception.code, 0)
@@ -95,7 +95,7 @@ class refupdate_test(unittest.TestCase):
         cm.read.return_value = '{ "status": "success", "message": "foo@bar.com signed the CLA" }'
         cm.__enter__.return_value = cm
         mock_urlopen.return_value = cm
-        (status, message) = refupdate.request_cla_status(cla_url, addr)
+        (status, message) = gerrithook.request_cla_status(cla_url, addr)
         self.assertTrue(status)
 
     @patch('urllib.request.urlopen')
@@ -112,7 +112,7 @@ class refupdate_test(unittest.TestCase):
         cm.__enter__.return_value = cm
         mock_urlopen.return_value = cm
 
-        (status, message) = refupdate.request_cla_status(cla_url, addr)
+        (status, message) = gerrithook.request_cla_status(cla_url, addr)
         self.assertFalse(status)
         self.assertEqual(message, "foo@bar.com needs to sign the CLA")
 
@@ -126,7 +126,7 @@ class refupdate_test(unittest.TestCase):
 
         mock_urlopen.side_effect = urllib.error.HTTPError(cla_url, 500, 'Internal Error', {}, None)
 
-        (status, message) = refupdate.request_cla_status(cla_url, addr)
+        (status, message) = gerrithook.request_cla_status(cla_url, addr)
         self.assertFalse(status)
         self.assertTrue(re.fullmatch(r'^Server encountered an HTTPError at URL.*$', message))
 
@@ -140,7 +140,7 @@ class refupdate_test(unittest.TestCase):
 
         mock_urlopen.side_effect = urllib.error.URLError(404, 'Not Found')
 
-        (status, message) = refupdate.request_cla_status(cla_url, addr)
+        (status, message) = gerrithook.request_cla_status(cla_url, addr)
         self.assertFalse(status)
         self.assertTrue(re.fullmatch(r'^An URLError occurred at URL.*$', message))
 
@@ -150,7 +150,7 @@ class refupdate_test(unittest.TestCase):
         '''
         jsondata = '{ "status": "success", "message": "foo@bar.com signed the CLA" }'
 
-        (status, message) = refupdate.check_cla_response(jsondata)
+        (status, message) = gerrithook.check_cla_response(jsondata)
         self.assertTrue(status)
 
     def test_check_cla_response_fail(self):
@@ -159,7 +159,7 @@ class refupdate_test(unittest.TestCase):
         '''
         jsondata = '{ "status": "failure", "message": "foo@bar.com needs to sign the CLA" }'
 
-        (status, message) = refupdate.check_cla_response(jsondata)
+        (status, message) = gerrithook.check_cla_response(jsondata)
         self.assertFalse(status)
         self.assertEqual(message, "foo@bar.com needs to sign the CLA")
 
@@ -169,7 +169,7 @@ class refupdate_test(unittest.TestCase):
         '''
         jsondata = '{ "status": "error", "message": "An error has occurred" }'
 
-        (status, message) = refupdate.check_cla_response(jsondata)
+        (status, message) = gerrithook.check_cla_response(jsondata)
         self.assertFalse(status)
         self.assertEqual(message, "An error has occurred")
 
@@ -179,7 +179,7 @@ class refupdate_test(unittest.TestCase):
         '''
         jsondata = "invalid"
 
-        (status, message) = refupdate.check_cla_response(jsondata)
+        (status, message) = gerrithook.check_cla_response(jsondata)
         self.assertFalse(status)
         self.assertEqual(message, "Unable to decode JSON")
 
@@ -189,7 +189,7 @@ class refupdate_test(unittest.TestCase):
         '''
         jsondata = '{ "status": "success" }'
 
-        (status, message) = refupdate.check_cla_response(jsondata)
+        (status, message) = gerrithook.check_cla_response(jsondata)
         self.assertFalse(status)
         self.assertEqual(message, "JSON didn't contain keys: 'status' and 'message'")
 
@@ -198,7 +198,7 @@ class refupdate_test(unittest.TestCase):
         Pass when CLA is signed
         '''
         with self.assertRaises(SystemExit) as cm:
-            refupdate.output_status(True, "")
+            gerrithook.output_status(True, "")
 
         self.assertEqual(cm.exception.code, 0)
 
@@ -207,10 +207,10 @@ class refupdate_test(unittest.TestCase):
         Fail when CLA is not signed
         '''
         with self.assertRaises(SystemExit) as cm:
-            refupdate.output_status(False, "foo@bar.com needs to sign the CLA")
+            gerrithook.output_status(False, "foo@bar.com needs to sign the CLA")
 
         # check exit code depening on ENFORCING value
-        if refupdate.ENFORCING:
+        if gerrithook.ENFORCING:
             self.assertEqual(cm.exception.code, 1)
         else:
             self.assertEqual(cm.exception.code, 0)
