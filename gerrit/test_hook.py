@@ -214,3 +214,13 @@ class gerrithook_test(unittest.TestCase):
             self.assertEqual(cm.exception.code, 1)
         else:
             self.assertEqual(cm.exception.code, 0)
+
+    def test_output_message_formatted(self):
+        '''
+        Message shown on terminal should be wrapped at 80 characters
+        (including `remote: ` prefix)
+        '''
+        lines = gerrithook.format_terminal_message("#"*100).split('\n')
+
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(len(lines[0]) + len('remote: '), 80)
