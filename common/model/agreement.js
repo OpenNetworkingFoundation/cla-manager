@@ -155,7 +155,7 @@ class agreement {
    * @returns {Promise<Addendum[]>}
    */
   getAddendums () {
-    return Addendum.get(this.id)
+    return Addendum.get(this.id, this.signer.value)
   }
 
   /**

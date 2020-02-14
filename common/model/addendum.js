@@ -123,8 +123,9 @@ class addendum {
   }
 
   // NOTE should we return instances of the class?
-  static get (agreementId) {
+  static get (agreementId, signerEmail) {
     return DB.connection().collection(addendumCollection)
+      .where('signer.value', '==', signerEmail)
       .where('agreementId', '==', agreementId)
       .orderBy('dateSigned')
       .get()
