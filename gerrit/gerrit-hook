@@ -27,6 +27,7 @@ import email.utils
 import json
 import logging
 import sys
+import textwrap
 import urllib.request
 
 # Edit this variable with the URL of the CLA manager instance
@@ -152,11 +153,20 @@ def check_cla_response(jsondata):
     return(status, message)
 
 
+def format_terminal_message(message):
+    '''
+    format message to be shown on terminal
+    '''
+    # Wrap at 80 characters including gerrit `remote: ` prefix
+    linelen = 80 - len('remote: ')
+    return '\n'.join(textwrap.wrap(message, width=linelen))
+
+
 def output_status(status, message):
 
     # CLA not signed, print a message
     if not status:
-        print(message)
+        print(format_terminal_message(message))
 
         # only fail if in enforcing mode
         if ENFORCING:
