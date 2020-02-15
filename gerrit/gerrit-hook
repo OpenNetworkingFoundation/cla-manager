@@ -15,7 +15,7 @@
 # limitations under the License.
 
 
-# Gerrit ref-update hook for cla-manager
+# Gerrit hook for cla-manager
 #
 # Gerrit Hook Documentation:
 # https://gerrit.googlesource.com/plugins/hooks/+/master/src/main/resources/Documentation/hooks.md
@@ -23,10 +23,11 @@
 from __future__ import absolute_import
 
 import argparse
+import email.utils
 import json
 import logging
-import re
 import sys
+import textwrap
 import urllib.request
 
 # Edit this variable with the URL of the CLA manager instance
@@ -37,7 +38,7 @@ ENFORCING = True
 
 # create shared logger
 logging.basicConfig()
-logger = logging.getLogger('ref-update')
+logger = logging.getLogger('gerrit-hook')
 
 
 def parse_gerrit_args():
@@ -49,6 +50,7 @@ def parse_gerrit_args():
         --uploader-username <username>
         --oldrev <sha1>
         --newrev <sha1>
+        --cmdref <refname>
 
     Arguments added for manual testing:
         --debug
@@ -56,6 +58,7 @@ def parse_gerrit_args():
 
     parser = argparse.ArgumentParser(description="Gerrit hook for cla-manager project")
 
+    # gerrit args
     parser.add_argument("--project", help="Gerrit project")
     parser.add_argument("--refname", help="Gerrit reference name")
     parser.add_argument("--uploader", help="Uploader name and email address",
@@ -63,6 +66,9 @@ def parse_gerrit_args():
     parser.add_argument("--uploader-username", help="Uploader username")
     parser.add_argument("--oldrev", help="Hash of the parent commit")
     parser.add_argument("--newrev", help="Hash of the new commit")
+    parser.add_argument("--cmdref", help="Git ref of the new commit")
+
+    # testing args
     parser.add_argument("--debug", help="Print additional debugging information",
                         action="store_true")
 
@@ -73,17 +79,10 @@ def uploader_email(uploader):
     '''
     Given the uploader string from Gerrit, return an email address
     '''
-    # python stdlib email.utils.parseaddr doesn't support this format
 
-    if re.fullmatch(r'^[\w ]+\([^@]+@[^@]+\.[^@]+\)$', uploader):
-        # email is in the form: "Foo Bar (foo@bar.baz)"
-        (name, after) = uploader.split("(", 1)
-        (addr, extra) = after.split(")", 1)
+    (name, addr) = email.utils.parseaddr(uploader)
 
-    elif re.fullmatch(r'^[^@]+@[^@]+\.[^@]+$', uploader):
-        # email is  the bare address: "foo@bar.baz"
-        addr = uploader
-    else:
+    if '@' not in addr:
         output_status(False, "Problem with email address: '%s'" % uploader)
 
     logger.debug("Email address: '%s'", addr)
@@ -154,11 +153,20 @@ def check_cla_response(jsondata):
     return(status, message)
 
 
+def format_terminal_message(message):
+    '''
+    format message to be shown on terminal
+    '''
+    # Wrap at 80 characters including gerrit `remote: ` prefix
+    linelen = 80 - len('remote: ')
+    return '\n'.join(textwrap.wrap(message, width=linelen))
+
+
 def output_status(status, message):
 
     # CLA not signed, print a message
     if not status:
-        print(message)
+        print(format_terminal_message(message))
 
         # only fail if in enforcing mode
         if ENFORCING:
