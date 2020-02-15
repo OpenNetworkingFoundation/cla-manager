@@ -51,6 +51,24 @@ exports.updateWhitelist = functions.firestore
   .onCreate(clalib.updateWhitelist)
 
 /**
+ * Periodically re-generates all whitelists in case of one-off errors with
+ * snapshot-based updateWhitelist.
+ */
+exports.reconcileWhitelist = functions.pubsub
+  .schedule('every 15 minutes')
+  .onRun(() => {
+    return db.collection('agreements').get()
+      .then(query => {
+        return Promise.all(query.docs
+          .map(doc => clalib.updateWhitelist(null, doc.id)))
+      })
+      .then(result => {
+        console.info(`Successfully updated ${result.length} whitelists`)
+      })
+      .catch(console.error)
+  })
+
+/**
  * Handles GitHub pull requests and other events. For pull requests, the
  * implementation is expected to create a new request document in the DB, which
  * will be picked up by the below function.
@@ -107,4 +125,7 @@ exports.handleWhitelistUpdate = functions.firestore
       })).catch(console.error)
   })
 
+/**
+ * Periodically backups firestore DB.
+ */
 exports.scheduledFirestoreExport = backup

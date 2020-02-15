@@ -121,6 +121,7 @@ describe('Cla lib', () => {
     const mockSnapshot = await addAndGetSnapshot(addendumsRef, mockAddendum)
     // Update whitelist
     expect(await assertFails(cla.updateWhitelist(mockSnapshot)))
+    expect(await assertFails(cla.updateWhitelist(null, 'i-dont-exist')))
   })
 
   it('should fail checking an invalid identity', async () => {
@@ -145,5 +146,23 @@ describe('Cla lib', () => {
   it('should be possible to check multiple identities at once', async () => {
     const identities = [idEmmaEmail, idEmmaGithub, sameAsIdEmmaEmail, idGigiGithub]
     expect(await cla.checkIdentities(identities))
+  })
+
+  it('should throw error if no valid argument is passed to updateWhitelist', async () => {
+    expect(await assertFails(cla.updateWhitelist(null, null)))
+  })
+
+  it('should update whitelist if passing only an agreementId', async () => {
+    // Add agreement
+    expect(await assertSucceeds(agreementRef.set(agreement)))
+    // Add addendum
+    addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum1)
+    // Update whitelist by passing agreementId instead of snapshot
+    expect(await assertSucceeds(cla.updateWhitelist(null, agreementId)))
+    // Verify whitelist
+    expect(await cla.isIdentityWhitelisted(idJohnEmail)).toBe(true)
+    expect(await cla.isIdentityWhitelisted(sameAsIdEmmaEmail)).toBe(true)
+    expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBe(true)
+    expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBe(true)
   })
 })
