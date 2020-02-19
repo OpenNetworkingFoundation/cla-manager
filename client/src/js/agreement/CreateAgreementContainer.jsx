@@ -15,6 +15,9 @@ const useStyles = makeStyles(theme => ({
   },
   cell: {
     textAlign: 'center'
+  },
+  textCenter: {
+    textAlign: 'center'
   }
 }))
 
@@ -26,19 +29,19 @@ function CreateAgreementContainer () {
   return (
     <Paper elevation={23} className={classes.root}>
       <h2 className={classes.h2}>Sign a CLA</h2>
-      <p>Who will you be submitting contributions on behalf of?</p>
+      <p className={classes.textCenter}>Who will you be submitting contributions on behalf of?</p>
       <Grid container spacing={3} justify='center'>
         <Grid item xs={12} md={6} className={classes.cell}>
           <Link to={`/sign/${AgreementType.INDIVIDUAL}`}>
             <Button variant='contained' color='primary' size='large'>
-              Only Yourself / Sign Individual CLA
+              Only Yourself &rarr; Sign Individual CLA
             </Button>
           </Link>
         </Grid>
         <Grid item xs={12} md={6} className={classes.cell}>
           <Link to={`/sign/${AgreementType.CORPORATE}`}>
             <Button variant='contained' color='primary' size='large'>
-              Your Employer / Sign Corporate CLA
+              Your Employer &rarr; Sign Institutional CLA
             </Button>
           </Link>
         </Grid>

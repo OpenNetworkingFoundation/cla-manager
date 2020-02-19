@@ -192,6 +192,11 @@ class agreement {
   static fromDocumentSnapshot (doc) {
     const data = doc.data()
     const signer = new Identity(IdentityType.EMAIL, data.signer.name, data.signer.value)
+    // TODO: create new signer class that extends Identity and provides
+    //  additional attributes such as title and phone numbe
+    // For now augment instance with missing keys so we can show them in the UI.
+    signer.title = data.signer.title
+    signer.phoneNumber = data.signer.phoneNumber
     let a
     if (data.type === AgreementType.INDIVIDUAL) {
       a = new Agreement(data.type, data.body, signer)

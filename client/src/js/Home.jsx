@@ -79,7 +79,7 @@ export default class Home extends React.Component {
           name: cla.data().signer.name,
           date,
           displayDate: date.toLocaleDateString('default', dateOptions),
-          link: <Link href={linkUrl}><Button variant='outlined' color='primary'>View Agreement</Button></Link>
+          link: <Link href={linkUrl}><Button variant='outlined' color='primary'>View/Edit</Button></Link>
         }
 
         if (type === AgreementType.INDIVIDUAL) {
@@ -122,7 +122,7 @@ export default class Home extends React.Component {
             <AgreementsTable
               header='Individual Agreements'
               description='Individual agreements we have on file for you:'
-              columnTitles={['Name', 'Date Signed', 'Manage']}
+              columnTitles={['Signatory', 'Date Signed', 'Actions']}
               columnIds={['name', 'displayDate', 'link']}
               data={this.state.individualCLATable}
             />
@@ -131,7 +131,7 @@ export default class Home extends React.Component {
             <AgreementsTable
               header='Institutional Agreements'
               description='Institutional agreements we have on file for you:'
-              columnTitles={['Organization', 'Signer', 'Date Signed', 'View / Manage']}
+              columnTitles={['Organization', 'Signatory', 'Date Signed', 'Actions']}
               columnIds={['organization', 'name', 'displayDate', 'link']}
               data={this.state.institutionCLATable}
             />
