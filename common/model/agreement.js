@@ -156,11 +156,12 @@ class agreement {
   }
 
   /**
-   * Returns a list of Identity that are valid on this Agreement
+   * Returns a list of Identity that are allowed to contribute under this
+   * agreement. The implementation emulates the logic used by the Firebase
+   * function to update the whitelist collection in the DB.
    * @returns {Promise<Identity[]>}
    */
-  getActiveIdentities () {
-    // We should emulate the same content of the whitelist.
+  getWhitelist () {
     return this.getAddendums().then(addendums => {
       const whitelistMap = addendums.reduce((map, addendum) => {
         addendum.added.forEach(i => map.set(identityKey(i), i))

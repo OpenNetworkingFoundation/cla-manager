@@ -129,7 +129,7 @@ describe('The Agreement model', () => {
     })
   })
 
-  describe('the getActiveIdentities method', () => {
+  describe('the getWhitelist method', () => {
     it('should return a list of valid users for an agreement ', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
@@ -137,7 +137,7 @@ describe('The Agreement model', () => {
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
         ]
       }
-      individualAgreement.getActiveIdentities()
+      individualAgreement.getWhitelist()
         .then(res => {
           expect(res.length).toEqual(2)
           // NOTE user1 is removed in the second addendum
