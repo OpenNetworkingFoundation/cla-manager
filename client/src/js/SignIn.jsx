@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 import { FirebaseApp } from '../common/app/app'
 
 import { makeStyles } from '@material-ui/core/styles'
-import { TextField, Grid, Button, Container, Box } from '@material-ui/core'
-import { Alert } from '@material-ui/lab';
+import { Box, Button, Container, Grid, TextField } from '@material-ui/core'
+import { Alert } from '@material-ui/lab'
 import SendIcon from '@material-ui/icons/Send'
 
 const useStyles = makeStyles(theme => ({
@@ -89,6 +89,21 @@ export default function SignIn () {
           </Box>
         </Grid>
         <Grid item xs={12}>
+          <p>
+            A Contributor License Agreement (CLA) is a legal document in which a
+            contributor (like you) states that they are entitled to contribute
+            to a project, and that they are willing to have their contribution
+            used in distributions and derivative works. You will need to
+            electronically sign a CLA before ONF can accept any contribution
+            from you or your company.
+          </p>
+          <p>
+            <strong>
+              Please enter your email address and click the button below. You
+              will receive a link to access a portal where you will be able to
+              sign a new CLA or view/edit existing ones.
+            </strong>
+          </p>
           <form
             onSubmit={(e) => e.preventDefault()}
             noValidate
@@ -105,11 +120,13 @@ export default function SignIn () {
               autoFocus
             />
             <p>
-              If you are already registered, please enter the email address you used to register with the ONF CLA Portal.
-              Click the button to receive a link to view your ONF CLA information.
-              <br/><br/>
-              If you have not yet registered, please enter the email address you wish to use to register with the ONF CLA Portal.
-              Click the button to receive a link to complete the registration process.
+              <strong>IMPORTANT:</strong> if want to sign an agreement for your
+              company (Institutional CLA), please enter your work email address.
+            </p>
+            <p>
+              If you have already signed a CLA through this portal, please enter
+              the email address you used to sign to view your existing CLA
+              information.
             </p>
             <Button
               className={classes.button}
@@ -119,7 +136,7 @@ export default function SignIn () {
               onClick={signIn}
               endIcon={<SendIcon/>}
             >
-              Send Sign In Link
+              Send Access Link
             </Button>
           </form>
         </Grid>
