@@ -7,15 +7,13 @@ import { Identity, IdentityType } from '../../common/model/identity'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
 
-
 const useStyles = makeStyles(theme => ({
   textField: {
     marginBottom: theme.spacing(2)
   }
 }))
 
-function UserForm (props) {
-
+function IdentityForm (props) {
   const classes = useStyles()
 
   const [name, setName] = useState('')
@@ -56,16 +54,16 @@ function UserForm (props) {
           <TextValidator
             className={classes.textField}
             fullWidth
-            label='Name'
+            label='Full Name'
             name='name'
             value={name}
             onChange={e => setName(e.target.value)}
             validators={['required']}
-            errorMessages={['Enter the name of the user']}
+            errorMessages={['Enter the full name of the person associated to this identity']}
             variant='outlined'
           />
-          {type === IdentityType.EMAIL ?
-            <TextValidator
+          {type === IdentityType.EMAIL
+            ? <TextValidator
               className={classes.textField}
               fullWidth
               label='Email'
@@ -73,12 +71,12 @@ function UserForm (props) {
               value={value}
               onChange={e => setValue(e.target.value)}
               validators={['required', 'isEmail']}
-              errorMessages={['Enter the email address of the user']}
+              errorMessages={['Enter the email address associated to the identity']}
               variant='outlined'
             /> : null
           }
-          {type === IdentityType.GITHUB ?
-            <TextValidator
+          {type === IdentityType.GITHUB
+            ? <TextValidator
               className={classes.textField}
               fullWidth
               label='GitHub ID'
@@ -86,7 +84,7 @@ function UserForm (props) {
               value={value}
               onChange={e => setValue(e.target.value)}
               validators={['required']}
-              errorMessages={['Enter the GitHub ID of the user']}
+              errorMessages={['Enter the GitHub ID associated to the identity']}
               variant='outlined'
             /> : null
           }
@@ -105,8 +103,8 @@ function UserForm (props) {
   )
 }
 
-UserForm.propTypes = {
+IdentityForm.propTypes = {
   callback: PropTypes.func.isRequired
 }
 
-export default UserForm
+export default IdentityForm
