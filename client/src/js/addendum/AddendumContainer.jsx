@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
 import {
-  Card,
-  Grid,
-  Button,
   Box,
+  Button,
+  Card,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Grid
 } from '@material-ui/core'
 import { Agreement } from '../../common/model/agreement'
 import UserForm from '../user/UserForm'
 import IdentityCard from './IdentityCard'
 import * as _ from 'lodash'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
-import { useHistory, Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
-  },
+  }
 }))
 
 /**
@@ -143,8 +143,9 @@ function AddendumContainer (props) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <h2>Active identities for this agreement:</h2>
-        <Box>here is a list of identities that are authorized to contribute code under this agreement</Box>
+        <h2>Active Identities for this Agreement</h2>
+        <Box>Here is a list of identities that are authorized to contribute code
+          under this agreement: {activeIdentities.length === 0 ? 'EMPTY' : ''}</Box>
         <Grid container spacing={2}>
           {activeIdentities.map((a, i) =>
             <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
@@ -156,11 +157,15 @@ function AddendumContainer (props) {
       <Grid item xs={12}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
+            <h2>Update Agreement</h2>
             <Box>
-              <h2>Update Agreement:</h2>
-              You can modify the people allowed to contribute code under this agreement by adding or removing them from
-              it. <br/>
-              Make sure to click on &quot;Sign Addendum&quot; below
+              <p>
+                You can modify the people allowed to contribute under this
+                agreement by adding or removing them from it.
+              </p>
+              <p>
+                Make sure to click on &quot;Sign Addendum&quot; below.
+              </p>
             </Box>
           </Grid>
           {removedIdentities.map((a, i) =>
