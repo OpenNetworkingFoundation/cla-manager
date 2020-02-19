@@ -37,6 +37,8 @@ function AddendumContainer (props) {
   const [activeIdentities, setWhitelist] = useState([])
   const [addedIdentities, setAddedIdentities] = useState([])
   const [removedIdentities, setRemovedIdentities] = useState([])
+  const [updateInProgress, setUpdateInProgress] = useState(false)
+  const [lastAddendum, setLastAddendum] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
 
   useEffect(() => {
@@ -55,6 +57,14 @@ function AddendumContainer (props) {
       })
   }, [props.agreement.id, addendums])
 
+  useEffect(() => {
+    if (addendums && addendums.length) {
+      setLastAddendum(addendums[addendums.length - 1])
+    } else {
+      setLastAddendum(null)
+    }
+  }, [addendums])
+
   const createAddendum = () => {
     const addendum = new Addendum(
       AddendumType.CONTRIBUTOR,
@@ -64,12 +74,17 @@ function AddendumContainer (props) {
       removedIdentities
     )
 
-    addendum.save().then(res => {
-      setAddedIdentities([])
-      setRemovedIdentities([])
-    }).catch(console.error)
-
-    setAddendums(addendums => [...addendums, addendum])
+    setUpdateInProgress(true)
+    addendum.save()
+      .then(res => {
+        setAddedIdentities([])
+        setRemovedIdentities([])
+      })
+      .catch(console.error)
+      .finally(() => {
+        setUpdateInProgress(false)
+        setAddendums(addendums => [...addendums, addendum])
+      })
   }
 
   const setAddedIdentity = (identity) => {
@@ -126,8 +141,8 @@ function AddendumContainer (props) {
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <h2>Active Identities for this Agreement</h2>
-        <Box>Here is a list of identities that are authorized to contribute code
-          under this agreement: {activeIdentities.length === 0 ? 'EMPTY' : ''}</Box>
+        <p>Here is a list of identities that are authorized to contribute code
+          under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
         <Grid container spacing={2}>
           {activeIdentities.map((a, i) =>
             <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
@@ -135,6 +150,10 @@ function AddendumContainer (props) {
             </Grid>
           )}
         </Grid>
+        <p>
+          We have {addendums ? addendums.length : 0} addendums on file for this
+          agreement. The last one was signed
+          on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}</p>
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={2}>
@@ -142,11 +161,13 @@ function AddendumContainer (props) {
             <h2>Update Agreement</h2>
             <Box>
               <p>
-                You can modify the people allowed to contribute under this
-                agreement by adding or removing them from it.
+                You can sign a new "addendum" to modify the identities allowed
+                to contribute under this agreement. Use the form below to add
+                identities, or select one from the above list to remove it.
               </p>
               <p>
-                Make sure to click on &quot;Sign Addendum&quot; below.
+                Once done, make sure to click on &quot;Sign
+                Addendum&quot; below to apply your changes.
               </p>
             </Box>
           </Grid>
@@ -166,10 +187,12 @@ function AddendumContainer (props) {
         </Card>
       </Grid>
       <Grid item xs={12}>
-        <Button fullWidth
+        <Button
+          fullWidth
           variant='contained'
+          size='large'
           color='primary'
-          disabled={addedIdentities.length === 0 && removedIdentities.length === 0}
+          disabled={updateInProgress || addedIdentities.length + removedIdentities.length === 0}
           onClick={createAddendum}>
           Sign Addendum
         </Button>
