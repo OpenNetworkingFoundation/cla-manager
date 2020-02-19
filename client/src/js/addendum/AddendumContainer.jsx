@@ -13,7 +13,7 @@ import {
   DialogTitle,
   Grid
 } from '@material-ui/core'
-import { Agreement } from '../../common/model/agreement'
+import { Agreement, AgreementType } from '../../common/model/agreement'
 import IdentityForm from '../identity/IdentityForm'
 import IdentityCard from './IdentityCard'
 import * as _ from 'lodash'
@@ -183,7 +183,9 @@ function AddendumContainer (props) {
           )}
         </Grid>
         <Card variant='outlined' className={classes.root}>
-          <IdentityForm callback={setAddedIdentity}/>
+          <IdentityForm
+            callback={setAddedIdentity}
+            name={props.agreement.type === AgreementType.INDIVIDUAL ? props.agreement.signer.name : null}/>
         </Card>
       </Grid>
       <Grid item xs={12}>

@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
 function IdentityForm (props) {
   const classes = useStyles()
 
-  const [name, setName] = useState('')
+  const [name, setName] = useState(props.name || '')
   const [value, setValue] = useState('')
   const [type, setType] = useState(IdentityType.EMAIL)
 
@@ -58,6 +58,10 @@ function IdentityForm (props) {
             name='name'
             value={name}
             onChange={e => setName(e.target.value)}
+            InputProps={{
+              // Use the given name if one is passed
+              readOnly: !!(props.name && props.name.length)
+            }}
             validators={['required']}
             errorMessages={['Enter the full name of the person associated to this identity']}
             variant='outlined'
@@ -104,7 +108,8 @@ function IdentityForm (props) {
 }
 
 IdentityForm.propTypes = {
-  callback: PropTypes.func.isRequired
+  callback: PropTypes.func.isRequired,
+  name: PropTypes.string
 }
 
 export default IdentityForm
