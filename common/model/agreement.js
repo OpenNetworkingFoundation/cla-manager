@@ -156,7 +156,7 @@ class agreement {
   }
 
   /**
-   * Returns a list of Identity that are allowed to contribute under this
+   * Returns all identities that are allowed to contribute under this
    * agreement. The implementation emulates the logic used by the Firebase
    * function to update the whitelist collection in the DB.
    * @returns {Promise<Identity[]>}

@@ -119,7 +119,7 @@ function AgreementContainer (props) {
     agreement.save()
       .then(res => {
         if (res.type === AgreementType.INDIVIDUAL) {
-          // Automatically create an addendum with for signer identity.
+          // Automatically create an addendum for the signer identity.
           return new Addendum(AddendumType.CONTRIBUTOR,
             res.id, res.signer, [res.signer], [])
             .save()
