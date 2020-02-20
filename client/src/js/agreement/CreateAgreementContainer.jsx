@@ -39,7 +39,7 @@ function CreateAgreementContainer () {
           </Link>
         </Grid>
         <Grid item xs={12} md={6} className={classes.cell}>
-          <Link to={`/sign/${AgreementType.CORPORATE}`}>
+          <Link to={`/sign/${AgreementType.INSTITUTIONAL}`}>
             <Button variant='contained' color='primary' size='large'>
               Your Employer &rarr; Sign Institutional CLA
             </Button>

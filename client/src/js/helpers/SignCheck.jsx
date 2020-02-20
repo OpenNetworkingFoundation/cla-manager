@@ -5,7 +5,7 @@ import AgreementContainer from '../agreement/AgreementContainer'
 import { AgreementType } from '../../common/model/agreement'
 import { Button, Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import { ClaRequestCorporate } from '../cla/ClaText'
+import { ClaRequestInstitutional } from '../text/Text'
 
 /**
  * Component which asks wether you are allowed to sign on behalf of your organization or not
@@ -32,7 +32,7 @@ function EmailBody (props) {
     <div>
       <h2>Please email the following to someone at your company who can sign the CLA:</h2>
       <p><i>If you don't know who that is, you can start with your manager or director.</i></p>
-      <ReactMarkdown source={ClaRequestCorporate} />
+      <ReactMarkdown source={ClaRequestInstitutional} />
     </div>
   )
 }
