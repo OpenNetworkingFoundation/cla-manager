@@ -18,6 +18,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Avatar from '@material-ui/core/Avatar'
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import TextField from '@material-ui/core/TextField'
+import { Addendum, AddendumType } from '../../common/model/addendum'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -117,8 +118,17 @@ function AgreementContainer (props) {
 
     agreement.save()
       .then(res => {
-        history.push(`/view/${res.id}`)
+        if (res.type === AgreementType.INDIVIDUAL) {
+          // Automatically create an addendum with for signer identity.
+          return new Addendum(AddendumType.CONTRIBUTOR,
+            res.id, res.signer, [res.signer], [])
+            .save()
+            .then(() => res.id)
+        } else {
+          return Promise.resolve(res.id)
+        }
       })
+      .then(agreementId => history.push(`/view/${agreementId}`))
       .catch(err => {
         if (err.code === 'permission-denied') {
           setError('Permission denied, please try again later')
@@ -137,7 +147,7 @@ function AgreementContainer (props) {
   }
 
   // NOTE consider moving in a different component
-  const form = (
+  const signatureForm = (
     <ValidatorForm
       onSubmit={ifSigned(() => {}, handleSubmit)}
       onError={errors => console.log(errors)}>
@@ -291,8 +301,8 @@ function AgreementContainer (props) {
               <AgreementDisplay text={agreement.body}/>
             </Grid>
           </Grid>
-          {form}
-          {ifSigned(<AddendumContainer agreement={agreement}/>, null)}
+          {signatureForm}
+          {agreementId ? <AddendumContainer agreement={agreement}/> : null}
         </Paper>
       }
     </div>
