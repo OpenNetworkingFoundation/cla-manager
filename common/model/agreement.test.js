@@ -12,7 +12,7 @@ const user2 = new Identity(IdentityType.EMAIL, 'Martha', 'martha@onf.dev')
 const user3 = new Identity(IdentityType.EMAIL, 'Felipe', 'felipe@onf.dev')
 
 describe('The Agreement model', () => {
-  let individualAgreement, corporateAgreement
+  let individualAgreement, institutionalAgreement
   const firestoreMock = new FirestoreMock()
 
   beforeEach(() => {
@@ -26,8 +26,8 @@ describe('The Agreement model', () => {
       signer
     )
 
-    corporateAgreement = new Agreement(
-      AgreementType.CORPORATE,
+    institutionalAgreement = new Agreement(
+      AgreementType.INSTITUTIONAL,
       'TODO, add agreement body',
       signer,
       'ONF',
@@ -43,19 +43,19 @@ describe('The Agreement model', () => {
     expect(individualAgreement.organization).toEqual(null)
   })
 
-  it('should correctly instantiate the class for CORPORATE', () => {
-    expect(corporateAgreement.id).toEqual(null)
-    expect(corporateAgreement.type).toEqual(AgreementType.CORPORATE)
-    expect(corporateAgreement.signer.email).toEqual(signer.email)
-    expect(corporateAgreement.signer.name).toEqual(signer.name)
-    expect(corporateAgreement.organization).toEqual('ONF')
-    expect(corporateAgreement.organizationAddress).toEqual('1000 El Camino Real, 94025 Menlo Park (CA)')
+  it('should correctly instantiate the class for INSTITUTIONAL', () => {
+    expect(institutionalAgreement.id).toEqual(null)
+    expect(institutionalAgreement.type).toEqual(AgreementType.INSTITUTIONAL)
+    expect(institutionalAgreement.signer.email).toEqual(signer.email)
+    expect(institutionalAgreement.signer.name).toEqual(signer.name)
+    expect(institutionalAgreement.organization).toEqual('ONF')
+    expect(institutionalAgreement.organizationAddress).toEqual('1000 El Camino Real, 94025 Menlo Park (CA)')
   })
 
-  it('should not instantiate the class for CORPORATE if organization is missing', function () {
+  it('should not instantiate the class for INSTITUTIONAL if organization is missing', function () {
     const create = () => {
-      corporateAgreement = new Agreement(
-        AgreementType.CORPORATE,
+      institutionalAgreement = new Agreement(
+        AgreementType.INSTITUTIONAL,
         'TODO, add agreement body',
         signer
       )
@@ -74,11 +74,11 @@ describe('The Agreement model', () => {
       expect(json.organization).toBe(undefined)
     })
 
-    it('should return a JSON object for the corporateAgreement', () => {
-      const json = corporateAgreement.toJson()
+    it('should return a JSON object for the institutionalAgreement', () => {
+      const json = institutionalAgreement.toJson()
       expect(json instanceof Object).toBe(true)
 
-      expect(json.type).toEqual(AgreementType.CORPORATE)
+      expect(json.type).toEqual(AgreementType.INSTITUTIONAL)
       expect(json.signer.email).toEqual(signer.email)
       expect(json.signer.name).toEqual(signer.name)
       expect(json.organization).toBe('ONF')

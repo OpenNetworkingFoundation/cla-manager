@@ -15,7 +15,7 @@ function identityKey (identity) {
 
 /**
  * Types of agreements.
- * @type {{CORPORATE: string, INDIVIDUAL: string}}
+ * @type {{INSTITUTIONAL: string, INDIVIDUAL: string}}
  */
 const agreementType = {
   /**
@@ -23,9 +23,9 @@ const agreementType = {
    */
   INDIVIDUAL: 'individual',
   /**
-   * Corporate CLA.
+   * Institutional CLA.
    */
-  CORPORATE: 'corporate'
+  INSTITUTIONAL: 'institutional'
 }
 
 /**
@@ -48,12 +48,12 @@ class agreement {
     this._signer = signer
 
     // Optional arguments default to null
-    if (type === AgreementType.CORPORATE && organization == null) {
+    if (type === AgreementType.INSTITUTIONAL && organization == null) {
       throw TypeError(`Agreement.type is ${type} and organization is missing`)
     }
     this._organization = organization
 
-    if (type === AgreementType.CORPORATE && organizationAddress == null) {
+    if (type === AgreementType.INSTITUTIONAL && organizationAddress == null) {
       throw TypeError(`Agreement.type is ${type} and organizationAddress is missing`)
     }
     this._organizationAddress = organizationAddress
@@ -126,7 +126,7 @@ class agreement {
       body: this._body,
       signer: this._signer.toJson()
     }
-    if (this._type === AgreementType.CORPORATE) {
+    if (this._type === AgreementType.INSTITUTIONAL) {
       json.organization = this._organization
       json.organizationAddress = this._organizationAddress
     }
@@ -187,7 +187,7 @@ class agreement {
     let a
     if (data.type === AgreementType.INDIVIDUAL) {
       a = new Agreement(data.type, data.body, signer)
-    } else if (data.type === AgreementType.CORPORATE) {
+    } else if (data.type === AgreementType.INSTITUTIONAL) {
       a = new Agreement(data.type, data.body, signer, data.organization, data.organizationAddress)
     }
     a._id = doc.id

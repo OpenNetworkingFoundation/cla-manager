@@ -10,7 +10,6 @@ import { Agreement, AgreementType } from '../../common/model/agreement'
 import { Alert, Skeleton } from '@material-ui/lab'
 import { useHistory } from 'react-router-dom'
 import { Identity, IdentityType } from '../../common/model/identity'
-import { ClaTextCorporate, ClaTextIndividual } from '../cla/ClaText'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemAvatar from '@material-ui/core/ListItemAvatar'
@@ -37,22 +36,23 @@ const useStyles = makeStyles(theme => ({
  */
 function AgreementContainer (props) {
   const history = useHistory()
-  const agreementId = props.agreementId
 
   const classes = useStyles()
 
   // component state
   const [error, setError] = useState(null)
   const [agreement, setAgreement] = useState({ body: '' })
-  const [loader, setLoading] = useState(agreementId !== undefined)
+  const [loader, setLoading] = useState(true)
 
   // form values
-  const [signerName, setName] = useState('')
+  const [signerName, setSignerName] = useState('')
   const [signerEmail, setSignerEmail] = useState(props.user.email)
   const [orgName, setOrgName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [signerTitle, setSignerTitle] = useState('')
   const [orgAddress, setOrgAddress] = useState('')
+  const [claText, setClaText] = useState('')
+  const [agreementType, setAgreementType] = useState('')
 
   useEffect(() => {
     if (props.agreementId) {
@@ -60,9 +60,11 @@ function AgreementContainer (props) {
       Agreement.get(props.agreementId)
         .then(res => {
           setAgreement(res)
-          setName(res.signer.name)
+          setAgreementType(res.type)
+          setClaText(res.body)
+          setSignerName(res.signer.name)
           setSignerEmail(res.signer.value)
-          if (res.type === AgreementType.CORPORATE) {
+          if (res.type === AgreementType.INSTITUTIONAL) {
             setOrgName(res.organization)
             setOrgAddress(res.organizationAddress)
             setSignerTitle(res.signer.title)
@@ -72,17 +74,13 @@ function AgreementContainer (props) {
         })
         .catch(console.error)
     } else {
-      if (props.agreementType === AgreementType.CORPORATE) {
-        setAgreement({
-          type: AgreementType.CORPORATE,
-          body: ClaTextCorporate
+      fetch(`/assets/cla/default/${props.agreementType}.md?_=${Date.now()}`)
+        .then((r) => r.text())
+        .then(text => {
+          setAgreementType(props.agreementType)
+          setClaText(text)
+          setLoading(false)
         })
-      } else if (props.agreementType === AgreementType.INDIVIDUAL) {
-        setAgreement({
-          type: AgreementType.INDIVIDUAL,
-          body: ClaTextIndividual
-        })
-      }
     }
   }, [props.agreementType, props.agreementId])
 
@@ -103,13 +101,13 @@ function AgreementContainer (props) {
     if (props.agreementType === AgreementType.INDIVIDUAL) {
       agreement = new Agreement(
         AgreementType.INDIVIDUAL,
-        ClaTextIndividual,
+        claText,
         signer
       )
-    } else if (props.agreementType === AgreementType.CORPORATE) {
+    } else if (props.agreementType === AgreementType.INSTITUTIONAL) {
       agreement = new Agreement(
-        AgreementType.CORPORATE,
-        ClaTextCorporate,
+        AgreementType.INSTITUTIONAL,
+        claText,
         signer,
         orgName,
         orgAddress
@@ -138,12 +136,12 @@ function AgreementContainer (props) {
       })
   }
 
-  const ifCorporate = (value, otherwise) => {
-    return agreement.type === AgreementType.CORPORATE ? value : otherwise
+  const ifInstitutional = (value, otherwise) => {
+    return agreementType === AgreementType.INSTITUTIONAL ? value : otherwise
   }
 
   const ifSigned = (value = true, otherwise = false) => {
-    return agreement.id ? value : otherwise
+    return props.agreementId ? value : otherwise
   }
 
   // NOTE consider moving in a different component
@@ -177,7 +175,7 @@ function AgreementContainer (props) {
             label='Signer Full Name'
             name='signerName'
             value={signerName}
-            onChange={e => setName(e.target.value)}
+            onChange={e => setSignerName(e.target.value)}
             validators={['required']}
             errorMessages={['You must enter your full name']}
             variant='outlined'
@@ -198,7 +196,7 @@ function AgreementContainer (props) {
           />
           <Box
             component='div'
-            display={ifCorporate('', 'none')}
+            display={ifInstitutional('', 'none')}
           >
             <TextValidator
               fullWidth
@@ -209,7 +207,7 @@ function AgreementContainer (props) {
               name='signerTitle'
               value={signerTitle}
               onChange={e => setSignerTitle(e.target.value)}
-              validators={ifCorporate(['required'], [])}
+              validators={ifInstitutional(['required'], [])}
               errorMessages={['You must enter your title']}
               variant='outlined'
               className={classes.formField}
@@ -223,7 +221,7 @@ function AgreementContainer (props) {
               name='phoneNumber'
               value={phoneNumber}
               onChange={e => setPhoneNumber(e.target.value)}
-              validators={ifCorporate(['required'], [])}
+              validators={ifInstitutional(['required'], [])}
               errorMessages={['You must enter your phone number']}
               variant='outlined'
               className={classes.formField}
@@ -237,7 +235,7 @@ function AgreementContainer (props) {
               name='orgName'
               value={orgName}
               onChange={e => setOrgName(e.target.value)}
-              validators={ifCorporate(['required'], [])}
+              validators={ifInstitutional(['required'], [])}
               errorMessages={['You must enter the company name']}
               variant='outlined'
               className={classes.formField}
@@ -251,7 +249,7 @@ function AgreementContainer (props) {
               name='orgAddress'
               value={orgAddress}
               onChange={e => setOrgAddress(e.target.value)}
-              validators={ifCorporate(['required'], [])}
+              validators={ifInstitutional(['required'], [])}
               errorMessages={['You must enter the company address']}
               variant='outlined'
               className={classes.formField}
@@ -290,19 +288,21 @@ function AgreementContainer (props) {
         ? <Paper elevation={23} className={classes.root}>
           <Skeleton className={classes.skeleton} variant='text'/>
           <Skeleton className={classes.skeleton} variant='text'/>
-          <Skeleton className={classes.skeleton} variant='circle' width={40} height={40}/>
+          <Skeleton className={classes.skeleton} variant='circle'
+            width={40} height={40}/>
           <Skeleton className={classes.skeleton} variant='text'/>
-          <Skeleton className={classes.skeleton} variant='rect' width={'100%'} height={118}/>
+          <Skeleton className={classes.skeleton} variant='rect'
+            width={'100%'} height={118}/>
         </Paper>
         : <Paper elevation={23} className={classes.root}>
           <Grid container spacing={2}>
             {ifSigned(agreementHeader, null)}
             <Grid item xs={12}>
-              <AgreementDisplay text={agreement.body}/>
+              <AgreementDisplay text={claText}/>
             </Grid>
           </Grid>
           {signatureForm}
-          {agreementId ? <AddendumContainer agreement={agreement}/> : null}
+          {props.agreementId ? <AddendumContainer agreement={agreement}/> : null}
         </Paper>
       }
     </div>

@@ -83,11 +83,11 @@ export default class Home extends React.Component {
             row.name = cla.data().signerDetails.name
           }
           individualCLATable.push(row)
-        } else if (type === AgreementType.CORPORATE) {
+        } else if (type === AgreementType.INSTITUTIONAL) {
           row.organization = cla.data().organization
           institutionCLATable.push(row)
         } else {
-          console.log('unknown cla type: ', cla.data())
+          throw Error(`unknown agreement type ${cla.data().type}`)
         }
       })
 
