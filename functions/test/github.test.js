@@ -1,8 +1,7 @@
 import {
   addAndGetSnapshot,
   setAndGetSnapshot,
-  setupDbAdmin,
-  teardownDb
+  setupEmulatorAdmin
 } from './helpers'
 
 const sha1 = require('sha1')
@@ -23,12 +22,12 @@ const createCommentUri = '/repos/bocon13/cla-test/issues/3/comments'
 const existingCommentUri = '/repos/bocon13/cla-test/issues/comments/1'
 
 const appId = 123
-const projectId = 'github-test-' + new Date()
 
 nock.disableNetConnect()
 
 describe('Github lib', () => {
   let db
+  let app
   let github
   let contribsRef
   let eventsRef
@@ -47,7 +46,9 @@ describe('Github lib', () => {
   })
 
   beforeEach(async () => {
-    db = await setupDbAdmin(null, projectId)
+    const firebase = await setupEmulatorAdmin(null)
+    app = firebase.app
+    db = firebase.db
     contribsRef = db.collection('contributions')
     eventsRef = db.collection('events')
     whitelistsRef = db.collection('whitelists')
@@ -72,8 +73,8 @@ describe('Github lib', () => {
     }
   })
 
-  afterAll(() => {
-    return teardownDb()
+  afterEach(() => {
+    return app.delete()
   })
 
   test('PR open event should be stored in the db', async () => {

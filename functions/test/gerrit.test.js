@@ -1,4 +1,4 @@
-import { setupDbAdmin, teardownDb } from './helpers'
+import { setupEmulatorAdmin } from './helpers'
 
 const rp = require('request-promise')
 const Gerrit = require('../lib/gerrit')
@@ -9,19 +9,22 @@ const url = 'http://localhost:' + port
 describe('Gerrit lib', () => {
   let db
   let app
+  let gerritApp
   let server
 
   beforeAll(async (done) => {
-    db = await setupDbAdmin(null, 'gerrit-test')
-    app = Gerrit(db).app
-    server = app.listen(port, () => {
+    const firebase = await setupEmulatorAdmin(null)
+    app = firebase.app
+    db = firebase.db
+    gerritApp = Gerrit(db).app
+    server = gerritApp.listen(port, () => {
       // console.log('App listening on port ' + port)
       done()
     })
   })
 
   afterAll(async () => {
-    return teardownDb().then(() => server.close())
+    server.close().then(app.delete)
   })
 
   it('should return error is no email param is provided', async () => {
@@ -59,7 +62,7 @@ describe('Gerrit lib', () => {
 
   it('should return error in case of other errors', async () => {
     // Kill db prematurely
-    await teardownDb()
+    app.delete()
     return rp({
       uri: url,
       qs: { email: 'foo@bar.com' },
