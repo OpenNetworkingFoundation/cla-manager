@@ -12,11 +12,7 @@ import { Button } from '@material-ui/core'
 const dateOptions = {
   year: 'numeric',
   month: 'short',
-  day: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-  hour12: false,
-  timeZoneName: 'short'
+  day: 'numeric'
 }
 
 /**

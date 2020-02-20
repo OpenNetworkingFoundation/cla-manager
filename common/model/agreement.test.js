@@ -118,18 +118,18 @@ describe('The Agreement model', () => {
         .then(res => {
           expect(firestoreMock.mockWhere).toBeCalledWith('signer.value', '==', signer.value)
           expect(firestoreMock.mockWhere).toBeCalledWith('agreementId', '==', null)
-          expect(res.docs.length).toEqual(2)
-          expect(res.docs[0].data().added.length).toEqual(2)
-          expect(res.docs[0].data().removed.length).toEqual(0)
-          expect(res.docs[1].data().added.length).toEqual(2)
-          expect(res.docs[1].data().removed.length).toEqual(1)
+          expect(res.length).toEqual(2)
+          expect(res[0].added.length).toEqual(2)
+          expect(res[0].removed.length).toEqual(0)
+          expect(res[1].added.length).toEqual(2)
+          expect(res[1].removed.length).toEqual(1)
           done()
         })
         .catch(done)
     })
   })
 
-  describe('the getActiveUser method', () => {
+  describe('the getWhitelist method', () => {
     it('should return a list of valid users for an agreement ', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
@@ -137,7 +137,7 @@ describe('The Agreement model', () => {
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
         ]
       }
-      individualAgreement.getActiveUser()
+      individualAgreement.getWhitelist()
         .then(res => {
           expect(res.length).toEqual(2)
           // NOTE user1 is removed in the second addendum

@@ -5,6 +5,15 @@ import { Identity, IdentityType } from './identity'
 const agreementCollection = 'agreements'
 
 /**
+ * Returns a string that uniquely identifies the given identity in a whitelist.
+ * @param identity {Identity}
+ * @returns {string}
+ */
+function identityKey (identity) {
+  return `${identity.type}:${identity.value}`
+}
+
+/**
  * Types of agreements.
  * @type {{CORPORATE: string, INDIVIDUAL: string}}
  */
@@ -26,32 +35,27 @@ class agreement {
   /**
    * Creates a new agreement.
    * @param {agreementType} type type of agreement
-   * agreement, if {@link type} is {@link agreementType.CORPORATE}, otherwise
-   * {@code null}
    * @param {string} body the agreement text body
    * @param {Identity} signer the signer of the agreement
-   * @param {string|null} organization organization covered by the
+   * @param {string|null} organization organization covered by this agreement
    * @param {string|null} organizationAddress organization address
    */
   constructor (type, body, signer, organization = null, organizationAddress = null) {
     this._id = null
     this._dateSigned = new Date()
-
     this._type = type
     this._body = body
-    // TODO validate that signer is of type Identity
     this._signer = signer
 
+    // Optional arguments default to null
     if (type === AgreementType.CORPORATE && organization == null) {
       throw TypeError(`Agreement.type is ${type} and organization is missing`)
     }
+    this._organization = organization
 
     if (type === AgreementType.CORPORATE && organizationAddress == null) {
       throw TypeError(`Agreement.type is ${type} and organizationAddress is missing`)
     }
-
-    // organization is an optional parameter, defaults to null
-    this._organization = organization // TODO start using the Organization model for this
     this._organizationAddress = organizationAddress
   }
 
@@ -61,14 +65,6 @@ class agreement {
    */
   get id () {
     return this._id
-  }
-
-  /**
-   * Sets the agreement ID.
-   * @param {string}
-   */
-  set id (id) {
-    this._id = id
   }
 
   /**
@@ -138,15 +134,16 @@ class agreement {
   }
 
   /**
-   * Saves the model into Firestore and returns the saved instance
-   * @returns {Promise<Object>}
+   * Saves the agreement into Firestore and returns the saved instance with
+   * non-null id.
+   * @returns {Promise<Agreement>}
    */
   save () {
     return DB.connection().collection(agreementCollection)
       .add(this.toJson())
       .then(res => {
         this._id = res.id
-        return res
+        return this
       })
   }
 
@@ -155,34 +152,24 @@ class agreement {
    * @returns {Promise<Addendum[]>}
    */
   getAddendums () {
-    return Addendum.get(this.id, this.signer.value)
+    return Addendum.get(this)
   }
 
   /**
-   * Returns a list of Identity that are valid on this Agreement
+   * Returns all identities that are allowed to contribute under this
+   * agreement. The implementation emulates the logic used by the Firebase
+   * function to update the whitelist collection in the DB.
    * @returns {Promise<Identity[]>}
    */
-  getActiveUser () {
-    return this.getAddendums()
-      .then(addendums => {
-        const reduced = addendums.docs.reduce((users, addendum) => {
-          addendum.data().added.forEach(u => users.add(u))
-          addendum.data().removed.forEach(removedUser => {
-            Array.from(users).some(existingUser => {
-              if (
-                existingUser.name === removedUser.name &&
-                existingUser.value === removedUser.value &&
-                existingUser.type === removedUser.type
-              ) {
-                users.delete(existingUser)
-                return true
-              }
-            })
-          })
-          return users
-        }, new Set())
-        return Array.from(reduced)
-      })
+  getWhitelist () {
+    return this.getAddendums().then(addendums => {
+      const whitelistMap = addendums.reduce((map, addendum) => {
+        addendum.added.forEach(i => map.set(identityKey(i), i))
+        addendum.removed.forEach(i => map.delete(identityKey(i)))
+        return map
+      }, new Map())
+      return Array.from(whitelistMap.values())
+    })
   }
 
   /**
@@ -191,7 +178,7 @@ class agreement {
    */
   static fromDocumentSnapshot (doc) {
     const data = doc.data()
-    const signer = new Identity(IdentityType.EMAIL, data.signer.name, data.signer.value)
+    const signer = Identity.fromJson(data.signer)
     // TODO: create new signer class that extends Identity and provides
     //  additional attributes such as title and phone numbe
     // For now augment instance with missing keys so we can show them in the UI.
@@ -203,7 +190,7 @@ class agreement {
     } else if (data.type === AgreementType.CORPORATE) {
       a = new Agreement(data.type, data.body, signer, data.organization, data.organizationAddress)
     }
-    a.id = doc.id
+    a._id = doc.id
     return a
   }
 
@@ -228,4 +215,3 @@ class agreement {
 
 export const Agreement = agreement
 export const AgreementType = agreementType
-export const AgreementCollection = agreementCollection

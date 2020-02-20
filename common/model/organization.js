@@ -1,6 +1,7 @@
 /**
  * Organization model class.
  */
+// TODO: consider removing this class as not used
 class organization {
   /**
    * Creates a new organization.

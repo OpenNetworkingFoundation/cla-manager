@@ -81,7 +81,10 @@ export default function SignIn () {
         className={classes.mainGrid}
       >
         <Grid item xs={12}>
-          <img alt='ONF LOGO' src={process.env.PUBLIC_URL + '/assets/onf-logo.jpg'}/>
+          <a href='https://www.opennetworking.org'>
+            <img alt='ONF LOGO'
+              src={process.env.PUBLIC_URL + '/assets/onf-logo.jpg'}/>
+          </a>
         </Grid>
         <Grid item xs={12}>
           <Box>

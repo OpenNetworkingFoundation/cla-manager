@@ -1,4 +1,5 @@
 import DB from '../db/db'
+import { Identity, IdentityType } from './identity'
 
 /**
  * types of agreement addendums.
@@ -24,12 +25,12 @@ const addendumType = {
 class addendum {
   /**
    * Creates a new agreement addendum.
-   * @param {string} id global identifier
    * @param {AddendumType} type type of addendum
-   * @param {string} agreementId ID of the agreement to which this addendum applies
-   * @param {Identity} signer signer  of the addendum
-   * @param {Identity[]} added array of users added by the addendum
-   * @param {Identity[]} removed array of users removed by the addendum
+   * @param {string} agreementId ID of the agreement to which this addendum
+   *   applies
+   * @param {Identity} signer signer of the addendum
+   * @param {Identity[]} added array of identities added by the addendum
+   * @param {Identity[]} removed array of identities removed by the addendum
    */
   constructor (type, agreementId, signer, added, removed) {
     this._agreementId = agreementId
@@ -66,23 +67,23 @@ class addendum {
 
   /**
    * Returns the signer.
-   * @returns {User}
+   * @returns {Identity}
    */
   get signer () {
     return this._signer
   }
 
   /**
-   * Returns the added users.
-   * @returns {User[]}
+   * Returns the added identities.
+   * @returns {Identity[]}
    */
   get added () {
     return this._added
   }
 
   /**
-   * Returns the removed users.
-   * @returns {User[]}
+   * Returns the removed identities.
+   * @returns {Identity[]}
    */
   get removed () {
     return this._removed
@@ -101,14 +102,13 @@ class addendum {
    * @returns {Object}
    */
   toJson () {
-    const json = {
-      signer: this.signer,
-      added: this.added,
-      removed: this.removed,
+    return {
+      signer: this.signer.toJson(),
+      added: this.added.map(i => i.toJson()),
+      removed: this.removed.map(i => i.toJson()),
       agreementId: this.agreementId,
-      dateSigned: this._dateSigned
+      dateSigned: this.dateSigned
     }
-    return json
   }
 
   save () {
@@ -122,16 +122,39 @@ class addendum {
       })
   }
 
-  // NOTE should we return instances of the class?
-  static get (agreementId, signerEmail) {
+  /**
+   * Retrieves addendums from the DB for the given agreement
+   * @param {Agreement} agreement
+   * @returns {Promise<Addendum[]>}
+   */
+  static get (agreement) {
     return DB.connection().collection(addendumCollection)
-      .where('signer.value', '==', signerEmail)
-      .where('agreementId', '==', agreementId)
+      .where('signer.value', '==', agreement.signer.value)
+      .where('agreementId', '==', agreement.id)
       .orderBy('dateSigned')
       .get()
+      .then(query => Array.from(query.docs.map(Addendum.fromDocumentSnapshot)))
+  }
+
+  /**
+   * Converts from firestore format to Addendum
+   * @returns {Addendum}
+   */
+  static fromDocumentSnapshot (doc) {
+    const data = doc.data()
+    // Older addendums in the DB have signer with no type. Assume EMAIL is the
+    // default one, which is fine since we only support that type of identity
+    // for signers.
+    data.signer.type = data.signer.type || IdentityType.EMAIL
+    const signer = Identity.fromJson(data.signer)
+    const added = data.added.map(Identity.fromJson)
+    const removed = data.removed.map(Identity.fromJson)
+    // Older addendums were stored in the DB without a type. Assume CONTRIBUTOR
+    // as the default one.
+    const type = data.type || AddendumType.CONTRIBUTOR
+    return new Addendum(type, data.agreementId, signer, added, removed)
   }
 }
 
 export const Addendum = addendum
 export const AddendumType = addendumType
-export const AddendumCollection = addendumCollection

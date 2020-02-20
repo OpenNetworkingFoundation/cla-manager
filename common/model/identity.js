@@ -5,7 +5,7 @@ export const IdentityType = {
 }
 
 function validateEmail (email) {
-  var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   return re.test(String(email).toLowerCase())
 }
 
@@ -16,8 +16,8 @@ function validateEmail (email) {
 export class Identity {
   /**
    * Creates a new Identity.
-   * @param {IdentityType} type the type of the identity
-   * @param {string} name name of the user
+   * @param {string} type the type of the identity
+   * @param {string} name name of the identity
    * @param {string} value the identifier for this identity
    */
 
@@ -79,9 +79,17 @@ export class Identity {
   }
 
   /**
+   * Returns an instance of this class from the given JSON compatible object.
+   * @returns {Identity}
+   */
+  static fromJson (json) {
+    return new Identity(json.type, json.name, json.value)
+  }
+
+  /**
    * Returns the list ov valid IdentityTypes.
    *
-   * @returns {[]string}
+   * @returns {string[]}
    */
   static enumTypes () {
     return Object.keys(IdentityType).map(k => IdentityType[k])
