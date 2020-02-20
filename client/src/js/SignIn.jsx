@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { Box, Button, Container, Grid, TextField } from '@material-ui/core'
 import { Alert } from '@material-ui/lab'
 import SendIcon from '@material-ui/icons/Send'
+import InfoIcon from '@material-ui/icons/Info'
 
 const useStyles = makeStyles(theme => ({
   '@global': {
@@ -94,17 +95,27 @@ export default function SignIn () {
         <Grid item xs={12}>
           <p>
             A Contributor License Agreement (CLA) is a legal document in which a
-            contributor (like you) states that they are entitled to contribute
-            to a project, and that they are willing to have their contribution
-            used in distributions and derivative works. You will need to
+            contributor states that they are entitled to contribute to a
+            project, and that they are willing to have their contribution used
+            in distributions and derivative works. You will need to
             electronically sign a CLA before ONF can accept any contribution
-            from you or your company.
+            from you.
           </p>
+          <Button
+            variant='outlined'
+            color='primary'
+            size='small'
+            href="https://wiki.opennetworking.org/x/BgCUI"
+            startIcon={<InfoIcon/>}
+            title='Learn more why ONF have a CLA'
+          >
+            Learn More
+          </Button>
           <p>
             <strong>
               Please enter your email address and click the button below. You
               will receive a link to access a portal where you will be able to
-              sign a new CLA or view/edit existing ones.
+              sign a new CLA or edit existing ones.
             </strong>
           </p>
           <form
