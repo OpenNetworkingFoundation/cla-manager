@@ -5,8 +5,8 @@ The `gerrit-hook` script runs as a synchronous gerrit hook, and is renamed to
 
 https://gerrit.googlesource.com/plugins/hooks/+/master/src/main/resources/Documentation/hooks.md
 
-When run, it queries the CLA server using the email address as a parameter,
-which returns a JSON blob that looks like:
+When run, it queries the CLA server using the email address of the uploader as
+a parameter, which returns a JSON blob that looks like:
 
 ```json
 {"status":"success|failure|error","message":"message text"}
@@ -37,9 +37,13 @@ etc.)
 
 4. Copy to your gerrit instance (default location is in the `$site_path/hooks`
    directory), and change the name of the file to be `commit-received` (or
-   other names, see the gerrit hook docs).
+   other names, see the gerrit hook docs), and make the script executable.
 
-   You may also need to modify the gerrit configuration to use it, if needed:
+   Repeat the tests in #2 to ensure the script works correctly on the gerrit
+   server.
+
+   Usually the defaults are fine, but if you have an unusual gerrit deployment
+   you may need to modify the gerrit hook configuration:
    https://gerrit.googlesource.com/plugins/hooks/+/master/src/main/resources/Documentation/config.md
 
    You can enable additional logging of hooks by changing the log level:
