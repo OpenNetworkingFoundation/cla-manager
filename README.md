@@ -45,16 +45,40 @@ library.
 ## Testing and development
 
 Automated tests are run prior to patchset acceptance using CircleCI - see the
-[./.circleci/config.yml](./.circleci/config.yml) for details.
+[./.circleci/config.yml](./.circleci/config.yml) for details. The commands in
+given in that file can be used to run tests locally on a developer machine.
 
-These tests can also be run locally on a developer machine by running: <FIXME>
+The whole site and functions can be run on a developer machine using the [local
+firebase emulator](https://firebase.google.com/docs/functions/local-emulator),
+which is run through the firebase CLI tool. `npm` must also be installed to
+obtain dependencies.
 
-The whole site can be run on a developer machine using the [local firebase
-emulator]: https://firebase.google.com/docs/functions/local-emulator
+Prepare the system by creating a file that contains the configuration variables
+in `functions/.runtimeconfig.json` with this dummy contents:
+
+    {
+      "gerrit": {
+        "password": "password",
+        "user": "username"
+      },
+      "backup": {
+        "bucket_name": "invalid",
+        "period": "every 24 hours"
+      },
+      "github": {
+        "key": "invalid",
+        "app_id": "invalid",
+        "secret": "invalid"
+      }
+    }
+
+Then, install dependencies for the functions with `npm --prefix ./functions install`
+
+Then run the emulator with:
 
     firebase --project cla-manager emulators:start
 
-<FIXME>
+See the output for the endpoint addresses of the site and functions.
 
 ## Data lifecycle
 
