@@ -9,7 +9,7 @@ I would like to contribute to one of the Open Networking Foundation's (ONF) open
 
 If we don't have an Institutional CLA signed with ONF, could you please sign one? It is a click-through agreement and only takes a few minutes. Then, can you please add my email address and GitHub ID(s) as listed below to our CLA?
 
-Please visit ONF CLA Manager(https://cla.opennetworking.org/) to sign the CLA.
+Please visit ONF CLA Manager (https://cla.opennetworking.org/) to sign the CLA.
 
 My email to be added to the CLA: ___
 
