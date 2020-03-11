@@ -1,17 +1,18 @@
 
 export const ClaRequestInstitutional =
-`Dear <boss, CTO, etc.>,
+`Below is a sample email you should send to the person at your company who is authorized to sign ONF Institutional CLA.
+If you don't know who that person is, you can start with your manager or director or company lawyer.
 
-I would like to contribute to one of Open Networking Foundation's projects,
-which requires a Contributor License Agreement (CLA).
+Dear <manager, CTO, lawyer, or similar>,
 
-If we don't have an institutional CLA on file, could you please sign one? Then, can
-you please add my email address and Github ID to our CLA?
+I would like to contribute to one of the Open Networking Foundation's (ONF) open source projects. This requires a Contributor License Agreement (CLA) to be signed between ONF and our company. Please find more information from the ONF CLA Information(https://wiki.opennetworking.org/display/COM/ONF+CLA+Information) page.
 
-https://cla.opennetworking.org/
+If we don't have an Institutional CLA signed with ONF, could you please sign one? It is a click-through agreement and only takes a few minutes. Then, can you please add my email address and GitHub ID(s) as listed below to our CLA?
 
-My Email used for contributions: _______
+Please visit ONF CLA Manager (https://cla.opennetworking.org/) to sign the CLA.
 
-My Github ID: _______
+My email to be added to the CLA: ___
 
-Thanks!`
+My GitHub ID(s) to be added to the CLA: ___
+
+Thank you for your support!`
