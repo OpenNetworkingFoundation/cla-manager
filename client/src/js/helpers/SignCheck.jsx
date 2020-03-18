@@ -30,8 +30,8 @@ const useStyles = makeStyles(theme => ({
 function EmailBody (props) {
   return (
     <div>
-      <h2>Please email the following to someone at your company who can sign the CLA:</h2>
-      <p><i>If you don't know who that is, you can start with your manager or director.</i></p>
+      <h2>Below is a sample email you should send to the person at your company who is authorized to sign ONF Institutional CLA.</h2>
+      <p><i>If you don't know who that person is, you can start with your manager or director or company lawyer.</i></p>
       <ReactMarkdown source={ClaRequestInstitutional} />
     </div>
   )
