@@ -5,7 +5,7 @@ If you don't know who that person is, you can start with your manager or directo
 
 Dear <manager, CTO, lawyer, or similar>,
 
-I would like to contribute to one of the Open Networking Foundation's (ONF) open source projects. This requires a Contributor License Agreement (CLA) to be signed between ONF and our company. Please find more information from the ONF CLA Information(https://wiki.opennetworking.org/display/COM/ONF+CLA+Information) page.
+I would like to contribute to one of the Open Networking Foundation's (ONF) open source projects. This requires a Contributor License Agreement (CLA) to be signed between ONF and our company. Please find more information from the ONF CLA Information (https://wiki.opennetworking.org/display/COM/ONF+CLA+Information) page.
 
 If we don't have an Institutional CLA signed with ONF, could you please sign one? It is a click-through agreement and only takes a few minutes. Then, can you please add my email address and GitHub ID(s) as listed below to our CLA?
 
