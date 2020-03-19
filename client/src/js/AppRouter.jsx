@@ -7,6 +7,7 @@ import Home from './Home'
 import { Container } from '@material-ui/core'
 import AgreementContainer from './agreement/AgreementContainer'
 import SignCheck from './helpers/SignCheck'
+import AdminAgreementsList from './admin/AdminAgreementsList'
 
 class AppRouter extends React.Component {
   constructor (props) {
@@ -59,6 +60,13 @@ class AppRouter extends React.Component {
               path='/view/:id' render={props => (
                 <AgreementContainer user={user} agreementId={props.match.params.id} />
               )}
+            />
+            <Route
+              path='/admin/agreements' exact render={() => (
+              // FIXME check user is admin or send him to a permission denied page
+              // this.props.isAdmin
+              <AdminAgreementsList/>
+            )}
             />
           </Container>
         </div>

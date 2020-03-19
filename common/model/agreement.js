@@ -211,6 +211,18 @@ class agreement {
       .get()
       .then(Agreement.fromDocumentSnapshot)
   }
+
+  /**
+   * Gets all the agreements from firestore
+   * @returns {Promise<Agreement[]>}
+   */
+  static list () {
+    return DB.connection().collection(agreementCollection)
+      .get()
+      .then(res => {
+        return res.docs.map(i => Agreement.fromDocumentSnapshot(i))
+      })
+  }
 }
 
 export const Agreement = agreement

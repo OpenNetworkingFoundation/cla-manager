@@ -26,6 +26,8 @@ function AgreementsTable (props) {
     return null
   }
 
+  console.log(props.data)
+
   return (
     <Paper elevation={23} className={classes.root}>
       <h4>{props.header}</h4>
