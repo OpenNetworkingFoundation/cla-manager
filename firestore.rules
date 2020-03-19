@@ -8,20 +8,26 @@ function didSign() {
   return request.auth.token.email == resource.data.signer.value;
 }
 
+// the request object contains info about the authentication status of the requesting user
+// if the .auth property is not set, the user is not signed in
+function isSignedIn() {
+  return request.auth != null;
+}
+
 // Note: CLAs and Addendums cannot be modified or deleted
 service cloud.firestore {
   match /databases/{database}/documents {
     match /agreements/{agreementId} {
-      allow create: if request.auth != null && isSigner();
-      allow read:   if request.auth != null && didSign(); //TODO (see below #2)
+      allow create: if isSignedIn() && isSigner();
+      allow read:   if isSignedIn() && didSign(); //TODO (see below #2)
       allow update: if false;
       allow delete: if false;
     }
     match /addendums/{addendumId} {
-      allow create: if request.auth != null && isSigner() &&
+      allow create: if isSignedIn() && isSigner() &&
         get(/databases/$(database)/documents/agreements/$(request.resource.data.agreementId)).data.signer.value
           == request.resource.data.signer.value; //TODO (see below #1)
-      allow read:   if request.auth != null && didSign(); //TODO (see below #2)
+      allow read:   if isSignedIn() && didSign(); //TODO (see below #2)
       allow update: if false;
       allow delete: if false;
     }
