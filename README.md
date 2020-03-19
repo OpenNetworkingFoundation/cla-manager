@@ -1,4 +1,4 @@
-# cla-manager (CLAM)
+# cla-manager (CLAM) [![CircleCI](https://circleci.com/gh/OpenNetworkingFoundation/cla-manager/tree/master.svg?style=svg)](https://circleci.com/gh/OpenNetworkingFoundation/cla-manager/tree/master)
 
 ![CLAM logo](media/clam.png)
 

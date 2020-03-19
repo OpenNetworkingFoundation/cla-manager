@@ -24,7 +24,7 @@ function IdentityForm (props) {
     evt.preventDefault()
     const user = new Identity(type, name, value)
     props.callback(user)
-    setName('')
+    setName(props.name || '')
     setValue('')
   }
 
