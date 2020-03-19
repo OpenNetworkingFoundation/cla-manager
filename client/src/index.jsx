@@ -31,12 +31,17 @@ const ErrorBoundary = bugsnagClient.getPlugin('react')
 
 FirebaseApp.auth().onAuthStateChanged((user) => {
   if (user) {
-    // User is signed in; render app
-    ReactDOM.render(
-      <ErrorBoundary>
-        <AppRouter user={user}/>
-      </ErrorBoundary>,
-      document.getElementById('root'))
+    // User is signed in; fetch token and render app
+    FirebaseApp.auth().currentUser.getIdTokenResult()
+      .then(token => {
+
+        ReactDOM.render(
+          <ErrorBoundary>
+            <AppRouter user={user} isAdmin={token.claims.admin || false}/>
+          </ErrorBoundary>,
+          document.getElementById('root'))
+      })
+      .catch(console.error) // FIXME handle errors
   } else {
     // No user is signed in
     // eslint-disable-next-line react/no-render-return-value

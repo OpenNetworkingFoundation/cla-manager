@@ -1,9 +1,7 @@
-
 import React from 'react'
 import { FirebaseApp } from '../common/app/app'
-
 import { BrowserRouter as Router, Route } from 'react-router-dom'
-
+import PropTypes from 'prop-types'
 import Header from './helpers/Header'
 import Home from './Home'
 import { Container } from '@material-ui/core'
@@ -44,6 +42,7 @@ class AppRouter extends React.Component {
           <Header
             user={user}
             onSignOut={this.signOut}
+            isAdmin={this.props.isAdmin}
           />
           <Container>
             <Route
@@ -66,6 +65,11 @@ class AppRouter extends React.Component {
       </Router>
     )
   }
+}
+
+AppRouter.propTypes = {
+  user: PropTypes.object.isRequired,
+  isAdmin: PropTypes.bool.isRequired
 }
 
 export default AppRouter
