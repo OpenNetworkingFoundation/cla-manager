@@ -5,6 +5,8 @@ import AppBar from '@material-ui/core/AppBar'
 import Link from '@material-ui/core/Link'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
+import PropTypes from 'prop-types'
+import AdminNav from './AdminNavigation'
 
 /**
  * Renders the standard header for pages within the CLA Manager application.
@@ -19,7 +21,7 @@ const useStyles = makeStyles({
   }
 })
 
-export default function Header (props) {
+function Header (props) {
   const classes = useStyles()
   const user = props.user
 
@@ -32,6 +34,7 @@ export default function Header (props) {
               ONF CLA Manager
             </Link>
           </Typography>
+          {props.isAdmin ? <AdminNav/> : null}
           {user && (
             <SignOutContainer
               user={user}
@@ -43,3 +46,11 @@ export default function Header (props) {
     </div>
   )
 }
+
+Header.propTypes = {
+  user: PropTypes.object.isRequired,
+  onSignOut: PropTypes.func.isRequired,
+  isAdmin: PropTypes.bool.isRequired
+}
+
+export default Header
