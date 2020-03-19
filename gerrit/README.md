@@ -22,8 +22,9 @@ etc.)
 
 ## Deploying the gerrit-hook script
 
-1. Modify the `CLA_MANAGER_URL` near the top of the `gerrit-hook` file to match
-   your cla-manager deployment.
+1. Modify the `CLA_MANAGER_URL`, `CLA_MANAGER_USERNAME`, and
+   `CLA_MANAGER_PASSWORD` near the top of the `gerrit-hook` file to match the
+   settings used with your cla-manager deployment.
 
 2. Test that settings are correct by running the command:
 

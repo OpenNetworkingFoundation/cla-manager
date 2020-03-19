@@ -1,11 +1,15 @@
 .idea
+.firebase
+.runtimeconfig.json
+
 */node_modules
 */coverage-final.json
-*/package-lock.json
-*/firebase-debug.log
-*/firestore-debug.log
+
+package-lock.json
+firebase-debug.log
+firestore-debug.log
+
 client/build
-.firebase
 
 # gerrit hook
 gerrit/.tox
