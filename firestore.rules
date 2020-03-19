@@ -14,12 +14,17 @@ function isSignedIn() {
   return request.auth != null;
 }
 
+// checks whether the user has admin privileges or not
+function isAdmin() {
+    return request.auth.token.admin == true;
+}
+
 // Note: CLAs and Addendums cannot be modified or deleted
 service cloud.firestore {
   match /databases/{database}/documents {
     match /agreements/{agreementId} {
       allow create: if isSignedIn() && isSigner();
-      allow read:   if isSignedIn() && didSign(); //TODO (see below #2)
+      allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
       allow update: if false;
       allow delete: if false;
     }
@@ -27,7 +32,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && isSigner() &&
         get(/databases/$(database)/documents/agreements/$(request.resource.data.agreementId)).data.signer.value
           == request.resource.data.signer.value; //TODO (see below #1)
-      allow read:   if isSignedIn() && didSign(); //TODO (see below #2)
+      allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
       allow update: if false;
       allow delete: if false;
     }

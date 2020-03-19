@@ -6,7 +6,7 @@ import Link from '@material-ui/core/Link'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import PropTypes from 'prop-types'
-import AdminNav from './AdminNavigation'
+import AdminNav from '../admin/AdminNavigation'
 
 /**
  * Renders the standard header for pages within the CLA Manager application.
