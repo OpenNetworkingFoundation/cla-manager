@@ -31,6 +31,20 @@ export default class Home extends React.Component {
    * Update the page to show all CLAs associated to the logged in user's email.
    */
   componentDidMount () {
+
+    // TODO https://firebase.google.com/docs/auth/admin/custom-claims
+    FirebaseApp.auth().currentUser.getIdToken(true)
+      .then(() => {
+        return FirebaseApp.auth().currentUser.getIdTokenResult()
+      })
+      .then((idTokenResult) => {
+        console.log('User claims: ', idTokenResult.claims)
+        if (idTokenResult.claims.admin) {
+          console.info(`User ${idTokenResult.claims.email} is admin`)
+        }
+      }).catch(console.error)
+
+
     const email = FirebaseApp.auth().currentUser.email
     if (!email) {
       // Clear all rows from the CLA tables.
