@@ -1,4 +1,4 @@
-import { addAndGetSnapshot, setupDbAdmin, teardownDb } from './helpers'
+import { addAndGetSnapshot, setupEmulatorAdmin } from './helpers'
 import { assertFails, assertSucceeds } from '@firebase/testing'
 
 const Cla = require('../lib/cla')
@@ -45,6 +45,7 @@ const addendum3 = {
 }
 
 describe('Cla lib', () => {
+  let app
   let db
   let cla
   let agreementRef
@@ -53,17 +54,20 @@ describe('Cla lib', () => {
   let addendumSnapshot
   let whitelistDoc
 
-  // Applies only to tests in this describe block
-  beforeAll(async () => {
-    db = await setupDbAdmin(null)
+  beforeEach(async () => {
+    // Set up independent app/db for each test so we avoid conflicts when
+    // executing tests in parallel
+    const firebase = await setupEmulatorAdmin(null)
+    app = firebase.app
+    db = firebase.db
     cla = new Cla(db)
     agreementRef = db.collection('agreements').doc(agreementId)
     whitelistRef = db.collection('whitelists').doc(agreementId)
     addendumsRef = db.collection('addendums')
   })
 
-  afterAll(async () => {
-    await teardownDb()
+  afterEach(async () => {
+    await app.delete()
   })
 
   it('should update whitelist', async () => {
@@ -121,6 +125,7 @@ describe('Cla lib', () => {
     const mockSnapshot = await addAndGetSnapshot(addendumsRef, mockAddendum)
     // Update whitelist
     expect(await assertFails(cla.updateWhitelist(mockSnapshot)))
+    expect(await assertFails(cla.updateWhitelist(null, 'i-dont-exist')))
   })
 
   it('should fail checking an invalid identity', async () => {
@@ -145,5 +150,23 @@ describe('Cla lib', () => {
   it('should be possible to check multiple identities at once', async () => {
     const identities = [idEmmaEmail, idEmmaGithub, sameAsIdEmmaEmail, idGigiGithub]
     expect(await cla.checkIdentities(identities))
+  })
+
+  it('should throw error if no valid argument is passed to updateWhitelist', async () => {
+    expect(await assertFails(cla.updateWhitelist(null, null)))
+  })
+
+  it('should update whitelist if passing only an agreementId', async () => {
+    // Add agreement
+    expect(await assertSucceeds(agreementRef.set(agreement)))
+    // Add addendum
+    addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum1)
+    // Update whitelist by passing agreementId instead of snapshot
+    expect(await assertSucceeds(cla.updateWhitelist(null, agreementId)))
+    // Verify whitelist
+    expect(await cla.isIdentityWhitelisted(idJohnEmail)).toBe(true)
+    expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBe(true)
+    expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBe(true)
+    expect(await cla.isIdentityWhitelisted(sameAsIdEmmaEmail)).toBe(true)
   })
 })

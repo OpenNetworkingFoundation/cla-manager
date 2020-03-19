@@ -1,14 +1,15 @@
 const firebase = require('@firebase/testing')
 
 /**
- * Returns a firestore instance that can be accessed as the user defined in the
- * given auth object, optionally pre-populated with the given data.
- * @param {{ uid: String, email: String }} auth identifiers
- * @param data {Object|null}
- * @param projectId {string|null}
- * @returns {Promise<FirebaseFirestore.Firestore>}
+ * Returns a firebase app and corresponding firestore instance that can be
+ * accessed as the user defined in the given auth object, optionally
+ * pre-populated with the given data.
+ * @param auth
+ * @param data
+ * @param projectId
+ * @returns {Promise<{app: firebase.app.App, db: FirebaseFirestore.Firestore}>}
  */
-module.exports.setupDb = async (auth, data, projectId = null) => {
+module.exports.setupEmulator = async (auth, data, projectId = null) => {
   if (!projectId) {
     projectId = `test-${Date.now()}`
   }
@@ -43,18 +44,21 @@ module.exports.setupDb = async (auth, data, projectId = null) => {
   //   rules: fs.readFileSync('../../../firestore.rules', 'utf8')
   // })
 
-  return db
+  return {
+    app: app,
+    db: db
+  }
 }
 
 /**
- * Returns a firestore instance that can be accessed as admin, optionally
- * populated with the given data object.
+ * Returns a firebase app and corresponding instance that can be accessed as
+ * admin, optionally populated with the given data object.
  * @param {Object|null} data
  * @param projectId {string|null}
- * @returns {Promise<FirebaseFirestore.Firestore>}
+ * @returns {Promise<{app: firebase.app.App, db: FirebaseFirestore.Firestore}>}
  */
-module.exports.setupDbAdmin = async (data, projectId = null) => {
-  return module.exports.setupDb(null, data)
+module.exports.setupEmulatorAdmin = async (data, projectId = null) => {
+  return module.exports.setupEmulator(null, data, projectId)
 }
 
 /**
@@ -67,10 +71,6 @@ module.exports.clearDb = async (projectId) => {
   return firebase.clearFirestoreData({
     projectId: projectId
   })
-}
-
-module.exports.teardownDb = async () => {
-  await Promise.all(firebase.apps().map(app => app.delete()))
 }
 
 module.exports.addAndGetSnapshot = async (collectionRef, document) => {

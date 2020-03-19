@@ -6,7 +6,7 @@ import MailOutlineIcon from '@material-ui/icons/MailOutline'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import ClearIcon from '@material-ui/icons/Clear'
 import { makeStyles } from '@material-ui/core/styles'
-import { IdentityType } from '../../common/model/identity'
+import { Identity, IdentityType } from '../../common/model/identity'
 
 const useStyles = makeStyles(theme => ({
   default: {
@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
-    position: 'relative',
+    position: 'relative'
   },
   emailTooltip: {
     visibility: 'hidden',
@@ -60,29 +60,29 @@ function IdentityCard (props) {
       <Grid container spacing={2}>
         <Grid item xs={2}>
           <CardContent>
-            {props.user.type === IdentityType.GITHUB ? <GitHubIcon fontSize={'large'}/> : null}
-            {props.user.type === IdentityType.EMAIL ? <MailOutlineIcon fontSize={'large'}/> : null}
+            {props.identity.type === IdentityType.GITHUB ? <GitHubIcon fontSize={'large'}/> : null}
+            {props.identity.type === IdentityType.EMAIL ? <MailOutlineIcon fontSize={'large'}/> : null}
           </CardContent>
         </Grid>
         <Grid item xs={8}>
           <CardContent className={classes.identityContainer}>
-            <div className={classes.emailTooltip}>{props.user.value}</div>
+            <div className={classes.emailTooltip}>{props.identity.value}</div>
             {props.type !== 'default' ? <Typography color="textSecondary" gutterBottom>
               {props.type.charAt(0).toUpperCase() + props.type.slice(1)}
             </Typography> : null}
             <Typography variant="h5" component="h5" className={classes.emailContainer}>
-              {props.user.value}
+              {props.identity.value}
             </Typography>
             <Typography className={classes.pos} color="textSecondary">
-              {props.user.name}
+              {props.identity.name}
             </Typography>
           </CardContent>
         </Grid>
-        {props.callback ?
-          <Grid item xs={2}>
+        {props.callback
+          ? <Grid item xs={2}>
             <CardContent>
               <Box textAlign='right' m={1}>
-                <Link href='#' onClick={props.callback(props.user)}>
+                <Link href='#' onClick={props.callback(props.identity)}>
                   <IconButton size='small' color='primary'>
                     {props.type === 'default' ? <DeleteIcon/> : null}
                     {props.type !== 'default' ? <ClearIcon/> : null}
@@ -98,7 +98,7 @@ function IdentityCard (props) {
 }
 
 IdentityCard.propTypes = {
-  user: PropTypes.object.isRequired,
+  identity: PropTypes.instanceOf(Identity).isRequired,
   type: PropTypes.oneOf(['added', 'removed', 'default']).isRequired,
   callback: PropTypes.func
 }

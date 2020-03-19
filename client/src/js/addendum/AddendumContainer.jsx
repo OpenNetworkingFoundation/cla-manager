@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
 import {
-  Card,
-  Grid,
-  Button,
   Box,
+  Button,
+  Card,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Grid
 } from '@material-ui/core'
-import { Agreement } from '../../common/model/agreement'
-import UserForm from '../user/UserForm'
+import { Agreement, AgreementType } from '../../common/model/agreement'
+import IdentityForm from '../identity/IdentityForm'
 import IdentityCard from './IdentityCard'
 import * as _ from 'lodash'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
-import { useHistory, Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
-  },
+  }
 }))
 
 /**
@@ -33,89 +33,86 @@ const useStyles = makeStyles(theme => ({
 function AddendumContainer (props) {
   const history = useHistory()
   const classes = useStyles()
-  const [agreement, setAgreement] = useState({})
   const [addendums, setAddendums] = useState([])
-  const [activeIdentities, setActiveIdentities] = useState([])
+  const [activeIdentities, setWhitelist] = useState([])
   const [addedIdentities, setAddedIdentities] = useState([])
   const [removedIdentities, setRemovedIdentities] = useState([])
+  const [updateInProgress, setUpdateInProgress] = useState(false)
+  const [lastAddendum, setLastAddendum] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
 
   useEffect(() => {
-    Addendum.get(props.agreementId)
-      .then(res => {
-        // go from whatever Firebase returns to a real array
-        // TODO consider to move this in the models
-        const parsed = []
-        res.forEach(r => {
-          const d = r.data()
-          d.id = r.id
-          parsed.push(d)
-        })
-        setAddendums(parsed)
-      })
+    props.agreement.getAddendums()
+      .then(setAddendums)
       .catch(console.error)
-  }, [props.agreementId])
+  }, [props.agreement.id])
 
   useEffect(() => {
-    Agreement.get(props.agreementId)
+    Agreement.get(props.agreement.id)
       .then(agreement => {
-        setAgreement(agreement)
-        return agreement.getActiveUser()
+        return agreement.getWhitelist()
       })
       .then((res) => {
-        setActiveIdentities(res)
+        setWhitelist(res)
       })
-  }, [props.agreementId, addendums])
+  }, [props.agreement.id, addendums])
+
+  useEffect(() => {
+    if (addendums && addendums.length) {
+      setLastAddendum(addendums[addendums.length - 1])
+    } else {
+      setLastAddendum(null)
+    }
+  }, [addendums])
 
   const createAddendum = () => {
-    const signer = {
-      name: agreement.signer.name,
-      value: props.user.email
-    }
-
     const addendum = new Addendum(
       AddendumType.CONTRIBUTOR,
-      props.agreementId,
-      signer,
-      addedIdentities.map(u => u.toJson()),
+      props.agreement.id,
+      props.agreement.signer,
+      addedIdentities,
       removedIdentities
     )
 
-    addendum.save().then(res => {
-      setAddedIdentities([])
-      setRemovedIdentities([])
-    })
+    setUpdateInProgress(true)
+    addendum.save()
+      .then(res => {
+        setAddedIdentities([])
+        setRemovedIdentities([])
+      })
       .catch(console.error)
-
-    setAddendums(addendums => [...addendums, addendum])
+      .finally(() => {
+        setUpdateInProgress(false)
+        setAddendums(addendums => [...addendums, addendum])
+      })
   }
 
-  const userAdded = (user) => {
-    setAddedIdentities(addedIdentities => [user, ...addedIdentities])
+  const setAddedIdentity = (identity) => {
+    setAddedIdentities(addedIdentities => [identity, ...addedIdentities])
   }
 
-  const removeUser = (user) => {
+  const setRemovedIdentity = (identity) => {
     return (evt) => {
       evt.preventDefault()
-      setRemovedIdentities(removedIdentities => [user, ...removedIdentities])
-      _.remove(activeIdentities, user)
-      setActiveIdentities(activeIdentities)
+      setRemovedIdentities(removedIdentities => [identity, ...removedIdentities])
+      _.remove(activeIdentities, identity)
+      setWhitelist(activeIdentities)
     }
   }
 
-  const undoRemove = (user) => {
+  const undoRemove = (identity) => {
     return (evt) => {
       evt.preventDefault()
-      _.remove(removedIdentities, user)
+      _.remove(removedIdentities, identity)
       setRemovedIdentities(removedIdentities)
-      setActiveIdentities(activeIdentities => [user, ...activeIdentities])
+      setWhitelist(activeIdentities => [identity, ...activeIdentities])
     }
   }
 
-  const undoAdd = (user) => {
+  const undoAdd = (identity) => {
     return (evt) => {
       evt.preventDefault()
-      setAddedIdentities(_.without(addedIdentities, user))
+      setAddedIdentities(_.without(addedIdentities, identity))
     }
   }
 
@@ -143,47 +140,62 @@ function AddendumContainer (props) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <h2>Active identities for this agreement:</h2>
-        <Box>here is a list of identities that are authorized to contribute code under this agreement</Box>
+        <h2>Active Identities for this Agreement</h2>
+        <p>Here is a list of identities that are authorized to contribute code
+          under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
         <Grid container spacing={2}>
           {activeIdentities.map((a, i) =>
             <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
-              <IdentityCard key={i} user={a} callback={removeUser} type={'default'}/>
+              <IdentityCard key={i} identity={a} callback={setRemovedIdentity} type={'default'}/>
             </Grid>
           )}
         </Grid>
+        <p>
+          We have {addendums ? addendums.length : 0} addendums on file for this
+          agreement. The last one was signed
+          on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}</p>
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
+            <h2>Update Agreement</h2>
             <Box>
-              <h2>Update Agreement:</h2>
-              You can modify the people allowed to contribute code under this agreement by adding or removing them from
-              it. <br/>
-              Make sure to click on &quot;Sign Addendum&quot; below
+              <p>
+                You can sign a new "addendum" to modify the identities allowed
+                to contribute under this agreement. Use the form below to add
+                identities, or select one from the above list to remove it.
+              </p>
+              <p>
+                Once done, make sure to click on &quot;Sign
+                Addendum&quot; below to apply your changes.
+              </p>
             </Box>
           </Grid>
           {removedIdentities.map((a, i) =>
             <Grid key={`container-removed-${i}`} item xs={12} sm={12} md={6} lg={4}>
-              <IdentityCard key={i} user={a} callback={undoRemove} type={'removed'}/>
+              <IdentityCard key={i} identity={a} callback={undoRemove} type={'removed'}/>
             </Grid>
           )}
           {addedIdentities.map((a, i) =>
             <Grid key={`container-added-${i}`} item xs={12} sm={12} md={6} lg={4}>
-              <IdentityCard key={i} user={a} callback={undoAdd} type={'added'}/>
+              <IdentityCard key={i} identity={a} callback={undoAdd} type={'added'}/>
             </Grid>
           )}
         </Grid>
         <Card variant='outlined' className={classes.root}>
-          <UserForm callback={userAdded}/>
+          <IdentityForm
+            callback={setAddedIdentity}
+            name={props.agreement.type === AgreementType.INDIVIDUAL ? props.agreement.signer.name : null}/>
         </Card>
       </Grid>
       <Grid item xs={12}>
-        <Button fullWidth
-                variant='contained'
-                color='primary'
-                disabled={addedIdentities.length === 0 && removedIdentities.length === 0}
-                onClick={createAddendum}>
+        <Button
+          fullWidth
+          variant='contained'
+          size='large'
+          color='primary'
+          disabled={updateInProgress || addedIdentities.length + removedIdentities.length === 0}
+          onClick={createAddendum}>
           Sign Addendum
         </Button>
       </Grid>
@@ -224,8 +236,7 @@ function AddendumContainer (props) {
 }
 
 AddendumContainer.propTypes = {
-  user: PropTypes.object.isRequired,
-  agreementId: PropTypes.string.isRequired
+  agreement: PropTypes.instanceOf(Agreement).isRequired
 }
 
 export default AddendumContainer

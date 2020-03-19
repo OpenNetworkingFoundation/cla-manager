@@ -1,28 +1,49 @@
+// Checks to see if the signer of the new CLA or Addendum is the authenticated user
 function isSigner() {
-	return request.auth.token.email == resource.data.signer.value;
+  return request.auth.token.email == request.resource.data.signer.value;
 }
 
-function isAdmin() {
-	return request.auth.token.email in resource.data.admins || isSigner();
+// Checks to see if the signer of the existing CLA or Addendum is the authenticated user
+function didSign() {
+  return request.auth.token.email == resource.data.signer.value;
 }
 
-function onWhitelist() {
-	return request.auth.token.email == resource.data.signer.value || isAdmin();
-}
-
+// Note: CLAs and Addendums cannot be modified or deleted
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /agreements/{cla} {
-      allow read: if request.auth != null && onWhitelist();
-      allow update: if request.auth != null && isAdmin();
-      allow create: if request.auth != null && request.auth.token.email == request.resource.data.signer.value;
-      allow delete: if request.auth != null && isSigner();
+    match /agreements/{agreementId} {
+      allow create: if request.auth != null && isSigner();
+      allow read:   if request.auth != null && didSign(); //TODO (see below #2)
+      allow update: if false;
+      allow delete: if false;
     }
     match /addendums/{addendumId} {
-      allow read: if true;
-      allow create: if true;
-      allow delete: if false;
+      allow create: if request.auth != null && isSigner() &&
+        get(/databases/$(database)/documents/agreements/$(request.resource.data.agreementId)).data.signer.value
+          == request.resource.data.signer.value; //TODO (see below #1)
+      allow read:   if request.auth != null && didSign(); //TODO (see below #2)
       allow update: if false;
+      allow delete: if false;
     }
   }
 }
+
+/* Notes:
+
+Today, only the signer of an agreement or addendum can read the document.
+
+1. In the future, we may allow office admins to amend agreements by adding addendums
+on behalf of a signer.
+
+If this happens, we will need to update the canAmendAgreements to check to see if
+the signer is authorized in the parent CLA as an admin.
+
+TODO: get() doesn't appear to work in a function. If that changes in the future,
+we might reconsider refactoring.
+
+2. We may also allow users that are named in corporate agreements
+to read, but not amend, the CLA that they are named on.
+
+If this happens, we will need up update the read functions above.
+
+*/

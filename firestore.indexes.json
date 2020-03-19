@@ -9,6 +9,24 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "signer.value",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dateSigned",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "addendums",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "agreementId",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "dateSigned",
           "order": "ASCENDING"
         }
