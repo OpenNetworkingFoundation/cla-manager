@@ -15,7 +15,11 @@ const github = new Github(
   functions.config().github.key,
   functions.config().github.secret,
   db)
-const gerrit = new Gerrit(db)
+
+const gerrit = new Gerrit(
+  db,
+  functions.config().gerrit.user,
+  functions.config().gerrit.password)
 
 const backup = new Backup(
   functions.config().backup.bucket_name,

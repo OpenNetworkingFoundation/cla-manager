@@ -1,4 +1,5 @@
 const express = require('express')
+const basicAuth = require('express-basic-auth')
 const Cla = require('./cla')
 const util = require('./util')
 
@@ -7,14 +8,18 @@ module.exports = Gerrit
 /**
  * Gerrit-related functions.
  * @param db {FirebaseFirestore.Firestore}
+ * @param user {string} to use for HTTP basic auth of all requests
+ * @param password {string} to use for HTTP basic auth of all requests
  */
-function Gerrit (db) {
+function Gerrit (db, user, password) {
   const app = express()
 
   /**
    * Express app to handle requests from the gerrit hook (gerrit/ref-update)
    */
-  app.get('/', (req, res) => {
+  app.use(basicAuth({
+    users: { [user]: password }
+  })).get('/', (req, res) => {
     if (!('email' in req.query)) {
       return res.json({
         status: 'error',
