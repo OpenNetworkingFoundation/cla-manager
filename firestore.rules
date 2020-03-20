@@ -36,6 +36,9 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if false;
     }
+    match /whitelists/{whitelistId} {
+        allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
+    }
   }
 }
 
