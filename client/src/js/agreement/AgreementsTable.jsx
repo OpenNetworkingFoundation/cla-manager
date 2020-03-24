@@ -25,7 +25,8 @@ function AgreementsTable (props) {
 
   const cols = [
     { title: 'Organization', field: 'organization' },
-    { title: 'Signatory', render: d => `${d.signer.name} - ${d.signer.value}` },
+    { title: 'Signatory Name', render: d => d.signer.name },
+    { title: 'Signatory Email', render: d => d.signer.value },
     { title: 'Date Signed', field: 'dateSigned', type: 'date' },
     {
       title: 'Actions',

@@ -154,6 +154,14 @@ class addendum {
     const type = data.type || AddendumType.CONTRIBUTOR
     return new Addendum(type, data.agreementId, signer, added, removed)
   }
+
+  static list () {
+    return DB.connection().collection(addendumCollection)
+      .get()
+      .then(res => {
+        return res.docs.map(Addendum.fromDocumentSnapshot)
+      })
+  }
 }
 
 export const Addendum = addendum

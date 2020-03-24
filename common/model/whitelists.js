@@ -1,6 +1,12 @@
 import DB from '../db/db'
+import { Addendum } from './addendum'
 
 const whitelistCollection = 'whitelists'
+
+// FIXME duplicate
+function identityKey (identity) {
+  return `${identity.type}:${identity.value}`
+}
 
 /**
  * Whitelist model class.
@@ -51,5 +57,26 @@ export class Whitelist {
       .then(res => {
         return res.docs.map(i => Whitelist.fromDocumentSnapshot(i))
       })
+  }
+
+  /**
+   * Get all the whitelisted identities with their Agreement ID
+   * @returns {*}
+   */
+  static getWhitelistWithAgreementId () {
+    return Addendum.list().then(addendums => {
+      const whitelistMap = addendums.reduce((map, addendum) => {
+        addendum.added.forEach(i => {
+          const val = {
+            identityValue: i.value,
+            agreementId: addendum.agreementId
+          }
+          map.set(identityKey(i), val)
+        })
+        addendum.removed.forEach(i => map.delete(identityKey(i)))
+        return map
+      }, new Map())
+      return Array.from(whitelistMap.values())
+    })
   }
 }

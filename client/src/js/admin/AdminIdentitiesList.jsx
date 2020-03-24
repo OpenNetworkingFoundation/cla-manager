@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Grid, Paper } from '@material-ui/core'
+import { Button, Grid, Link, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { Whitelist } from '../../common/model/whitelists'
 import MaterialTable from 'material-table'
@@ -16,18 +16,9 @@ function AdminIdentitiesList (props) {
   const [whitelist, setWhitelist] = useState([])
 
   useEffect(() => {
-    Whitelist.list()
+    Whitelist.getWhitelistWithAgreementId()
       .then(res => {
-        const a = res.reduce((list, i) => {
-          return [
-            ...list,
-            ...i.values.map(identity => {
-              const [type, value] = identity.split(':')
-              return { value, type}
-            })
-          ]
-        }, [])
-        setWhitelist(a)
+        setWhitelist(res)
       })
       .catch(console.error) // FIXME handle errors
   }, [])
@@ -42,8 +33,14 @@ function AdminIdentitiesList (props) {
         <Grid item xs={12}>
           <MaterialTable
             columns={[
-              { title: 'Identity', field: 'value' },
-              { title: 'Type', field: 'type' }
+              { title: 'Identity', field: 'identityValue' },
+              {
+                title: 'Agreement',
+                render: d => {
+                  return <Link href={`/view/${d.agreementId}`}><Button variant='outlined'
+                                                              color='primary'>View Agreement</Button></Link>
+                }
+              }
             ]}
             data={whitelist}
             title='All existing identities'
