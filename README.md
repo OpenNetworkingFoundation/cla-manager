@@ -87,7 +87,7 @@ timer, and also prior to each deployment.
 
 ## Other CLA management tools to consider
 
-[easycla](https://github.com/communitybridge/easycla), which is Linux
+[easycla](https://github.com/communitybridge/easycla), which is a Linux
 Foundation's tool, but is closely tied to their identity/authentication
 management platform and was (is?) undergoing a partial rewrite.  Much of the
 workflow used in CLAM inspired by [this easycla process
