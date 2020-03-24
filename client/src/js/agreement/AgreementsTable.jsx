@@ -31,8 +31,9 @@ function AgreementsTable (props) {
     {
       title: 'Actions',
       render: d => {
-        return <Link href={`/view/${d.id}`}><Button variant='outlined'
-                                                    color='primary'>View/Edit</Button></Link>
+        return <Link href={`/view/${d.id}`}>
+          <Button variant='outlined' color='primary'>View/Edit</Button>
+        </Link>
       }
     }
   ]

@@ -1,5 +1,5 @@
 # pip install firebase-admin
-# python addAdmin.py --cred /Users/teone/gcloud/calm-teo.json --user teo.punto@gmail.com
+# python addAdmin.py --cred /Users/teone/gcloud/clam.json --user foo@opennetworking.com
 import sys
 
 import firebase_admin

@@ -18,6 +18,9 @@ import Avatar from '@material-ui/core/Avatar'
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import TextField from '@material-ui/core/TextField'
 import { Addendum, AddendumType } from '../../common/model/addendum'
+import { GetBugSnagClient } from '../../common/app/app'
+
+const bugsnagClient = GetBugSnagClient()
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -132,6 +135,7 @@ function AgreementContainer (props) {
           setError('Permission denied, please try again later')
           return
         }
+        bugsnagClient.notify(err)
         setError('Request failed, please try again later')
       })
   }
@@ -289,10 +293,10 @@ function AgreementContainer (props) {
           <Skeleton className={classes.skeleton} variant='text'/>
           <Skeleton className={classes.skeleton} variant='text'/>
           <Skeleton className={classes.skeleton} variant='circle'
-            width={40} height={40}/>
+                    width={40} height={40}/>
           <Skeleton className={classes.skeleton} variant='text'/>
           <Skeleton className={classes.skeleton} variant='rect'
-            width={'100%'} height={118}/>
+                    width={'100%'} height={118}/>
         </Paper>
         : <Paper elevation={23} className={classes.root}>
           <Grid container spacing={2}>

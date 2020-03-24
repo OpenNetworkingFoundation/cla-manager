@@ -37,8 +37,9 @@ function AdminIdentitiesList (props) {
               {
                 title: 'Agreement',
                 render: d => {
-                  return <Link href={`/view/${d.agreementId}`}><Button variant='outlined'
-                                                              color='primary'>View Agreement</Button></Link>
+                  return <Link href={`/view/${d.agreementId}`}>
+                    <Button variant='outlined' color='primary'>View Agreement</Button>
+                  </Link>
                 }
               }
             ]}
