@@ -1,12 +1,6 @@
 import DB from '../db/db'
-import { Addendum } from './addendum'
 
 const whitelistCollection = 'whitelists'
-
-// FIXME duplicate
-function identityKey (identity) {
-  return `${identity.type}:${identity.value}`
-}
 
 /**
  * Whitelist model class.
@@ -71,7 +65,7 @@ export class Whitelist {
 
   /**
    * Get all the whitelisted identities with their Agreement ID
-   * @returns {*}
+   * @returns {Promise<{identity: string, agreements: string[]}[]>}
    */
   static getWhitelistWithAgreementId () {
     const identityMap = {}
