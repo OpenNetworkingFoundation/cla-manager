@@ -152,7 +152,7 @@ function AgreementContainer (props) {
   const signatureForm = (
     <ValidatorForm
       onSubmit={ifSigned(() => {}, handleSubmit)}
-      onError={errors => console.log(errors)}>
+      onError={errors => console.error(errors)}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           {error ? <Alert severity='error'>{error}</Alert> : null}

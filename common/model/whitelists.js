@@ -15,17 +15,27 @@ function identityKey (identity) {
 export class Whitelist {
   /**
    * Creates a new whitelist.
+   * @param {string} id the firebase ID
    * @param {date} lastUpdated when the whitelist was updated the last time
    * @param {string[]} values all the valid identities for the agreement
    */
-  constructor (lastUpdated, values) {
+  constructor (id, lastUpdated, values) {
+    this._id = id
     this._lastUpdated = lastUpdated
     this._values = values
   }
 
   /**
-   * Returns the whitelist updated date.
+   * Returns the whitelist id.
    * @returns {string}
+   */
+  get id () {
+    return this._id
+  }
+
+  /**
+   * Returns the whitelist updated date.
+   * @returns {date}
    */
   get lastUpdated () {
     return this._lastUpdated
@@ -44,7 +54,7 @@ export class Whitelist {
    * @returns {Whitelist}
    */
   static fromDocumentSnapshot (doc) {
-    return new Whitelist(new Date(doc.data().lastUpdated.seconds * 1000), doc.data().values)
+    return new Whitelist(doc.id, new Date(doc.data().lastUpdated.seconds * 1000), doc.data().values)
   }
 
   /**
@@ -64,19 +74,21 @@ export class Whitelist {
    * @returns {*}
    */
   static getWhitelistWithAgreementId () {
-    return Addendum.list().then(addendums => {
-      const whitelistMap = addendums.reduce((map, addendum) => {
-        addendum.added.forEach(i => {
-          const val = {
-            identityValue: i.value,
-            agreementId: addendum.agreementId
-          }
-          map.set(identityKey(i), val)
+    const identityMap = {}
+    return Whitelist.list()
+      .then(whitelist => {
+        whitelist.forEach(entry => {
+          entry.values.forEach(identity => {
+            if (!identityMap[identity]) {
+              identityMap[identity] = []
+            }
+            identityMap[identity].push(entry.id)
+          })
         })
-        addendum.removed.forEach(i => map.delete(identityKey(i)))
-        return map
-      }, new Map())
-      return Array.from(whitelistMap.values())
-    })
+        return Object.keys(identityMap).reduce((list, key) => {
+          list.push({ identity: key.split(':')[1], agreements: identityMap[key] })
+          return list
+        }, [])
+      })
   }
 }

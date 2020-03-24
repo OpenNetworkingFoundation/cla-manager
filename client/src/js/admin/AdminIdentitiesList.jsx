@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Grid, Link, Paper } from '@material-ui/core'
+import { Button, Grid, Link, Paper, Box } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { Whitelist } from '../../common/model/whitelists'
 import MaterialTable from 'material-table'
@@ -33,13 +33,17 @@ function AdminIdentitiesList (props) {
         <Grid item xs={12}>
           <MaterialTable
             columns={[
-              { title: 'Identity', field: 'identityValue' },
+              { title: 'Identity', field: 'identity' },
               {
                 title: 'Agreement',
                 render: d => {
-                  return <Link href={`/view/${d.agreementId}`}>
-                    <Button variant='outlined' color='primary'>View Agreement</Button>
-                  </Link>
+                  return d.agreements.map(id => {
+                    return <Box key={id} className={classes.root}>
+                      <Link href={`/view/${id}`}>
+                        <Button variant='outlined' color='primary'>View Agreement</Button>
+                      </Link>
+                    </Box>
+                  })
                 }
               }
             ]}
