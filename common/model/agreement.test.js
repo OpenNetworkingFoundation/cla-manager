@@ -149,7 +149,7 @@ describe('The Agreement model', () => {
     })
   })
 
-  describe('the subscriber method', () => {
+  describe('the subscribe method', () => {
     it('should get a list of models from the DB', (done) => {
       firestoreMock.mockOnSnaptshotSuccess = []
       const email = 'info@onf.org'
@@ -165,6 +165,30 @@ describe('The Agreement model', () => {
           done(err)
         }
       )
+    })
+  })
+
+  describe('the list method', () => {
+    it('should return all the agreements in the DB', (done) => {
+      firestoreMock.mockGetReturn = {
+        docs: [
+          { data: () => new Agreement(AgreementType.INDIVIDUAL, 'TODO, add agreement body', signer) },
+          { data: () => new Agreement(AgreementType.INSTITUTIONAL, 'TODO, add agreement body', signer, 'ONF', '1000 El Camino Real, 94025 Menlo Park (CA)') }
+        ]
+      }
+
+      Agreement.list()
+        .then(res => {
+          expect(res[0].type).toEqual(AgreementType.INDIVIDUAL)
+          expect(res[0].signer).toEqual(signer)
+
+          expect(res[1].type).toEqual(AgreementType.INSTITUTIONAL)
+          expect(res[1].signer).toEqual(signer)
+          expect(res[1].organization).toEqual('ONF')
+          expect(res[1].organizationAddress).toEqual('1000 El Camino Real, 94025 Menlo Park (CA)')
+          done()
+        })
+        .catch(done)
     })
   })
 })
