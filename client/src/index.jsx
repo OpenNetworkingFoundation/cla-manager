@@ -31,8 +31,12 @@ const ErrorBoundary = bugsnagClient.getPlugin('react')
 FirebaseApp.auth().onAuthStateChanged((user) => {
   if (user) {
     // User is signed in; fetch token and render app
-    FirebaseApp.auth().currentUser.getIdTokenResult()
+    FirebaseApp.auth().currentUser.getIdToken(true)
+      .then(res => {
+        return FirebaseApp.auth().currentUser.getIdTokenResult()
+      })
       .then(token => {
+        console.log(token)
         ReactDOM.render(
           <ErrorBoundary>
             <AppRouter user={user} isAdmin={token.claims.admin || false}/>
