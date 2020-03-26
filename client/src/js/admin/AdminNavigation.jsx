@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Menu, MenuItem, Button } from '@material-ui/core'
 import { useHistory } from 'react-router-dom'
+import MenuIcon from '@material-ui/icons/Menu'
 
 function AdminNav (props) {
   const history = useHistory()
@@ -19,7 +20,10 @@ function AdminNav (props) {
 
   return (
     <div>
-      <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+      <Button
+        variant='outlined'
+        startIcon={<MenuIcon />}
+        onClick={handleClick}>
         Admin
       </Button>
       <Menu

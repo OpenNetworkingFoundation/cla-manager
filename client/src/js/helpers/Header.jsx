@@ -2,24 +2,24 @@ import React from 'react'
 import SignOutContainer from './SignOutContainer'
 import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
-import Link from '@material-ui/core/Link'
-import Toolbar from '@material-ui/core/Toolbar'
-import Typography from '@material-ui/core/Typography'
 import PropTypes from 'prop-types'
 import AdminNav from '../admin/AdminNavigation'
+import { Link, Button, Toolbar, Typography } from '@material-ui/core'
 
 /**
  * Renders the standard header for pages within the CLA Manager application.
  */
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   root: {
-    flexGrow: 1
+    '& * + *:not(:last-child)': {
+      marginRight: theme.spacing(2)
+    }
   },
   title: {
     flexGrow: 1
   }
-})
+}))
 
 function Header (props) {
   const classes = useStyles()
@@ -34,6 +34,11 @@ function Header (props) {
               ONF CLA Manager
             </Link>
           </Typography>
+          <Link href="https://wiki.opennetworking.org/x/BgCUI" target="_blank">
+            <Button variant='contained' color='secondary'>
+              Know More
+            </Button>
+          </Link>
           {props.isAdmin ? <AdminNav/> : null}
           {user && (
             <SignOutContainer

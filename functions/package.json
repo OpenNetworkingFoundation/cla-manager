@@ -27,6 +27,7 @@
     "firebase-admin": "^8.9.2",
     "firebase-functions": "^3.3.0",
     "lodash": "^4.17.15",
+    "express-basic-auth": "^1.2.0",
     "sha1": "^1.1.1"
   },
   "devDependencies": {
@@ -41,7 +42,6 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "express-basic-auth": "^1.2.0",
     "firebase-tools": "^7.13.1",
     "firebase-functions-test": "^0.1.7",
     "jest": "^25.1.0",
