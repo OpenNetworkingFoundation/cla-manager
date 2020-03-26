@@ -75,18 +75,23 @@ describe('The Whitelist model', () => {
     Whitelist.getWhitelistWithAgreementId()
       .then(res => {
         expect(res[0].identity).toEqual('wl1@opennetworking.org')
+        expect(res[0].type).toEqual('email')
         expect(res[0].agreements).toEqual(['123'])
 
         expect(res[1].identity).toEqual('foo@opennetworking.org')
+        expect(res[1].type).toEqual('email')
         expect(res[1].agreements).toEqual(['123', '456'])
 
         expect(res[2].identity).toEqual('baz')
+        expect(res[2].type).toEqual('github')
         expect(res[2].agreements).toEqual(['123'])
 
         expect(res[3].identity).toEqual('wl2@opennetworking.org')
+        expect(res[3].type).toEqual('email')
         expect(res[3].agreements).toEqual(['456'])
 
         expect(res[4].identity).toEqual('wl3@opennetworking.org')
+        expect(res[4].type).toEqual('email')
         expect(res[4].agreements).toEqual(['789'])
 
         done()

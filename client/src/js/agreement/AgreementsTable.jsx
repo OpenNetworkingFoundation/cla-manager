@@ -30,6 +30,8 @@ function AgreementsTable (props) {
     { title: 'Date Signed', field: 'dateSigned', type: 'date' },
     {
       title: 'Actions',
+      sorting: false,
+      searchable: false,
       render: d => {
         return <Link href={`/view/${d.id}`}>
           <Button variant='outlined' color='primary'>View/Edit</Button>

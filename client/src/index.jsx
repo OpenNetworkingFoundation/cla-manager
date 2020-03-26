@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { FirebaseApp, FirebaseAppInit, BugSnagInit } from './common/app/app'
+import { FirebaseApp, FirebaseAppInit, BugsnagInit } from './common/app/app'
 import bugsnagReact from '@bugsnag/plugin-react'
 // Also, import other individual Firebase SDK components that we use
 import './index.css'
@@ -15,7 +15,7 @@ import Container from '@material-ui/core/Container'
 // For dev, no bugsnag key env should be set to avoid reporting errors.
 const bugnsnagApiKey = !process.env.REACT_APP_BUGSNAG_API_KEY
   ? 'do-not-report' : process.env.REACT_APP_BUGSNAG_API_KEY
-const bugsnagClient = BugSnagInit(bugnsnagApiKey)
+const bugsnagClient = BugsnagInit(bugnsnagApiKey)
 bugsnagClient.use(bugsnagReact, React)
 
 if (!process.env.REACT_APP_FIREBASE_ENV || !process.env.REACT_APP_FIREBASE_API_KEY) {
@@ -36,7 +36,6 @@ FirebaseApp.auth().onAuthStateChanged((user) => {
         return FirebaseApp.auth().currentUser.getIdTokenResult()
       })
       .then(token => {
-        console.log(token)
         ReactDOM.render(
           <ErrorBoundary>
             <AppRouter user={user} isAdmin={token.claims.admin || false}/>

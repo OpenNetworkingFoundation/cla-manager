@@ -9,7 +9,7 @@ const whitelistCollection = 'whitelists'
 export class Whitelist {
   /**
    * Creates a new whitelist.
-   * @param {string} id the firebase ID
+   * @param {string} id the whitelist ID
    * @param {date} lastUpdated when the whitelist was updated the last time
    * @param {string[]} values all the valid identities for the agreement
    */
@@ -52,7 +52,7 @@ export class Whitelist {
   }
 
   /**
-   * Gets all the whitelis from firestore
+   * Gets all the whitelists from firestore
    * @returns {Promise<Whitelist[]>}
    */
   static list () {
@@ -80,8 +80,8 @@ export class Whitelist {
           })
         })
         return Object.keys(identityMap).reduce((list, key) => {
-          list.push({ identity: key.split(':')[1], agreements: identityMap[key] })
-          return list
+          const [type, value] = key.split(':')
+          return [...list, { identity: value, type: type, agreements: identityMap[key] }]
         }, [])
       })
   }

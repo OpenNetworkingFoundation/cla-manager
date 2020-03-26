@@ -5,9 +5,9 @@ import { makeStyles } from '@material-ui/core/styles'
 import AgreementsTable from '../agreement/AgreementsTable'
 import * as _ from 'lodash'
 import { Alert } from '@material-ui/lab'
-import { GetBugSnagClient } from '../../common/app/app'
+import { GetBugsnagClient } from '../../common/app/app'
 
-const bugsnagClient = GetBugSnagClient()
+const bugsnagClient = GetBugsnagClient()
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -51,7 +51,7 @@ function AdminAgreementsList (props) {
         </Grid>
         <Grid item xs={12}>
           <h2>Agreements list</h2>
-          <p>This page let you see a list of all the available agreements</p>
+          <p>This page shows all agreements in the system</p>
         </Grid>
         <Grid item xs={6}>
           <Card>

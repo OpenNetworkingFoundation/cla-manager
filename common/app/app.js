@@ -26,7 +26,7 @@ let bugsnagClient = null
  * @returns {BugsnagCore.Client}
  * @constructor
  */
-export const BugSnagInit = (apiKey) => {
+export const BugsnagInit = (apiKey) => {
   bugsnagClient = bugsnag(apiKey)
   return bugsnagClient
 }
@@ -36,7 +36,7 @@ export const BugSnagInit = (apiKey) => {
  * @returns {BugsnagCore.Client}
  * @constructor
  */
-export const GetBugSnagClient = () => {
+export const GetBugsnagClient = () => {
   return bugsnagClient
 }
 

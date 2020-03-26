@@ -18,9 +18,9 @@ import Avatar from '@material-ui/core/Avatar'
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import TextField from '@material-ui/core/TextField'
 import { Addendum, AddendumType } from '../../common/model/addendum'
-import { GetBugSnagClient } from '../../common/app/app'
+import { GetBugsnagClient } from '../../common/app/app'
 
-const bugsnagClient = GetBugSnagClient()
+const bugsnagClient = GetBugsnagClient()
 
 const useStyles = makeStyles(theme => ({
   root: {
