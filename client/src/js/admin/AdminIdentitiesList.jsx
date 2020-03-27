@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, Grid, Link, Paper, Box } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { Whitelist } from '../../common/model/whitelists'
@@ -14,7 +14,6 @@ const useStyles = makeStyles(theme => ({
 }))
 
 function AdminIdentitiesList (props) {
-
   const classes = useStyles()
   const [whitelist, setWhitelist] = useState([])
 
@@ -26,7 +25,7 @@ function AdminIdentitiesList (props) {
     }
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     Whitelist.getWhitelistWithAgreementId()
       .then(res => {
         setWhitelist(res)
