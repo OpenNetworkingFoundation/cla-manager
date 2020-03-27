@@ -1,12 +1,9 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import Table from '@material-ui/core/Table'
-import TableHead from '@material-ui/core/TableHead'
-import TableRow from '@material-ui/core/TableRow'
-import TableBody from '@material-ui/core/TableBody'
-import TableCell from '@material-ui/core/TableCell'
-import { Paper } from '@material-ui/core'
+import PropTypes, { instanceOf } from 'prop-types'
+import { Link, Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
+import { Agreement, AgreementType } from '../../common/model/agreement'
+import MaterialTable from 'material-table'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -26,41 +23,43 @@ function AgreementsTable (props) {
     return null
   }
 
+  const cols = [
+    { title: 'Organization', field: 'organization' },
+    { title: 'Signatory Name', field: 'signer.name' },
+    { title: 'Signatory Email', field: 'signer.value' },
+    { title: 'Date Signed', field: 'dateSigned', type: 'date' },
+    {
+      title: 'Actions',
+      sorting: false,
+      searchable: false,
+      render: d => {
+        return <Link href={`/view/${d.id}`}>
+          <Button variant='outlined' color='primary'>View/Edit</Button>
+        </Link>
+      }
+    }
+  ]
+
+  if (props.type === AgreementType.INDIVIDUAL) {
+    // remove the org name if we're printing individual CLAs
+    cols.shift()
+  }
+
   return (
-    <Paper elevation={23} className={classes.root}>
-      <h4>{props.header}</h4>
-      <p>{props.description}</p>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {props.columnTitles.map(t => <TableCell key={t}>{t}</TableCell>)}
-          </TableRow>
-        </TableHead>
-        <TableBody>{
-          props.data.map(r => (
-            <TableRow key={r.id + '-row'}>
-              {props.columnIds.map((n, i) => {
-                // Enable screen readers to identify a cell's value by it's row and column name
-                const attrs = i !== 0 ? {} : {
-                  component: 'th',
-                  scope: 'row'
-                }
-                return <TableCell key={`${r.id}-${n}`} {...attrs}>{r[n]}</TableCell>
-              })}
-            </TableRow>
-          ))
-        }
-        </TableBody>
-      </Table>
-    </Paper>
+    <div className={classes.root}>
+      <MaterialTable
+        columns={cols}
+        data={props.data}
+        title={props.header}
+      />
+    </div>
   )
 }
 
 AgreementsTable.propTypes = {
   header: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  columnTitles: PropTypes.arrayOf(PropTypes.string).isRequired,
-  columnIds: PropTypes.arrayOf(PropTypes.string).isRequired
+  data: PropTypes.arrayOf(instanceOf(Agreement)).isRequired,
+  type: PropTypes.oneOf(Object.keys(AgreementType).map(i => AgreementType[i])).isRequired
 }
 
 export default AgreementsTable

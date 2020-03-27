@@ -2,6 +2,8 @@ import React from 'react'
 import SignOutContainer from './SignOutContainer'
 import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
+import PropTypes from 'prop-types'
+import AdminNav from '../admin/AdminNavigation'
 import { Link, Button, Toolbar, Typography } from '@material-ui/core'
 
 /**
@@ -19,7 +21,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default function Header (props) {
+function Header (props) {
   const classes = useStyles()
   const user = props.user
 
@@ -37,6 +39,7 @@ export default function Header (props) {
               Know More
             </Button>
           </Link>
+          {props.isAdmin ? <AdminNav/> : null}
           {user && (
             <SignOutContainer
               user={user}
@@ -48,3 +51,11 @@ export default function Header (props) {
     </div>
   )
 }
+
+Header.propTypes = {
+  user: PropTypes.object.isRequired,
+  onSignOut: PropTypes.func.isRequired,
+  isAdmin: PropTypes.bool.isRequired
+}
+
+export default Header

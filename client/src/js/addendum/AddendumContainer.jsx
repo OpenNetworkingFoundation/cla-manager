@@ -19,6 +19,8 @@ import IdentityCard from './IdentityCard'
 import * as _ from 'lodash'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
 import { Link, useHistory } from 'react-router-dom'
+import { Alert } from '@material-ui/lab'
+import { FirebaseApp } from '../../common/app/app'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,12 +42,14 @@ function AddendumContainer (props) {
   const [updateInProgress, setUpdateInProgress] = useState(false)
   const [lastAddendum, setLastAddendum] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
+  const [admin, setAdmin] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     props.agreement.getAddendums()
       .then(setAddendums)
       .catch(console.error)
-  }, [props.agreement.id])
+  }, [props.agreement])
 
   useEffect(() => {
     Agreement.get(props.agreement.id)
@@ -65,6 +69,13 @@ function AddendumContainer (props) {
     }
   }, [addendums])
 
+  useEffect(() => {
+    FirebaseApp.auth().currentUser.getIdTokenResult()
+      .then(token => {
+        setAdmin(token.claims.admin)
+      })
+  }, [])
+
   const createAddendum = () => {
     const addendum = new Addendum(
       AddendumType.CONTRIBUTOR,
@@ -80,7 +91,13 @@ function AddendumContainer (props) {
         setAddedIdentities([])
         setRemovedIdentities([])
       })
-      .catch(console.error)
+      .catch(err => {
+        if (err.code === 'permission-denied') {
+          setError('Permission denied, please try again later')
+          return
+        }
+        setError('Request failed, please try again later')
+      })
       .finally(() => {
         setUpdateInProgress(false)
         setAddendums(addendums => [...addendums, addendum])
@@ -137,26 +154,11 @@ function AddendumContainer (props) {
     history.push('/')
   }
 
-  return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <h2>Active Identities for this Agreement</h2>
-        <p>Here is a list of identities that are authorized to contribute code
-          under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
-        <Grid container spacing={2}>
-          {activeIdentities.map((a, i) =>
-            <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
-              <IdentityCard key={i} identity={a} callback={setRemovedIdentity} type={'default'}/>
-            </Grid>
-          )}
-        </Grid>
-        <p>
-          We have {addendums ? addendums.length : 0} addendums on file for this
-          agreement. The last one was signed
-          on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}</p>
-      </Grid>
+  const updateForm = (
+    <div>
       <Grid item xs={12}>
         <Grid container spacing={2}>
+
           <Grid item xs={12}>
             <h2>Update Agreement</h2>
             <Box>
@@ -189,6 +191,9 @@ function AddendumContainer (props) {
         </Card>
       </Grid>
       <Grid item xs={12}>
+        {error ? <Alert severity='error'>{error}</Alert> : null}
+      </Grid>
+      <Grid item xs={12}>
         <Button
           fullWidth
           variant='contained'
@@ -199,6 +204,30 @@ function AddendumContainer (props) {
           Sign Addendum
         </Button>
       </Grid>
+    </div>
+  )
+
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <h2>Active Identities for this Agreement</h2>
+        <p>Here is a list of identities that are authorized to contribute code
+          under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
+        <Grid container spacing={2}>
+          {activeIdentities.map((a, i) =>
+            <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
+              <IdentityCard key={i} identity={a} callback={setRemovedIdentity} type={'default'}/>
+            </Grid>
+          )}
+        </Grid>
+        <p>
+          We have {addendums ? addendums.length : 0} addendums on file for this
+          agreement. The last one was signed
+          on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}</p>
+      </Grid>
+      {/* TODO print a list of all the addendums if it's admin */}
+      {admin ? null : updateForm}
+
       <Grid item xs={12}>
         <Dialog
           onClose={confirmLeave}

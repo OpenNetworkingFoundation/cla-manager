@@ -1,14 +1,14 @@
-
 import React from 'react'
 import { FirebaseApp } from '../common/app/app'
-
 import { BrowserRouter as Router, Route } from 'react-router-dom'
-
+import PropTypes from 'prop-types'
 import Header from './helpers/Header'
 import Home from './Home'
 import { Container } from '@material-ui/core'
 import AgreementContainer from './agreement/AgreementContainer'
 import SignCheck from './helpers/SignCheck'
+import AdminAgreementsList from './admin/AdminAgreementsList'
+import AdminIdentitiesList from './admin/AdminIdentitiesList'
 
 class AppRouter extends React.Component {
   constructor (props) {
@@ -44,6 +44,7 @@ class AppRouter extends React.Component {
           <Header
             user={user}
             onSignOut={this.signOut}
+            isAdmin={this.props.isAdmin}
           />
           <Container>
             <Route
@@ -61,11 +62,30 @@ class AppRouter extends React.Component {
                 <AgreementContainer user={user} agreementId={props.match.params.id} />
               )}
             />
+            <Route
+              path='/admin/agreements' exact render={() => (
+              // FIXME check user is admin or send him to a permission denied page
+              // this.props.isAdmin
+              <AdminAgreementsList/>
+            )}
+            />
+            <Route
+              path='/admin/identities' exact render={() => (
+              // FIXME check user is admin or send him to a permission denied page
+              // this.props.isAdmin
+              <AdminIdentitiesList/>
+            )}
+            />
           </Container>
         </div>
       </Router>
     )
   }
+}
+
+AppRouter.propTypes = {
+  user: PropTypes.object.isRequired,
+  isAdmin: PropTypes.bool.isRequired
 }
 
 export default AppRouter

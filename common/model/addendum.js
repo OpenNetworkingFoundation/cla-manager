@@ -33,11 +33,11 @@ class addendum {
    * @param {Identity[]} removed array of identities removed by the addendum
    */
   constructor (type, agreementId, signer, added, removed) {
+    this._type = type
     this._agreementId = agreementId
     this._signer = signer
     this._added = added
     this._removed = removed
-    this._type = type
     this._dateSigned = new Date()
   }
 
@@ -153,6 +153,18 @@ class addendum {
     // as the default one.
     const type = data.type || AddendumType.CONTRIBUTOR
     return new Addendum(type, data.agreementId, signer, added, removed)
+  }
+
+  /**
+   * Gets all the addendums from firestore
+   * @returns {Promise<Addendum[]>}
+   */
+  static list () {
+    return DB.connection().collection(addendumCollection)
+      .get()
+      .then(res => {
+        return res.docs.map(Addendum.fromDocumentSnapshot)
+      })
   }
 }
 
