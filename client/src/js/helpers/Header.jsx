@@ -36,7 +36,7 @@ function Header (props) {
           </Typography>
           <Link href="https://wiki.opennetworking.org/x/BgCUI" target="_blank">
             <Button variant='contained' color='secondary'>
-              Know More
+              Learn More
             </Button>
           </Link>
           {props.isAdmin ? <AdminNav/> : null}
