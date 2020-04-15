@@ -24,7 +24,7 @@ function AdminIdentitiesList (props) {
       return <MailOutlineIcon fontSize={'large'}/>
     }
   }
-
+  
   React.useEffect(() => {
     Whitelist.getWhitelistWithAgreementId()
       .then(res => {

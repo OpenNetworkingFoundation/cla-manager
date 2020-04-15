@@ -134,12 +134,11 @@ function AddendumContainer (props) {
   }
 
   const confirmLeave = (val) => {
-    console.log(val)
     if (val === false) {
       setOpenDialog(false)
       return
     }
-    history.push('/')
+    history.goBack()
   }
 
   const goBack = () => {
@@ -151,7 +150,7 @@ function AddendumContainer (props) {
       return
     }
 
-    history.push('/')
+    history.goBack()
   }
 
   const updateForm = (

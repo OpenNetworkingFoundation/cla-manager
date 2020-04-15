@@ -83,7 +83,7 @@ function Cla (db) {
   }
 
   /**
-   * Promises and object describing whether all given identities are
+   * Promises an object describing whether all given identities are
    * whitelisted, or not.
    * @param identities {{..., type: string, value: string}[]}
    * @returns {Promise<{allWhitelisted: boolean, missingIdentities: string[]}>}
@@ -97,7 +97,6 @@ function Cla (db) {
       })
     }
 
-    // Normalize keys to simplify DB queries.
     let identityKeys
     try {
       identityKeys = identities.map(util.identityKey)

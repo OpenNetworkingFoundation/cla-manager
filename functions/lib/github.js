@@ -100,7 +100,10 @@ function Github (appId, privateKey, secret, db) {
     }
 
     // Check whitelist
-    event.identity = `github:${pr.user.login}`
+    event.identity = util.identityKey({
+      type: 'github',
+      value: pr.user.login
+    })
     try {
       if (await Cla(db).isIdentityWhitelisted(util.identityObj(event.identity))) {
         status.state = 'success'
@@ -112,7 +115,7 @@ function Github (appId, privateKey, secret, db) {
           'this is the ONF bot 🤖 I\'m glad you want to contribute to ' +
           'our projects! However, before accepting your contribution, ' +
           'we need to ask you to sign a Contributor License Agreement ' +
-          '(CLA). You can do it online, it will take only few minutes:' +
+          '(CLA). You can do it online, it will take only a few minutes:' +
           '\n\n✒️ 👉 https://cla.opennetworking.org\n\n' +
           'After signing, make sure to add your Github user ID ' +
           `\`${pr.user.login}\` to the agreement.`
