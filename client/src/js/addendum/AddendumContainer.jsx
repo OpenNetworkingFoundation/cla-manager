@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
@@ -20,7 +20,6 @@ import * as _ from 'lodash'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
 import { Link, useHistory } from 'react-router-dom'
 import { Alert } from '@material-ui/lab'
-import { FirebaseApp } from '../../common/app/app'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -30,51 +29,58 @@ const useStyles = makeStyles(theme => ({
 }))
 
 /**
+ * This class contains the logic for the AddendumContainer component
+ */
+class AddendumContainerCtrl {
+  /**
+   * Check if a User owns this agreement. For now this is true only when the User is the Signer of the Agreement.
+   * This may change when we support co-signers/managers.
+   * @param user {{email: string}} The Firebase user object
+   * @param agreement {Agreement} An Agreement object
+   * @returns {boolean}
+   */
+  static isOwner (user, agreement) {
+    return user.email === agreement.signer.value
+  }
+}
+
+/**
  * Component which given an Agreement displays a list of associated addendums
  */
 function AddendumContainer (props) {
+
   const history = useHistory()
   const classes = useStyles()
   const [addendums, setAddendums] = useState([])
-  const [activeIdentities, setWhitelist] = useState([])
+  const [activeIdentities, setActiveIdentities] = useState([])
   const [addedIdentities, setAddedIdentities] = useState([])
   const [removedIdentities, setRemovedIdentities] = useState([])
   const [updateInProgress, setUpdateInProgress] = useState(false)
   const [lastAddendum, setLastAddendum] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
-  const [admin, setAdmin] = useState(false)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
+  React.useEffect(() => {
     props.agreement.getAddendums()
       .then(setAddendums)
       .catch(console.error)
   }, [props.agreement])
 
-  useEffect(() => {
-    Agreement.get(props.agreement.id)
-      .then(agreement => {
-        return agreement.getWhitelist()
-      })
+  React.useEffect(() => {
+    props.agreement.getWhitelist()
       .then((res) => {
-        setWhitelist(res)
+        setActiveIdentities(res)
       })
   }, [props.agreement.id, addendums])
 
-  useEffect(() => {
+  React.useEffect(() => {
+    // FIXME this seems to be state more than effect, doublecheck
     if (addendums && addendums.length) {
       setLastAddendum(addendums[addendums.length - 1])
     } else {
       setLastAddendum(null)
     }
   }, [addendums])
-
-  useEffect(() => {
-    FirebaseApp.auth().currentUser.getIdTokenResult()
-      .then(token => {
-        setAdmin(token.claims.admin)
-      })
-  }, [])
 
   const createAddendum = () => {
     const addendum = new Addendum(
@@ -113,7 +119,7 @@ function AddendumContainer (props) {
       evt.preventDefault()
       setRemovedIdentities(removedIdentities => [identity, ...removedIdentities])
       _.remove(activeIdentities, identity)
-      setWhitelist(activeIdentities)
+      setActiveIdentities(activeIdentities)
     }
   }
 
@@ -122,7 +128,7 @@ function AddendumContainer (props) {
       evt.preventDefault()
       _.remove(removedIdentities, identity)
       setRemovedIdentities(removedIdentities)
-      setWhitelist(activeIdentities => [identity, ...activeIdentities])
+      setActiveIdentities(activeIdentities => [identity, ...activeIdentities])
     }
   }
 
@@ -154,7 +160,7 @@ function AddendumContainer (props) {
   }
 
   const updateForm = (
-    <div>
+    <div className="AddendumContainer__update-form">
       <Grid item xs={12}>
         <Grid container spacing={2}>
 
@@ -205,27 +211,29 @@ function AddendumContainer (props) {
       </Grid>
     </div>
   )
-
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
+    <Grid container spacing={2} className="AddendumContainer">
+      <Grid item xs={12} className="AddendumContainer__active-identities">
         <h2>Active Identities for this Agreement</h2>
         <p>Here is a list of identities that are authorized to contribute code
           under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
         <Grid container spacing={2}>
           {activeIdentities.map((a, i) =>
-            <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}>
-              <IdentityCard key={i} identity={a} callback={setRemovedIdentity} type={'default'}/>
+            <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4} className="AddendumContainer__active-identity">
+              <IdentityCard key={i} identity={a}
+                            callback={setRemovedIdentity} type={'default'}/>
             </Grid>
           )}
         </Grid>
+      </Grid>
+      <Grid item xs={12} className="AddendumContainer__summary">
         <p>
           We have {addendums ? addendums.length : 0} addendums on file for this
           agreement. The last one was signed
           on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}</p>
       </Grid>
       {/* TODO print a list of all the addendums if it's admin */}
-      {admin ? null : updateForm}
+      {AddendumContainerCtrl.isOwner(props.user, props.agreement) ? updateForm : null}
 
       <Grid item xs={12}>
         <Dialog
@@ -264,6 +272,7 @@ function AddendumContainer (props) {
 }
 
 AddendumContainer.propTypes = {
+  user: PropTypes.object.isRequired,
   agreement: PropTypes.instanceOf(Agreement).isRequired
 }
 

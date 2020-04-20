@@ -306,7 +306,7 @@ function AgreementContainer (props) {
             </Grid>
           </Grid>
           {signatureForm}
-          {props.agreementId ? <AddendumContainer agreement={agreement}/> : null}
+          {props.agreementId ? <AddendumContainer agreement={agreement} user={props.user}/> : null}
         </Paper>
       }
     </div>
