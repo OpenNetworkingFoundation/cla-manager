@@ -118,7 +118,9 @@ function Github (appId, privateKey, secret, db) {
           '(CLA). You can do it online, it will take only a few minutes:' +
           '\n\n✒️ 👉 https://cla.opennetworking.org\n\n' +
           'After signing, make sure to add your Github user ID ' +
-          `\`${pr.user.login}\` to the agreement.`
+          `\`${pr.user.login}\` to the agreement.` +
+          '\n\nFor more information or help:"\n' +
+          'https://wiki.opennetworking.org/x/BgCUI'
       }
     } catch (error) {
       console.error(error)
