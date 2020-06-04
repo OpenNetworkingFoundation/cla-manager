@@ -66,7 +66,7 @@ function GitHubAPI(accessToken) {
     })
   }
 
-  async function deleteUserFromTeam(githubID, org, team) {
+  async function deleteUserFromTeam (githubID, org, team) {
     return rp.delete({
       ...rpConf,
       uri: baseUri + `/orgs/${org}/teams/${team}/memberships/${githubID}`
