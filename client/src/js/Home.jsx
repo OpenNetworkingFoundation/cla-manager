@@ -1,11 +1,12 @@
 import React from 'react'
-import { FirebaseApp } from '../common/app/app'
+import { Firebase } from '../common/app/app'
 import Grid from '@material-ui/core/Grid'
 
 import AgreementsTable from './agreement/AgreementsTable'
 import CreateAgreementContainer from './agreement/CreateAgreementContainer'
 
 import { Agreement, AgreementType } from '../common/model/agreement'
+import UserCrowdSignInContainer from './user/UserCrowdSigninContainer'
 
 /**
  * User home screen for this CLA Manager application.
@@ -23,7 +24,7 @@ export default class Home extends React.Component {
    * Update the page to show all CLAs associated to the logged in user's email.
    */
   componentDidMount () {
-    const email = FirebaseApp.auth().currentUser.email
+    const email = Firebase.auth().currentUser.email
     if (!email) {
       // Clear all rows from the CLA tables.
       this.setState({
@@ -102,6 +103,9 @@ export default class Home extends React.Component {
               data={this.state.institutionCLATable}
             />
           </Grid>
+        </Grid>
+        <Grid container style={style}>
+          <UserCrowdSignInContainer/>
         </Grid>
       </main>
     )
