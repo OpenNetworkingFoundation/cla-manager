@@ -8,7 +8,7 @@ module.exports = GitHubAPI
  * @return {{getUsers: getUsers, addUser:addUser, deleteUser:deleteUser}}
  * @constructor
  */
-function GitHubAPI(accessToken) {
+function GitHubAPI (accessToken) {
   // curl -H "Authorization: token 1bff643d42980fd0cf62d32db3ef451172a3c295" -i https://api.github.com/orgs/cloud-native-taiwan/teams/hwchiu-test/memberships/hwchiu
 
   const githubServer = 'api.github.com'
@@ -16,27 +16,26 @@ function GitHubAPI(accessToken) {
   const rpConf = {
     json: true,
     headers: {
-      'Accept': 'application/json',
-      'Authorization': 'token ' + accessToken,
+      Accept: 'application/json',
+      Authorization: 'token ' + accessToken,
       'User-Agent': 'Awesome-Octocat-App'
     }
   }
 
-
-  async function getUsers(org, team) {
-    valid_users = []
+  async function getUsers (org, team) {
+    const validUsers = []
     try {
-      users = await getUsersUnderTeam(org, team)
+      const users = await getUsersUnderTeam(org, team)
       for (const user of users) {
-        valid_users[user.login] = true
+        validUsers[user.login] = true
       }
     } catch (e) {
       throw new functions.https.HttpsError('Fetching user list failed' + e)
     }
-    return valid_users
+    return validUsers
   }
 
-  async function addUser(githubID, org, team) {
+  async function addUser (githubID, org, team) {
     try {
       await addUserToTeam(githubID, org, team)
     } catch (e) {
@@ -44,7 +43,7 @@ function GitHubAPI(accessToken) {
     }
   }
 
-  async function deleteUser(githubID, org, team) {
+  async function deleteUser (githubID, org, team) {
     try {
       await deleteUserFromTeam(githubID, org, team)
     } catch (e) {
@@ -52,14 +51,14 @@ function GitHubAPI(accessToken) {
     }
   }
 
-  async function getUsersUnderTeam(org, team) {
+  async function getUsersUnderTeam (org, team) {
     return rp.get({
       ...rpConf,
       uri: baseUri + `/orgs/${org}/teams/${team}/members`
     })
   }
 
-  async function addUserToTeam(githubID, org, team) {
+  async function addUserToTeam (githubID, org, team) {
     return rp.put({
       ...rpConf,
       uri: baseUri + `/orgs/${org}/teams/${team}/memberships/${githubID}`

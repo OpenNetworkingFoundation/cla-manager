@@ -1,4 +1,3 @@
-var http = require('https')
 var rp = require('request-promise')
 const functions = require('firebase-functions')
 
@@ -11,7 +10,7 @@ module.exports = Crowd
  * @return {{getUsersWithGithubID: getUsersWithGithubID}}
  * @constructor
  */
-function Crowd(db, appName, appPassword) {
+function Crowd (db, appName, appPassword) {
   const crowdServer = 'crowd.opennetworking.org'
   const baseUri = `https://${crowdServer}/crowd/rest/usermanagement/1`
   const rpConf = {
@@ -23,51 +22,51 @@ function Crowd(db, appName, appPassword) {
     }
   }
 
-  async function getUsersWithGithubID(group) {
-    valid_users = []
+  async function getUsersWithGithubID (group) {
+    const validUsers = []
+    let users = []
     try {
-      crowdUsers = await getUsersUnderGroup(group)
+      users = await getUsersUnderGroup(group).users
     } catch (e) {
       throw new functions.https.HttpsError('Listing user failed' + e)
     }
 
-    for (const user of crowdUsers.users) {
+    for (const user of users) {
       try {
-        user_attribute = await getAttribute(user.name)
-        result = await getGithubID(user_attribute.attributes)
-        if (result != "") {
-          valid_users[result] = true
+        const userAttribute = await getAttribute(user.name)
+        const result = await getGithubID(userAttribute.attributes)
+        if (result !== '') {
+          validUsers[result] = true
         }
       } catch (e) {
         throw new functions.https.HttpsError('Getting user attribute failed' + e)
       }
     }
 
-    return valid_users
+    return validUsers
   }
 
-  async function getUsersUnderGroup(group) {
+  async function getUsersUnderGroup (group) {
     return rp.get({
       ...rpConf,
       uri: baseUri + `/group/user/direct?groupname=${group}&max-results=3000`
     })
   }
 
-  async function getAttribute(name) {
+  async function getAttribute (name) {
     return rp.get({
       ...rpConf,
       uri: baseUri + `/user/attribute?username=${name}`
     })
   }
 
-  async function getGithubID(attributes) {
-    users = {}
+  async function getGithubID (attributes) {
     for (const attr of attributes) {
-      if (attr.name == 'github_id' && attr.values.length != 0) {
+      if (attr.name === 'github_id' && attr.values.length !== 0) {
         return attr.values[0]
       }
     }
-    return ""
+    return ''
   }
 
   return {
