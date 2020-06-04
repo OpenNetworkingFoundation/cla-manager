@@ -25,8 +25,8 @@ const gerrit = new Gerrit(
 
 const crowd = new Crowd(
   db,
-  functions.config().crowd.appName,
-  functions.config().crowd.appPassword)
+  functions.config().crowd.app_name,
+  functions.config().crowd.app_password)
 
 const backup = new Backup(
   functions.config().backup.bucket_name,
