@@ -48,10 +48,18 @@ Automated tests are run prior to patchset acceptance using CircleCI - see the
 [./.circleci/config.yml](./.circleci/config.yml) for details. The commands in
 given in that file can be used to run tests locally on a developer machine.
 
-The whole site and functions can be run on a developer machine using the [local
-firebase emulator](https://firebase.google.com/docs/functions/local-emulator),
-which is run through the firebase CLI tool. `npm` must also be installed to
-obtain dependencies.
+If you don't have one, create an application on
+[Firebase](https://console.firebase.google.com/).
+
+Once you have it, you'll need to keep track of the `Project ID` and `Web API
+Key` (You can find them in the `Settings` panel). You'll also need to set up
+Email/Password authentication in the `Authentication` panel.
+
+The whole site, including Firestore and Firebase functions can be run on a
+developer machine using the [local firebase
+emulator](https://firebase.google.com/docs/functions/local-emulator), which is
+run through the firebase CLI tool. `npm` must also be installed to obtain
+dependencies.
 
 Prepare the system by creating a file that contains the configuration variables
 in `functions/.runtimeconfig.json` with this dummy contents:
@@ -69,16 +77,28 @@ in `functions/.runtimeconfig.json` with this dummy contents:
         "key": "invalid",
         "app_id": "invalid",
         "secret": "invalid"
+      },
+      "crowd": {
+        "app_name": "invalid",
+        "app_password": "invalid",
       }
     }
 
-Then, install dependencies for the functions with `npm --prefix ./functions install`
+To run the emulators:
+    
+    cd ./functions
+    npm install
+    npx firebase --project <project-id> emulators:start --only firestore,functions
 
-Then run the emulator with:
+See the output for the endpoint address of the emulator UI (usually <http://127.0.0.1:4000/>)
 
-    firebase --project cla-manager emulators:start
+To serve the client:
 
-See the output for the endpoint addresses of the site and functions.
+    cd ./client
+    npm install
+    REACT_APP_FIREBASE_ENV=<project-id> REACT_APP_FIREBASE_API_KEY=<web-api-key> npm start
+
+See the output for the endpoint address (usually <http://localhost:3000/>).
 
 ## Data lifecycle
 

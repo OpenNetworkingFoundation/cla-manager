@@ -32,7 +32,6 @@ function UserCrowdSignInContainer () {
   const classes = useStyles()
   const [crowdUsername] = React.useState()
   const [crowdPassword] = React.useState()
-  // UserCrowSignIn('carmelo', '688Y2dCzP2')
   const handleSubmit = (event) => {
     event.preventDefault()
     const verifyCrowdUser = Firebase.functions().httpsCallable('verifyCrowdUser')
