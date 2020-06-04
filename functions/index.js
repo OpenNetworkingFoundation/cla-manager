@@ -4,12 +4,14 @@ const Github = require('./lib/github')
 const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
 const Backup = require('./lib/backup.js')
+const Crowd = require('./lib/Crowd.js')
 const _ = require('lodash')
 
 admin.initializeApp(functions.config().firebase)
 const db = admin.firestore()
 
 const clalib = new Cla(db)
+
 const github = new Github(
   functions.config().github.app_id,
   functions.config().github.key,
@@ -21,10 +23,14 @@ const gerrit = new Gerrit(
   functions.config().gerrit.user,
   functions.config().gerrit.password)
 
+const crowd = new Crowd(
+  db,
+  functions.config().crowd.appName,
+  functions.config().crowd.appPassword)
+
 const backup = new Backup(
   functions.config().backup.bucket_name,
-  functions.config().backup.period
-)
+  functions.config().backup.period)
 
 /**
  * Handles the given event snapshot. The implementation is expected to update
@@ -133,3 +139,8 @@ exports.handleWhitelistUpdate = functions.firestore
  * Periodically backups firestore DB.
  */
 exports.scheduledFirestoreExport = backup
+
+/**
+ * Callable function to validate Crowd user credentials from the client.
+ */
+exports.verifyCrowdUser = functions.https.onCall(crowd.verifyCrowdUser)
