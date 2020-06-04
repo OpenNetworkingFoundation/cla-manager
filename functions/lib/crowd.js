@@ -1,4 +1,4 @@
-var http = require('https');
+var http = require('https')
 var rp = require('request-promise')
 const functions = require('firebase-functions')
 
@@ -12,7 +12,6 @@ module.exports = Crowd
  * @constructor
  */
 function Crowd(db, appName, appPassword) {
-
   const crowdServer = 'crowd.opennetworking.org'
   const baseUri = `https://${crowdServer}/crowd/rest/usermanagement/1`
   const rpConf = {
@@ -23,7 +22,6 @@ function Crowd(db, appName, appPassword) {
       sendImmediately: true
     }
   }
-
 
   async function getUsersWithGithubID(group) {
     valid_users = []
@@ -75,77 +73,4 @@ function Crowd(db, appName, appPassword) {
   return {
     getUsersWithGithubID: getUsersWithGithubID
   }
-}
-
-
-
-
-async function GetGitHubUser(options, org, team) {
-  return new Promise(function (resolve, reject) {
-    options['path'] = '/orgs/' + org + '/teams/' + team + '/members';
-    let data = '';
-    var request = http.request(options,
-      function (response) {
-        response.setEncoding('utf8');
-        response.on('data', (chunk) => {
-          data += chunk;
-        });
-        response.on('end', () => {
-          users = {}
-          for (user of JSON.parse(data)) {
-            users[user.login] = true
-          }
-          resolve(users);
-        });
-      }).end();
-  })
-}
-
-
-/**
- * Github-related functions.
- * @param crowd_group {string}
- * @param crowd_hostname {string}
- * @param crowd_auth {string}
- * @param github_auth {string}
- * @param github_orgs {array of object{org,team}}
- * @constructor
- */
-async function CrowdToGithub(crowd_group, crowd_hostname, crowd_auth, github_auth, github_orgs) {
-  var github_options = {
-    'hostname': 'api.github.com',
-    'port': 443,
-    'headers': {
-      'Accept': 'application/json',
-      'Authorization': 'token ' + github_auth,
-      'User-Agent': 'Awesome-Octocat-App'
-    },
-  };
-
-
-
-  for (const github of github_orgs) {
-    let github_users = await GetGitHubUser(github_options, github.org, github.team)
-    //console.log(g_users)
-
-    //For All Crowd Users
-    for (const [key, value] of Object.entries(crowd_users)) {
-      //Pass it user already in Github
-      if (key in github_users) {
-        continue;
-      } else {
-        //Add to Github
-        console.log("Add " + key + " to github " + github.org + "/" + github.team)
-      }
-    }
-    //For All Github Users
-    for (const [key, value] of Object.entries(github_users)) {
-      //Remove from Github if user is not in Crowd
-      if (!(key in crowd_users)) {
-        console.log("Remove " + key + " from github " + github.org + "/" + github.team)
-      }
-    }
-
-  }
-
 }
