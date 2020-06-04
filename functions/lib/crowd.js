@@ -12,7 +12,6 @@ module.exports = Crowd
  * @constructor
  */
 function Crowd (db, appName, appPassword) {
-
   const crowdServer = 'crowd.opennetworking.org'
   const baseUri = `https://${crowdServer}/crowd/rest/usermanagement/1`
   const rpConf = {
