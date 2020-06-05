@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Grid
 } from '@material-ui/core'
-import { Agreement } from '../../common/model/agreement'
+import { Agreement, AgreementType } from '../../common/model/agreement'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
 import { Link, useHistory } from 'react-router-dom'
 import AddendumForm from './AddendumForm'
@@ -54,6 +54,14 @@ function AddendumContainer (props) {
 
   return (
     <Grid container spacing={2} className="AddendumContainer">
+      {props.agreement.type === AgreementType.INSTITUTIONAL ? <Grid item xs={12}>
+        <AddendumForm
+          user={props.user}
+          agreement={props.agreement}
+          addendumType={AddendumType.COSIGNER}
+          updateStatus={setContributorUpdateStatus}
+        />
+      </Grid> : null}
       <Grid item xs={12}>
         <AddendumForm
           user={props.user}
