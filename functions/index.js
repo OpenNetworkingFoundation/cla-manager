@@ -26,13 +26,13 @@ const gerrit = new Gerrit(
 const backup = new Backup(
   functions.config().backup.bucket_name,
   functions.config().backup.period)
-
+/*
 const crowdAudit = new CrowdToGitHub(
   functions.config().crowd.app_name,
   functions.config().crowd.app_password,
   functions.config().github.access_token,
   functions.config().crowd.period)
-
+*/
 /**
  * Handles the given event snapshot. The implementation is expected to update
  * the status of the contribution (e.g., PR) on the provider (e.g. Github), and
