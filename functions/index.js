@@ -149,3 +149,13 @@ exports.setAppUserOnfAccount = functions.https.onCall(crowd.setAppUserAccount)
  * Callable function to set Github account for app user
  */
 exports.setAppUserGithubAccount = functions.https.onCall(github.setAppUserAccount)
+
+/**
+ * Reacts to changes to the linked accounts for an app user
+ */
+exports.handleAppUserAccountUpdate = functions.firestore
+  .document('/appUsers/{uid}/accounts/{accountId}')
+  .onWrite((change, context) => {
+    const uid = context.params.uid
+    return crowd.updateCrowdUser(uid)
+  })
