@@ -1,4 +1,4 @@
-const { Octokit } = require("@octokit/rest");
+const { Octokit } = require('@octokit/rest')
 const functions = require('firebase-functions')
 
 module.exports = GitHubAPI
@@ -14,7 +14,10 @@ function GitHubAPI (accessToken) {
   async function getUsers (org, team) {
     const validUsers = []
     try {
-      const { data: users } = await octokit.request(`GET /orgs/${org}/teams/${team}/members`)
+      const { data: users } = await octokit.teams.listMembersInOrg({
+        org: org,
+        team_slug: team
+      })
       for (const user of users) {
         validUsers[user.login] = true
       }
@@ -29,8 +32,8 @@ function GitHubAPI (accessToken) {
       await octokit.teams.addOrUpdateMembershipInOrg({
         org: org,
         team_slug: team,
-        username: githubID,
-      });
+        username: githubID
+      })
     } catch (e) {
       throw new functions.https.HttpsError('Adding user failed ' + e)
     }
@@ -41,16 +44,44 @@ function GitHubAPI (accessToken) {
       await octokit.teams.removeMembershipInOrg({
         org: org,
         team_slug: team,
-        username: githubID,
-      });
+        username: githubID
+      })
     } catch (e) {
       throw new functions.https.HttpsError('Deleting user failed ' + e)
+    }
+  }
+
+  async function createTeamIfNotExist (org, name) {
+    try {
+      let check = false
+      const { data: teams } = await octokit.teams.list({
+        org: org
+      })
+
+      // Check the existence
+      for (const team of teams) {
+        if (team.name === name) {
+          check = true
+          break
+        }
+      }
+
+      // Create if necessary
+      if (!check) {
+        await octokit.teams.create({
+          org: org,
+          name: name
+        })
+      }
+    } catch (e) {
+      throw new functions.https.HttpsError('Creating team failed ' + e)
     }
   }
 
   return {
     getUsers: getUsers,
     addUser: addUser,
-    deleteUser: deleteUser
+    deleteUser: deleteUser,
+    createTeam: createTeamIfNotExist
   }
 }
