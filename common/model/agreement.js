@@ -149,20 +149,23 @@ class agreement {
 
   /**
    * Returns a list of Addendum associated with this list
+   * @param {AddendumType}  type  The type of addendums to load
    * @returns {Promise<Addendum[]>}
    */
-  getAddendums () {
-    return Addendum.get(this)
+  getAddendums (type) {
+    console.log(`Type: ${type}`)
+    return Addendum.get(this, type)
   }
 
   /**
    * Returns all identities that are allowed to contribute under this
    * agreement. The implementation emulates the logic used by the Firebase
    * function to update the whitelist collection in the DB.
+   * @param {AddendumType}  type  The type of addendums to load
    * @returns {Promise<Identity[]>}
    */
-  getWhitelist () {
-    return this.getAddendums().then(addendums => {
+  getWhitelist (type) {
+    return this.getAddendums(type).then(addendums => {
       const whitelistMap = addendums.reduce((map, addendum) => {
         addendum.added.forEach(i => map.set(identityKey(i), i))
         addendum.removed.forEach(i => map.delete(identityKey(i)))

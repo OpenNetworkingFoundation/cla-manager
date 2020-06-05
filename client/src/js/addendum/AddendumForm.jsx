@@ -52,13 +52,14 @@ function AddendumForm (props) {
   const [error, setError] = useState(null)
 
   React.useEffect(() => {
-    props.agreement.getAddendums()
+    console.log(`props.addendumType: ${props.addendumType}`)
+    props.agreement.getAddendums(props.addendumType)
       .then(setAddendums)
       .catch(console.error)
   }, [props.agreement])
 
   React.useEffect(() => {
-    props.agreement.getWhitelist()
+    props.agreement.getWhitelist(props.addendumType)
       .then((res) => {
         setActiveIdentities(res)
       })
@@ -176,7 +177,8 @@ function AddendumForm (props) {
         <Card variant='outlined' className={classes.root}>
           <IdentityForm
             callback={setAddedIdentity}
-            name={props.agreement.type === AgreementType.INDIVIDUAL ? props.agreement.signer.name : null}/>
+            githubAllowed={props.addendumType === AddendumType.CONTRIBUTOR}
+            name={props.agreement.type === AgreementType.INDIVIDUAL && props.addendumType === AddendumType.CONTRIBUTOR ? props.agreement.signer.name : null}/>
         </Card>
       </Grid>
       <Grid item xs={12}>
@@ -198,7 +200,7 @@ function AddendumForm (props) {
   return (
     <Grid container spacing={2} className="AddendumContainer">
       <Grid item xs={12} className="AddendumContainer__active-identities">
-        <h2>Active Identities for this Agreement</h2>
+        <h2>Active {props.addendumType.toString()}s for this Agreement</h2>
         <p>Here is a list of identities that are authorized to contribute code
           under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
         <Grid container spacing={2}>
