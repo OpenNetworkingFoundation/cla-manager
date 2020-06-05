@@ -4,6 +4,8 @@ const Github = require('./lib/github')
 const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
 const Backup = require('./lib/backup.js')
+// const CrowdToGitHub = require('./crowd_to_github.js')
+
 const _ = require('lodash')
 
 admin.initializeApp(functions.config().firebase)
@@ -23,9 +25,14 @@ const gerrit = new Gerrit(
 
 const backup = new Backup(
   functions.config().backup.bucket_name,
-  functions.config().backup.period
-)
-
+  functions.config().backup.period)
+/*
+const crowdAudit = new CrowdToGitHub(
+  functions.config().crowd.app_name,
+  functions.config().crowd.app_password,
+  functions.config().github.access_token,
+  functions.config().crowd.period)
+*/
 /**
  * Handles the given event snapshot. The implementation is expected to update
  * the status of the contribution (e.g., PR) on the provider (e.g. Github), and
@@ -133,3 +140,8 @@ exports.handleWhitelistUpdate = functions.firestore
  * Periodically backups firestore DB.
  */
 exports.scheduledFirestoreExport = backup
+
+/**
+ * Periodically Sync from Crowd to Github
+ */
+// exports.scheduledFirestoreExport = crowdAudit.PeriodicAudit
