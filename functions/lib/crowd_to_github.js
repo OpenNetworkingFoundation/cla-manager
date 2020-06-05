@@ -1,5 +1,6 @@
 const Crowd = require('./crowd.js')
 const GitHubAPI = require('./github_api.js')
+const functions = require('firebase-functions')
 
 module.exports = CrowdToGitHub
 /**
@@ -7,13 +8,14 @@ module.exports = CrowdToGitHub
  * @param crowdApp {string} crowd app name
  * @param crowdPassword {string} crowd app password
  * @param githubToken {string} Github Access token
+ * @param period {string} period for scheduled function
  * @return {{getUsersWithGithubID: getUsersWithGithubID}}
  * @constructor
  */
-function CrowdToGitHub (crowdApp, crowdPassword, githubToken) {
+function CrowdToGitHub (crowdApp, crowdPassword, githubToken, period) {
   const crowdGroups = ['members', 'AetherAccess', 'ONFStaff']
   // FIXME
-  const githubOrganizations = ['xxxxxx']
+  const githubOrganizations = []
 
   async function AuditFromCrowdToGitHub () {
     const crowd = new Crowd(null, crowdApp, crowdPassword)
@@ -47,7 +49,14 @@ function CrowdToGitHub (crowdApp, crowdPassword, githubToken) {
       }
     }
   }
+
+  function PeriodicAudit () {
+    return functions.pubsub.schedule(period).onRun((context) => {
+      AuditFromCrowdToGitHub()
+    })
+  }
   return {
-    AuditFromCrowdToGitHub: AuditFromCrowdToGitHub
+    ManuallyAudit: AuditFromCrowdToGitHub,
+    PeriodicAudit: PeriodicAudit
   }
 };
