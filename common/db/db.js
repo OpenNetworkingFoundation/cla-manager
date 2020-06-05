@@ -4,7 +4,7 @@ export default class DB {
   static connection () {
     const db = Firebase.firestore()
     if (location.hostname === 'localhost') {
-      // Talk to emulator (hostname comes from docker-compose.yml)
+      // Talk to emulator
       db.settings({
         host: 'localhost:8080',
         ssl: false
