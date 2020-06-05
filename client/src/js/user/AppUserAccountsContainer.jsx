@@ -35,7 +35,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-function UserAccountsContainer () {
+function AppUserAccountsContainer () {
   const classes = useStyles()
 
   const onfHostname = 'opennetworking.org'
@@ -103,7 +103,13 @@ function UserAccountsContainer () {
       .httpsCallable('setAppUserGithubAccount')
     setUpdateInProgress(true)
     Firebase.auth().currentUser
-      .linkWithPopup(new Firebase.auth.GithubAuthProvider())
+      // If the DB ends up in an inconsistent state, honor the user's desire to
+      // re-link account. As such, always tries to unlink first to a avoid
+      // errors when linking.
+      .unlink(ghHostname)
+      .catch(() => {})
+      .then(() => Firebase.auth().currentUser// Silently ignore.
+        .linkWithPopup(new Firebase.auth.GithubAuthProvider()))
       .then(result => setAppUserGithubAccount({
         token: result.credential.accessToken
       }))
@@ -257,4 +263,4 @@ function UserAccountsContainer () {
   )
 }
 
-export default UserAccountsContainer
+export default AppUserAccountsContainer
