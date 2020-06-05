@@ -28,7 +28,7 @@ const addendums = [
   new Addendum(AddendumType.CONTRIBUTOR, 'test_id', signer, [identites[1]], [])
 ]
 
-describe('AddendumContainer Component Test Suite', () => {
+describe('AddendumForm Component Test Suite', () => {
   jest.useFakeTimers()
 
   let wrapper
