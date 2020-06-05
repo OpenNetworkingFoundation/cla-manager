@@ -1,5 +1,6 @@
 const rp = require('request-promise')
 const functions = require('firebase-functions')
+const sha1 = require('sha1')
 
 module.exports = Crowd
 
@@ -12,8 +13,8 @@ module.exports = Crowd
  * @constructor
  */
 function Crowd (db, appName, appPassword) {
-  const crowdServer = 'crowd.opennetworking.org'
-  const baseUri = `https://${crowdServer}/crowd/rest/usermanagement/1`
+  const onfHostname = 'opennetworking.org'
+  const baseUri = `https://crowd.${onfHostname}/crowd/rest/usermanagement/1`
   const rpConf = {
     json: true,
     auth: {
@@ -52,13 +53,14 @@ function Crowd (db, appName, appPassword) {
       crowdSession = await createSession(crowdUsername, crowdPassword)
     } catch (e) {
       throw new functions.https.HttpsError('failed-precondition',
-        'Crowd authentication failed')
+        `Authentication failed with ${onfHostname}`)
     }
 
     try {
       // Authenticated! Get user info.
       const crowdUser = await getUser(crowdUsername)
       const result = {
+        hostname: onfHostname,
         key: crowdUser.key,
         username: crowdUser.name,
         active: crowdUser.active,
@@ -71,11 +73,13 @@ function Crowd (db, appName, appPassword) {
       // We got what we needed. User logout.
       invalidateSession(crowdSession.token).catch(console.error)
       // Update db.
-      const docPath = `${firebaseUid}/${crowdServer}/${result.key}`
+      const accountDocKey = sha1(`${onfHostname}${result.key}`)
       await db.collection('users')
-        .doc(docPath)
+        .doc(firebaseUid)
+        .collection('accounts')
+        .doc(accountDocKey)
         .set(result)
-      return docPath
+      return accountDocKey
     } catch (e) {
       console.log(e)
       throw new functions.https.HttpsError('internal',

@@ -14,6 +14,10 @@ function isSignedIn() {
   return request.auth != null;
 }
 
+function isUidSigned(uid) {
+  return isSignedIn() && request.auth.uid == uid;
+}
+
 // checks whether the user has admin privileges or not
 function isAdmin() {
     return request.auth.token.admin == true;
@@ -38,6 +42,12 @@ service cloud.firestore {
     }
     match /whitelists/{whitelistId} {
         allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
+    }
+    match /users/{uid} {
+        match /accounts/{accountId} {
+            allow read, delete: if isUidSigned(uid);
+            allow update: if false;
+        }
     }
   }
 }
