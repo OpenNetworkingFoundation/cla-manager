@@ -10,6 +10,11 @@ import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
 
 const useStyles = makeStyles(theme => ({
   formField: {
@@ -30,16 +35,18 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-/**
- * Input widget which lets a user sign a new agreement.
- */
 function UserAccountsContainer () {
   const classes = useStyles()
 
   const onfHostname = 'opennetworking.org'
+  const ghHostname = 'github.com'
 
   const [accounts, setAccounts] = React.useState([])
   const [hasOnfAccount, setHasOnfAccount] = React.useState(true)
+  const [hasGhAccount, setHasGhAccount] = React.useState(true)
+  const [updateInProgress, setUpdateInProgress] = React.useState(false)
+  const [alertDialogOpen, setAlertDialogOpen] = React.useState(false)
+  const [alertDialogMessage, setAlertDialogMessage] = React.useState('')
   // FIXME (carmelo): no need for state here. I'm too lazy to figure out how to
   //  simply read values from a form.
   const [onfUsername, setOnfUsername] = React.useState()
@@ -61,21 +68,73 @@ function UserAccountsContainer () {
     const hostnames = new Set()
     accounts.forEach(a => hostnames.add(a.hostname))
     setHasOnfAccount(hostnames.has(onfHostname))
+    setHasGhAccount(hostnames.has(ghHostname))
   }, [accounts])
 
-  // Handle ONF sign in form submits by calling backend function to validate
-  // credentials against Crowd.
-  const verifyCrowdUser = Firebase.functions().httpsCallable('verifyCrowdUser')
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    verifyCrowdUser({ username: onfUsername, password: onfPassword })
-      .then(docPath => {
-        console.debug(`Authenticated! Account created at ${docPath.toString()}`)
-      })
-      .catch(alert)
+  const openAlertDialog = (message) => {
+    setAlertDialogOpen(true)
+    setAlertDialogMessage(message)
   }
 
-  const onfSigninForm = () => {
+  const closeAlertDialog = () => {
+    setAlertDialogOpen(false)
+  }
+
+  const handleOnfLink = (event) => {
+    event.preventDefault()
+    const setAppUserOnfAccount = Firebase.functions()
+      .httpsCallable('setAppUserOnfAccount')
+    setUpdateInProgress(true)
+    setAppUserOnfAccount({
+      username: onfUsername,
+      password: onfPassword
+    })
+      .then(accountId => {
+        console.debug(`Linked! Account created: ${accountId.toString()}`)
+      })
+      .catch(error => {
+        openAlertDialog(error.message)
+      })
+      .finally(() => setUpdateInProgress(false))
+  }
+
+  const handleGhLink = () => {
+    const setAppUserGithubAccount = Firebase.functions()
+      .httpsCallable('setAppUserGithubAccount')
+    setUpdateInProgress(true)
+    Firebase.auth().currentUser
+      .linkWithPopup(new Firebase.auth.GithubAuthProvider())
+      .then(result => setAppUserGithubAccount({
+        token: result.credential.accessToken
+      }))
+      .then(accountId => {
+        console.debug(`Linked! Account created: ${accountId.toString()}`)
+      })
+      .catch(error => {
+        openAlertDialog(error.message)
+      })
+      .finally(() => setUpdateInProgress(false))
+  }
+
+  const handleUnlink = (accountId, hostname) => {
+    let firebaseUnlink
+    switch (hostname) {
+      case ghHostname:
+        firebaseUnlink = Firebase.auth().currentUser.unlink(hostname)
+        break
+      default:
+        // No need to unlink account in firebase.
+        firebaseUnlink = Promise.resolve()
+    }
+    setUpdateInProgress(true)
+    return firebaseUnlink
+      .then(() => AppUser.current().deleteAccount(accountId))
+      .catch(alert)
+      .finally(() => setUpdateInProgress(false))
+  }
+
+  // TODO: make a pop up dialog
+  const onfLinkForm = () => {
     return <Box>
       <p className={classes.textCenter}>
         Insert the same credentials you use for
@@ -83,7 +142,7 @@ function UserAccountsContainer () {
       </p>
       <Box>
         <ValidatorForm
-          onSubmit={handleSubmit}
+          onSubmit={handleOnfLink}
           onError={errors => console.error(errors)}>
           <TextField
             className={classes.formField}
@@ -110,17 +169,32 @@ function UserAccountsContainer () {
             variant='contained'
             color='primary'
             size='large'
-          >Sign in
+            disabled={updateInProgress}
+          >Link ONF account
           </Button>
         </ValidatorForm>
       </Box>
     </Box>
   }
 
-  const connectedAccounts = () => {
+  const ghLinkForm = () => {
+    return <Box>
+      <Button
+        fullWidth
+        variant='contained'
+        color='primary'
+        size='large'
+        onClick={handleGhLink}
+        disabled={updateInProgress}
+      >Link GitHub account
+      </Button>
+    </Box>
+  }
+
+  const linkedAccounts = () => {
     return <Grid item xs={12}>
       <p>
-        You are currently signed in with the following accounts:
+        You have linked the following accounts:
       </p>
       <List>
         {accounts.map(item => (
@@ -131,9 +205,11 @@ function UserAccountsContainer () {
             />
             <ListItemSecondaryAction>
               <Button
-                onClick={() => AppUser.current().deleteAccount(item.id)}
-                color='secondary'>
-                Sign out
+                onClick={() => handleUnlink(item.id, item.hostname)}
+                color='secondary'
+                disabled={updateInProgress}
+              >
+                Unlink
               </Button>
             </ListItemSecondaryAction>
           </ListItem>
@@ -143,17 +219,41 @@ function UserAccountsContainer () {
   }
 
   return (
-    <Paper elevation={23} className={classes.root}>
-      <h2 className={classes.h2}>Member-only Access</h2>
-      <Grid container>
-        <p>
-          Here you can connect your developer accounts to get access to
-          member-only resources.
-        </p>
-        {accounts.length > 0 ? connectedAccounts() : null}
-        {!hasOnfAccount ? onfSigninForm() : null}
-      </Grid>
-    </Paper>
+    <div>
+      <Paper elevation={23} className={classes.root}>
+        <h2 className={classes.h2}>Member-only Access</h2>
+        <Grid container>
+          <p>
+            Here you can link your developer accounts to get access to
+            member-only resources.
+          </p>
+          {accounts.length > 0 ? linkedAccounts() : null}
+          {!hasOnfAccount ? onfLinkForm() : null}
+          {!hasGhAccount ? ghLinkForm() : null}
+        </Grid>
+      </Paper>
+      <div>
+        <Dialog
+          open={alertDialogOpen}
+          onClose={closeAlertDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle
+            id="alert-dialog-title">Something went wrong</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {alertDialogMessage}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeAlertDialog} color="primary" autoFocus>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </div>
   )
 }
 

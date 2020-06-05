@@ -1,7 +1,7 @@
 import DB from '../db/db'
 import { Firebase } from '../app/app'
 
-const userCollection = 'users'
+const userCollection = 'appUsers'
 const accountsCollection = 'accounts'
 
 /**

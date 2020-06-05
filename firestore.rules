@@ -43,10 +43,10 @@ service cloud.firestore {
     match /whitelists/{whitelistId} {
         allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
     }
-    match /users/{uid} {
+    match /appUsers/{uid} {
         match /accounts/{accountId} {
             allow read, delete: if isUidSigned(uid);
-            allow update: if false;
+            // Only functions can write (verified) accounts
         }
     }
   }

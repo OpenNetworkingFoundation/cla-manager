@@ -1,6 +1,7 @@
 const rp = require('request-promise')
 const functions = require('firebase-functions')
 const sha1 = require('sha1')
+const admin = require('firebase-admin')
 
 module.exports = Crowd
 
@@ -9,7 +10,7 @@ module.exports = Crowd
  * @param db {FirebaseFirestore.Firestore}
  * @param appName {string} crowd app name
  * @param appPassword {string} crowd app password
- * @return {{verifyCrowdUser: validateCredentials}}
+ * @return {{setAppUserAccount: setAppUserAccount}}
  * @constructor
  */
 function Crowd (db, appName, appPassword) {
@@ -26,16 +27,15 @@ function Crowd (db, appName, appPassword) {
 
   /**
    * Validates user credentials against the Crowd server and updates the DB if
-   * successful. Returns the path to the updated document under the "users"
-   * collection.
+   * successful.
    *
    * This function can be called from the client.
    *
-   * @param data {{username: string, password: string}} request data
+   * @param data {{username: string, password: string}} crowd credentials
    * @param context {CallableContext} firebase context
-   * @return {string} user key
+   * @return {string} account document ID
    */
-  async function validateCredentials (data, context) {
+  async function setAppUserAccount (data, context) {
     // Checking that the Firebase user is authenticated.
     if (!context.auth) {
       // Throwing an HttpsError so that the client gets the error details.
@@ -64,22 +64,20 @@ function Crowd (db, appName, appPassword) {
         key: crowdUser.key,
         username: crowdUser.name,
         active: crowdUser.active,
-        firstName: crowdUser['first-name'],
-        lastName: crowdUser['last-name'],
-        displayName: crowdUser['display-name'],
+        name: crowdUser['display-name'],
         email: crowdUser.email,
         updatedOn: new Date()
       }
       // We got what we needed. User logout.
       invalidateSession(crowdSession.token).catch(console.error)
       // Update db.
-      const accountDocKey = sha1(`${onfHostname}${result.key}`)
-      await db.collection('users')
+      const accountDocId = sha1(`${onfHostname}${result.key}`)
+      await db.collection('appUsers')
         .doc(firebaseUid)
         .collection('accounts')
-        .doc(accountDocKey)
+        .doc(accountDocId)
         .set(result)
-      return accountDocKey
+      return accountDocId
     } catch (e) {
       console.log(e)
       throw new functions.https.HttpsError('internal',
@@ -113,6 +111,6 @@ function Crowd (db, appName, appPassword) {
   }
 
   return {
-    verifyCrowdUser: validateCredentials
+    setAppUserAccount: setAppUserAccount
   }
 }
