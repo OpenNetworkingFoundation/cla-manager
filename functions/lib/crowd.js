@@ -24,14 +24,13 @@ function Crowd (db, appName, appPassword) {
 
   async function getUsersWithGithubID (group) {
     const validUsers = []
-    let users = []
+    let users = {}
     try {
-      users = await getUsersUnderGroup(group).users
+      users = await getUsersUnderGroup(group)
     } catch (e) {
       throw new functions.https.HttpsError('Listing user failed' + e)
     }
-
-    for (const user of users) {
+    for (const user of users.users) {
       try {
         const userAttribute = await getAttribute(user.name)
         const result = await getGithubID(userAttribute.attributes)
