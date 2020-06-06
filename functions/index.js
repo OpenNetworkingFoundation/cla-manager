@@ -141,12 +141,13 @@ exports.handleWhitelistUpdate = functions.firestore
 exports.scheduledFirestoreExport = backup
 
 /**
- * Callable function to set ONF account for app user via Crowd
+ * Callable function to set ONF account for app user (via Crowd authentication)
  */
 exports.setAppUserOnfAccount = functions.https.onCall(crowd.setAppUserAccount)
 
 /**
- * Callable function to set Github account for app user
+ * Callable function to set Github account for app user (via Firebase's Github
+ * auth provider.)
  */
 exports.setAppUserGithubAccount = functions.https.onCall(github.setAppUserAccount)
 

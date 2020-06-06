@@ -22,6 +22,11 @@ function Crowd (db, appName, appPassword) {
       user: appName,
       pass: appPassword,
       sendImmediately: true
+    },
+    // Otherwise requests to write APIs fail:
+    // https://confluence.atlassian.com/cloudkb/xsrf-check-failed-when-calling-cloud-apis-826874382.html
+    headers: {
+      'X-Atlassian-Token': 'no-check'
     }
   }
 
@@ -92,13 +97,13 @@ function Crowd (db, appName, appPassword) {
    * @return {Promise<void>}
    */
   async function updateCrowdUser (uid) {
-    // Initialize some attributes to be empty, so to implicitely unset if the
-    // corresponding value is not found in the DB. Crowd expects array for
-    // attribute values.
-    // FIXME: what happens if a user unlink their crowd account? We should be
-    //  resetting all attributes (e.g., remove the github_id), but for this we
-    //  need the old crowd account. This can be found in the Firestore document
-    //  change update (old value).
+    // Initialize some attributes to be empty, so to implicitly unset them on
+    // Crowd if the corresponding value is not found in the DB. Crowd expects
+    // an array for attribute values.
+    // FIXME: what happens if a user unlinks their crowd account first? We
+    //  should be resetting all attributes (e.g., remove the github_id), but for
+    //  this we need the removed crowd username. This can be found in the
+    //  Firestore document change snapshot (old value).
     const attributeMap = {
       github_id: []
     }
@@ -115,7 +120,6 @@ function Crowd (db, appName, appPassword) {
               crowdUsername = a.username
               break
             case 'github.com':
-              // a.key stores the numberic Github user ID
               attributeMap.github_id = [a.username]
               break
             default:
@@ -127,7 +131,6 @@ function Crowd (db, appName, appPassword) {
           console.log(`Cannot find Crowd account for uid ${uid}, aborting update`, accounts)
           return
         }
-        console.log(`Computed attribute map for crowd user ${crowdUsername}`, attributeMap)
         // Transform attributeMap in an object understood by Crowd.
         const attributes = []
         Object.keys(attributeMap).forEach(name => {
@@ -171,7 +174,9 @@ function Crowd (db, appName, appPassword) {
     return rp.post({
       ...rpConf,
       uri: baseUri + `/user/attribute?username=${username}`,
-      attributes: attributes
+      body: {
+        attributes: attributes
+      }
     })
   }
 
