@@ -1,7 +1,6 @@
 const rp = require('request-promise')
 const functions = require('firebase-functions')
 const sha1 = require('sha1')
-const admin = require('firebase-admin')
 
 module.exports = Crowd
 
