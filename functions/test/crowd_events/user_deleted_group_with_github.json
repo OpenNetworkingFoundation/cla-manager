@@ -1,0 +1,11 @@
+{
+  "type": "USER_DELETED_GROUP",
+  "user": {
+    "username": "test",
+    "email": "test@test2",
+    "name": "tester",
+    "groups": [],
+    "githubId": "tester_github"
+  },
+  "groupName": "foo"
+}

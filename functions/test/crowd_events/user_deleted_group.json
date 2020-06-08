@@ -1,0 +1,10 @@
+{
+  "type": "USER_DELETED_GROUP",
+  "user": {
+    "username": "test",
+    "email": "test@test2",
+    "name": "tester",
+    "groups": []
+  },
+  "groupName": "foo"
+}

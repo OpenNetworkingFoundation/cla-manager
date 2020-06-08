@@ -1,0 +1,18 @@
+{
+    "foo" : [
+        {
+            "githubOrg": "github_org1",
+            "team": "team1"
+        },
+        {
+            "githubOrg": "github_org2",
+            "team": "team2"
+        }
+    ],
+    "bar" : [
+        {
+            "githubOrg": "github_org3",
+            "team": "team3"
+        }
+    ]
+}

@@ -6,6 +6,7 @@ const Cla = require('./lib/cla')
 const Backup = require('./lib/backup.js')
 const Crowd = require('./lib/Crowd.js')
 // const CrowdToGitHub = require('./crowd_to_github.js')
+const CrowdWebhook = require('./lib/crowd_webhook')
 const _ = require('lodash')
 
 admin.initializeApp(functions.config().firebase)
@@ -28,6 +29,10 @@ const crowd = new Crowd(
   db,
   functions.config().crowd.app_name,
   functions.config().crowd.app_password)
+
+const crowdWebhook = new CrowdWebhook(
+  functions.config().crowdGroupMappings,
+  github)
 
 const backup = new Backup(
   functions.config().backup.bucket_name,
@@ -110,6 +115,28 @@ exports.handleEvent = functions.firestore
  * @type {HttpsFunction}
  */
 exports.gerritEndpoint = functions.https.onRequest(gerrit.app)
+
+/**
+ * Handles calls from the Gerrit hook.
+ * @type {HttpsFunction}
+ */
+exports.crowdEndpoint = functions.https.onRequest((req, res) => {
+  // FIXME BOC
+  if (req.method === 'POST') {
+    let body = []
+    req.on('data', (chunk) => {
+      body.push(chunk)
+    }).on('end', () => {
+      body = Buffer.concat(body).toString()
+      const event = JSON.parse(body)
+      console.log(event)
+      crowdWebhook.processEvent(event)
+      res.end()
+    })
+  } else {
+    res.end('no data')
+  }
+})
 
 /**
  * When a whitelist is updated, check for events in state failure that match the
