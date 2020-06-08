@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { FirebaseApp, FirebaseAppInit, BugsnagInit } from './common/app/app'
+import { Firebase, FirebaseAppInit, BugsnagInit } from './common/app/app'
 import bugsnagReact from '@bugsnag/plugin-react'
 // Also, import other individual Firebase SDK components that we use
 import './index.css'
@@ -28,12 +28,12 @@ FirebaseAppInit(process.env.REACT_APP_FIREBASE_API_KEY, process.env.REACT_APP_FI
 
 const ErrorBoundary = bugsnagClient.getPlugin('react')
 
-FirebaseApp.auth().onAuthStateChanged((user) => {
+Firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     // User is signed in; fetch token and render app
-    FirebaseApp.auth().currentUser.getIdToken(true)
+    Firebase.auth().currentUser.getIdToken(true)
       .then(res => {
-        return FirebaseApp.auth().currentUser.getIdTokenResult()
+        return Firebase.auth().currentUser.getIdTokenResult()
       })
       .then(token => {
         ReactDOM.render(

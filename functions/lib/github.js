@@ -4,6 +4,7 @@ const App = require('@octokit/app')
 const { Octokit } = require('@octokit/rest')
 const WebhooksApi = require('@octokit/webhooks')
 const sha1 = require('sha1')
+const functions = require('firebase-functions')
 
 module.exports = Github
 
@@ -16,6 +17,7 @@ module.exports = Github
  * @constructor
  */
 function Github (appId, privateKey, secret, db) {
+  const ghHostname = 'github.com'
   const ghApp = new App({
     id: appId,
     // Key is passed as a firebase config string with new lines encoded as "\n".
@@ -35,7 +37,7 @@ function Github (appId, privateKey, secret, db) {
       // Store event int the db. We'll process it later.
       // TODO: check repo owner and discard if it's not managed by ONF
       const pr = context.payload.pull_request
-      const contributionKey = `github.com/${pr.base.repo.full_name}/pull/${pr.number}`
+      const contributionKey = `${ghHostname}/${pr.base.repo.full_name}/pull/${pr.number}`
       const contributionId = sha1(contributionKey)
       const contributionRef = db.collection('contributions').doc(contributionId)
       const action = context.payload.action
@@ -223,9 +225,58 @@ function Github (appId, privateKey, secret, db) {
       .catch(console.error)
   }
 
+  /**
+   * Retrieves the Github user profile info associated with the given personal
+   * access token, and updates the DB if successful.
+   *
+   * This function can be called from the client.
+   *
+   * @param data {{token: string}} github personal access token
+   * @param context {CallableContext} firebase context
+   * @return {string} account document ID
+   */
+  async function setAppUserAccount (data, context) {
+    // Checking that the Firebase user is authenticated.
+    if (!context.auth) {
+      // Throwing an HttpsError so that the client gets the error details.
+      throw new functions.https.HttpsError('permission-denied',
+        'The function must be called while authenticated')
+    }
+    const firebaseUid = context.auth.uid
+    const userToken = data.token
+    const octokit = new Octokit({ auth: userToken })
+
+    try {
+      // Get user info using provided personal access token.
+      const info = await octokit.users.getAuthenticated()
+      const result = {
+        hostname: ghHostname,
+        key: info.data.id,
+        username: info.data.login,
+        active: true,
+        name: info.data.name,
+        email: info.data.email,
+        updatedOn: new Date()
+      }
+      // Update db.
+      const accountDocId = sha1(`${ghHostname}${result.key}`)
+      await db.collection('appUsers')
+        .doc(firebaseUid)
+        .collection('accounts')
+        .doc(accountDocId)
+        .set(result)
+      return accountDocId
+    } catch (e) {
+      console.log(e)
+      throw new functions.https.HttpsError('internal',
+        'An internal error occurred while evaluating the request')
+    }
+  }
+
   return {
     receive: ghWebhooks.receive,
     handler: ghWebhooks.middleware,
-    processEvent: processEvent
+    processEvent: processEvent,
+    setAppUserAccount: setAppUserAccount
   }
 }

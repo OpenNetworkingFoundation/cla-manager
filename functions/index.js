@@ -4,14 +4,15 @@ const Github = require('./lib/github')
 const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
 const Backup = require('./lib/backup.js')
+const Crowd = require('./lib/Crowd.js')
 // const CrowdToGitHub = require('./crowd_to_github.js')
-
 const _ = require('lodash')
 
 admin.initializeApp(functions.config().firebase)
 const db = admin.firestore()
 
 const clalib = new Cla(db)
+
 const github = new Github(
   functions.config().github.app_id,
   functions.config().github.key,
@@ -23,9 +24,15 @@ const gerrit = new Gerrit(
   functions.config().gerrit.user,
   functions.config().gerrit.password)
 
+const crowd = new Crowd(
+  db,
+  functions.config().crowd.app_name,
+  functions.config().crowd.app_password)
+
 const backup = new Backup(
   functions.config().backup.bucket_name,
   functions.config().backup.period)
+
 /*
 const crowdAudit = new CrowdToGitHub(
   functions.config().crowd.app_name,
@@ -33,6 +40,7 @@ const crowdAudit = new CrowdToGitHub(
   functions.config().github.access_token,
   functions.config().crowd.period)
 */
+
 /**
  * Handles the given event snapshot. The implementation is expected to update
  * the status of the contribution (e.g., PR) on the provider (e.g. Github), and
@@ -140,6 +148,27 @@ exports.handleWhitelistUpdate = functions.firestore
  * Periodically backups firestore DB.
  */
 exports.scheduledFirestoreExport = backup
+
+/**
+ * Callable function to set ONF account for app user (via Crowd authentication)
+ */
+exports.setAppUserOnfAccount = functions.https.onCall(crowd.setAppUserAccount)
+
+/**
+ * Callable function to set Github account for app user (via Firebase's Github
+ * auth provider.)
+ */
+exports.setAppUserGithubAccount = functions.https.onCall(github.setAppUserAccount)
+
+/**
+ * Reacts to changes to the linked accounts for an app user
+ */
+exports.handleAppUserAccountUpdate = functions.firestore
+  .document('/appUsers/{uid}/accounts/{accountId}')
+  .onWrite((change, context) => {
+    const uid = context.params.uid
+    return crowd.updateCrowdUser(uid)
+  })
 
 /**
  * Periodically Sync from Crowd to Github

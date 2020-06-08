@@ -1,7 +1,15 @@
-import { FirebaseApp } from '../app/app'
+import { Firebase } from '../app/app'
 
 export default class DB {
   static connection () {
-    return FirebaseApp.firestore()
+    const db = Firebase.firestore()
+    if (location.hostname === 'localhost') {
+      // Talk to emulator
+      db.settings({
+        host: 'localhost:8080',
+        ssl: false
+      })
+    }
+    return db
   }
 }
