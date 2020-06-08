@@ -1,6 +1,7 @@
-import firebase from 'firebase/app'
+import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
+import 'firebase/functions'
 import bugsnag from '@bugsnag/js'
 
 export const FirebaseAppInit = function (apiKey, projectName) {
@@ -12,6 +13,11 @@ export const FirebaseAppInit = function (apiKey, projectName) {
     messagingSenderId: '232849741230',
     projectId: `${projectName}`
   })
+  if (location.hostname === 'localhost') {
+    // Running in emulator.
+    firebase.functions()
+      .useFunctionsEmulator('http://localhost:5001')
+  }
 }
 
 /**
@@ -40,4 +46,4 @@ export const GetBugsnagClient = () => {
   return bugsnagClient
 }
 
-export const FirebaseApp = firebase
+export const Firebase = firebase
