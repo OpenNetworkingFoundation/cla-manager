@@ -121,20 +121,13 @@ exports.gerritEndpoint = functions.https.onRequest(gerrit.app)
  * @type {HttpsFunction}
  */
 exports.crowdEndpoint = functions.https.onRequest((req, res) => {
-  // FIXME BOC
-  if (req.method === 'POST') {
-    let body = []
-    req.on('data', (chunk) => {
-      body.push(chunk)
-    }).on('end', () => {
-      body = Buffer.concat(body).toString()
-      const event = JSON.parse(body)
-      console.log(event)
-      crowdWebhook.processEvent(event)
-      res.end()
-    })
+  if (req.method === 'POST' && req.get('content-type') === 'application/json') {
+    const { event } = req.body
+    console.log(event)
+    crowdWebhook.processEvent(event)
+    res.end()
   } else {
-    res.end('no data')
+    res.status(502).send('invalid event format')
   }
 })
 
