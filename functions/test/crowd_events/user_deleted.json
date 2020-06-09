@@ -1,0 +1,5 @@
+{
+  "type": "USER_DELETED",
+  "oldGithubId": "tester_github",
+  "oldEmail": "test@test2"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "USER_DELETED_GITHUB",
+  "user": {
+    "username": "test",
+    "email": "test@test2",
+    "name": "tester",
+    "groups": [
+      "foo"
+    ]
+  },
+  "oldGithubId": "tester_github"
+}

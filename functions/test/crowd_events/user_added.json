@@ -1,0 +1,9 @@
+{
+  "type": "USER_ADDED",
+  "user": {
+    "username": "test",
+    "email": "test@test",
+    "name": "tester",
+    "groups": []
+  }
+}
