@@ -1,5 +1,4 @@
 const Crowd = require('./crowd.js')
-const GitHubAPI = require('./github_api.js')
 const functions = require('firebase-functions')
 
 module.exports = CrowdToGitHub
@@ -12,38 +11,35 @@ module.exports = CrowdToGitHub
  * @return {{getUsersWithGithubID: getUsersWithGithubID}}
  * @constructor
  */
-function CrowdToGitHub (crowdApp, crowdPassword, githubToken, period) {
-  const crowdGroups = ['members', 'AetherAccess', 'ONFStaff']
-  // FIXME
-  const githubOrganizations = []
-
+function CrowdToGitHub (crowdApp, crowdPassword, githubObj, period) {
+  const config = require('./crowd_webhook_config.json')
   async function AuditFromCrowdToGitHub () {
     const crowd = new Crowd(null, crowdApp, crowdPassword)
-    const githubAPI = new GitHubAPI(githubToken)
 
     // Iterate all Crowd groups
-    for (const crowdGroup of crowdGroups) {
+    for (const [crowdGroup, value] of Object.entries(config)) {
       // Get all valid Users from Crowd serer (valid means the user has Github_id attribute)
       const crowdUsers = await crowd.getUsersWithGithubID(crowdGroup)
       // Iterate all github organization,
-      for (const org of githubOrganizations) {
+      for (const github of value) {
+        console.log(`mapping from Crowd ${crowdGroup} to ${github.githubOrg}/${github.team}`)
         // Create the Team if necessary
-        await githubAPI.createTeam(org, crowdGroup)
+        await githubObj.createTeam(github.githubOrg, github.team)
 
         // Get all users under github team
-        const githubUsers = await githubAPI.getUsers(org, crowdGroup)
+        const githubUsers = await githubObj.getUsers(github.githubOrg, github.team)
         // For All Crowd Users
         for (const [key] of Object.entries(crowdUsers)) {
           // Add to Github if user is not in Github
           if (!(key in githubUsers)) {
-            githubAPI.addUser(key, org, crowdGroup)
+            githubObj.addUser(key, github.githubOrg, github.team)
           }
         }
         // For All Github Users
         for (const [key] of Object.entries(githubUsers)) {
           // Remove from Github if user is not in Crowd
           if (!(key in crowdUsers)) {
-            githubAPI.deleteUser(key, org, crowdGroup)
+            githubObj.deleteUser(key, github.githubOrg, github.team)
           }
         }
       }
