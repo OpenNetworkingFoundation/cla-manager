@@ -1,60 +1,54 @@
-// Checks to see if the signer of the new CLA or Addendum is the authenticated user
-function isSigner() {
-  return request.auth.token.email == request.resource.data.signer.value;
-}
-
-// Checks to see if the signer of the existing CLA or Addendum is the authenticated user
-function didSign() {
-  return request.auth.token.email == resource.data.signer.value;
-}
-
-// the request object contains info about the authentication status of the requesting user
-// if the .auth property is not set, the user is not signed in
-function isSignedIn() {
-  return request.auth != null;
-}
-
-// checks whether the user has admin privileges or not
-function isAdmin() {
-    return request.auth.token.admin == true;
-}
-
 // Note: CLAs and Addendums cannot be modified or deleted
 service cloud.firestore {
+
+  // Checks to see if the signer of the new CLA or Addendum is the authenticated user
+  function isSigner() {
+    return request.auth.token.email == request.resource.data.signer.value;
+  }
+
+  // Checks to see if the signer of the existing CLA or Addendum is the authenticated user
+  function didSign() {
+    return request.auth.token.email == resource.data.signer.value;
+  }
+
+  // the request object contains info about the authentication status of the requesting user
+  // if the .auth property is not set, the user is not signed in
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  // checks whether the user has admin privileges or not
+  function isAdmin() {
+      return request.auth.token.admin == true;
+  }
+
+  // check whether the user can manage addendums for a given Agreement
+  // in order for this to happen the User needs to be listed in an Addendum with type "COSIGNER"
+  function isManager() {
+      return get(/databases/$(database)/documents/agreements/$(request.resource.data.agreementId)).data.signer.value
+                == request.resource.data.signer.value;
+  }
+
   match /databases/{database}/documents {
     match /agreements/{agreementId} {
       allow create: if isSignedIn() && isSigner();
-      allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
+      allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #1)
       allow update: if false;
       allow delete: if false;
     }
     match /addendums/{addendumId} {
-      allow create: if isSignedIn() && isSigner() &&
-        get(/databases/$(database)/documents/agreements/$(request.resource.data.agreementId)).data.signer.value
-          == request.resource.data.signer.value; //TODO (see below #1)
-      allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
+      allow create: if isSignedIn() && isSigner() && isManager();
+      allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #1)
       allow update: if false;
       allow delete: if false;
     }
     match /whitelists/{whitelistId} {
-        allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #2)
+        allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #1)
     }
   }
 }
 
 /* Notes:
-
-Today, only the signer of an agreement or addendum can read the document.
-
-1. In the future, we may allow office admins to amend agreements by adding addendums
-on behalf of a signer.
-
-If this happens, we will need to update the canAmendAgreements to check to see if
-the signer is authorized in the parent CLA as an admin.
-
-TODO: get() doesn't appear to work in a function. If that changes in the future,
-we might reconsider refactoring.
-
 2. We may also allow users that are named in corporate agreements
 to read, but not amend, the CLA that they are named on.
 

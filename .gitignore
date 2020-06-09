@@ -2,6 +2,7 @@
 .firebase
 .runtimeconfig.json
 
+node_modules
 */node_modules
 */coverage-final.json
 

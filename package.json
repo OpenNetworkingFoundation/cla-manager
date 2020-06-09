@@ -1,0 +1,20 @@
+{
+  "name": "cla-manager",
+  "version": "1.0.0",
+  "description": "![CLAM logo](media/clam.png)",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --timeout=10000"
+  },
+  "devDependencies": {
+    "@firebase/testing": "^0.15.0",
+    "mocha": "5.2.0",
+    "prettier": "1.15.2"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenNetworkingFoundation/cla-manager/issues"
+  },
+  "homepage": "https://github.com/OpenNetworkingFoundation/cla-manager#readme"
+}
