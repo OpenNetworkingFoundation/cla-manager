@@ -18,12 +18,20 @@ function CrowdWebhook (groupMappings, github) {
       if (hasProperty(mapping, 'githubOrg') && // handle Github membership
               (noFilter || filter.includes('github')) &&
               hasProperty(user, 'githubId')) {
-        if (add) {
-          github.addUser(user.githubId, mapping.githubOrg, mapping.team)
-          // TODO: handle response?
-        } else {
-          github.deleteUser(user.githubId, mapping.githubOrg, mapping.team)
-          // TODO: handle response?
+        try {
+          if (add) {
+            console.log(`Adding ${user.githubId} to ${mapping.githubOrg}:${mapping.team}`)
+            // TODO: save some API calls by not always calling this
+            await github.createTeam(mapping.githubOrg, mapping.team)
+            await github.addUser(user.githubId, mapping.githubOrg, mapping.team)
+            // TODO: handle response?
+          } else {
+            console.log(`Removing ${user.githubId} from ${mapping.githubOrg}:${mapping.team}`)
+            await github.deleteUser(user.githubId, mapping.githubOrg, mapping.team)
+            // TODO: handle response?
+          }
+        } catch (e) {
+          console.log(e)
         }
       } // else if gerrit mapping
       // TODO: implement this
@@ -31,43 +39,42 @@ function CrowdWebhook (groupMappings, github) {
   }
 
   async function addMembership (user, group, filter) {
-    processMembership(user, group, filter, true)
+    await processMembership(user, group, filter, true)
   }
 
   async function removeMembership (user, group, filter) {
-    processMembership(user, group, filter, false)
+    await processMembership(user, group, filter, false)
   }
 
   async function processEvent (event) {
     if (event.type === 'USER_ADDED' || event.type === 'USER_ADDED_GITHUB') {
       const filter = (event.type === 'USER_ADDED_GITHUB') ? ['github'] : []
       if (event.user && event.user.groups) {
-        event.user.groups.forEach(group => {
-          addMembership(event.user, group, filter)
-        })
+        for (const group of event.user.groups) {
+          await addMembership(event.user, group, filter)
+        }
       }
     } else if (event.type === 'USER_UPDATED_GITHUB') {
       if (event.user && event.user.groups) {
-        event.user.groups.forEach(group => {
-          removeMembership({ githubId: event.oldGithubId }, group, ['github'])
-          addMembership(event.user, group, ['github'])
-        })
+        for (const group of event.user.groups) {
+          await removeMembership({ githubId: event.oldGithubId }, group, ['github'])
+          await addMembership(event.user, group, ['github'])
+        }
       }
     } else if (event.type === 'USER_DELETED_GITHUB') {
       if (event.user && event.user.groups) {
-        event.user.groups.forEach(group => {
-          removeMembership({ githubId: event.oldGithubId }, group, ['github'])
-          addMembership(event.user, group, ['github'])
-        })
+        for (const group of event.user.groups) {
+          await removeMembership({ githubId: event.oldGithubId }, group, ['github'])
+        }
       }
     } else if (event.type === 'USER_ADDED_GROUP') {
-      addMembership(event.user, event.groupName, [])
+      await addMembership(event.user, event.groupName, [])
     } else if (event.type === 'USER_DELETED_GROUP') {
-      removeMembership(event.user, event.groupName, [])
+      await removeMembership(event.user, event.groupName, [])
     } else if (event.type === 'USER_DELETED') {
       for (const group in groupMappings) {
         // this approach is a bit brute force, and will attempt to remove user from all known groups
-        removeMembership({ githubId: event.oldGithubId, email: event.oldEmail }, group, [])
+        await removeMembership({ githubId: event.oldGithubId, email: event.oldEmail }, group, [])
       }
     } else {
       // don't care about this event

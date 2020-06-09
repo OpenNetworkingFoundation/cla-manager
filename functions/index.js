@@ -122,12 +122,12 @@ exports.gerritEndpoint = functions.https.onRequest(gerrit.app)
  */
 exports.crowdEndpoint = functions.https.onRequest((req, res) => {
   if (req.method === 'POST' && req.get('content-type') === 'application/json') {
-    const { event } = req.body
+    const event = req.body
     console.log(event)
     crowdWebhook.processEvent(event)
     res.end()
   } else {
-    res.status(502).send('invalid event format')
+    res.status(400).send('invalid event format')
   }
 })
 

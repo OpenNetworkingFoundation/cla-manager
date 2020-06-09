@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@octokit/app": "^2.2.5",
+    "@octokit/request": "^5.4.4",
     "@octokit/rest": "^16.43.1",
     "@octokit/webhooks": "^6.3.2",
     "atlassian-crowd-client": "^2.0.0",

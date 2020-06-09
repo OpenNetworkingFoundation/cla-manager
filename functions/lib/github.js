@@ -4,6 +4,7 @@ const App = require('@octokit/app')
 const { Octokit } = require('@octokit/rest')
 const WebhooksApi = require('@octokit/webhooks')
 const { request } = require('@octokit/request')
+// const { createTokenAuth } = require('@octokit/auth-token')
 const sha1 = require('sha1')
 const functions = require('firebase-functions')
 
@@ -277,35 +278,42 @@ function Github (appId, privateKey, secret, db) {
   /**
    * TODO comment
    */
-  async function getInstallationToken (owner) {
+  async function getInstallationToken (org) {
     const jwt = ghApp.getSignedJsonWebToken()
 
     // Experimental API to get the installation ID for an organization
     // https://developer.github.com/v3/apps/#get-an-organization-installation-for-the-authenticated-app
-    const { data } = await request('GET /orgs/:owner/installation', {
-      owner,
+    const { data } = await request('GET /orgs/:org/installation', {
+      org,
       headers: {
         authorization: `Bearer ${jwt}`,
         accept: 'application/vnd.github.machine-man-preview+json'
       }
     })
-
     const installationId = data.id
+    // TODO: we should cache the org -> installationId mapping to prevent repeated requests
+
     const installationAccessToken = await ghApp.getInstallationAccessToken({
       installationId
     })
-
-    // TODO: we should cache these tokens to prevent repeated requests
     return installationAccessToken
+  }
+
+  async function getApi (org) {
+    const installationToken = await getInstallationToken(org)
+    // const auth = createTokenAuth(installationToken);
+    // const authentication = await auth();
+    const octokit = new Octokit({
+      auth: installationToken
+    })
+    return octokit
   }
 
   /**
    * TODO comment
    */
   async function getUsers (org, team) {
-    const installationToken = getInstallationToken(org)
-    const octokit = new Octokit({ auth: installationToken })
-
+    const octokit = await getApi(org)
     const validUsers = []
     try {
       const { data: users } = await octokit.teams.listMembersInOrg({
@@ -325,9 +333,7 @@ function Github (appId, privateKey, secret, db) {
    * TODO comment
    */
   async function addUser (githubID, org, team) {
-    const installationToken = getInstallationToken(org)
-    const octokit = new Octokit({ auth: installationToken })
-
+    const octokit = await getApi(org)
     try {
       await octokit.teams.addOrUpdateMembershipInOrg({
         org: org,
@@ -343,9 +349,7 @@ function Github (appId, privateKey, secret, db) {
    * TODO comment
    */
   async function deleteUser (githubID, org, team) {
-    const installationToken = getInstallationToken(org)
-    const octokit = new Octokit({ auth: installationToken })
-
+    const octokit = await getApi(org)
     try {
       await octokit.teams.removeMembershipInOrg({
         org: org,
@@ -361,9 +365,7 @@ function Github (appId, privateKey, secret, db) {
    * TODO comment
    */
   async function createTeamIfNotExist (org, name) {
-    const installationToken = getInstallationToken(org)
-    const octokit = new Octokit({ auth: installationToken })
-
+    const octokit = await getApi(org)
     try {
       let check = false
       const { data: teams } = await octokit.teams.list({
