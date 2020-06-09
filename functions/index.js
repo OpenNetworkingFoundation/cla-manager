@@ -4,6 +4,7 @@ const Github = require('./lib/github')
 const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
 const Backup = require('./lib/backup.js')
+// TODO: merge all crowd-related functions in the same lib/crowd.js file
 const Crowd = require('./lib/Crowd.js')
 const CrowdToGitHub = require('./crowd_to_github.js')
 const CrowdWebhook = require('./lib/crowd_webhook')
@@ -39,10 +40,11 @@ const backup = new Backup(
   functions.config().backup.period)
 
 const crowdAudit = new CrowdToGitHub(
+  functions.config().crowd_group_mappings,
   functions.config().crowd.app_name,
   functions.config().crowd.app_password,
   github,
-  functions.config().crowd.period)
+  functions.config().crowd.github_sync_period)
 
 /**
  * Handles the given event snapshot. The implementation is expected to update
@@ -191,4 +193,4 @@ exports.handleAppUserAccountUpdate = functions.firestore
 /**
  * Periodically Sync from Crowd to Github
  */
-exports.scheduledFirestoreExport = crowdAudit.PeriodicAudit
+exports.crowdToGithubPeriodicAudit = crowdAudit.PeriodicAudit

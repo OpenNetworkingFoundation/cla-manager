@@ -327,7 +327,7 @@ function Github (appId, privateKey, secret, db) {
         validUsers[user.login] = true
       }
     } catch (e) {
-      throw new functions.https.HttpsError('Fetching user list failed' + e)
+      throw new Error('Fetching user list failed:' + e)
     }
     return validUsers
   }
@@ -348,7 +348,7 @@ function Github (appId, privateKey, secret, db) {
         username: githubID
       })
     } catch (e) {
-      throw new functions.https.HttpsError('Adding user failed ' + e)
+      throw new Error('Adding user failed:' + e)
     }
   }
 
@@ -368,7 +368,7 @@ function Github (appId, privateKey, secret, db) {
         username: githubID
       })
     } catch (e) {
-      throw new functions.https.HttpsError('Deleting user failed ' + e)
+      throw new Error('Deleting user failed:' + e)
     }
   }
 
@@ -402,7 +402,7 @@ function Github (appId, privateKey, secret, db) {
         })
       }
     } catch (e) {
-      throw new functions.https.HttpsError('Creating team failed ' + e)
+      throw new Error('Creating team failed:' + e)
     }
   }
 
