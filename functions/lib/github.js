@@ -310,7 +310,10 @@ function Github (appId, privateKey, secret, db) {
   }
 
   /**
-   * TODO comment
+   * Fetch user list from a GitHub Team
+   * @param org {GitHub Organization name}
+   * @param team {GitHub Team name}
+   * @return {list} user list
    */
   async function getUsers (org, team) {
     const octokit = await getApi(org)
@@ -330,7 +333,11 @@ function Github (appId, privateKey, secret, db) {
   }
 
   /**
-   * TODO comment
+   * Add a GitHub user into a GitHub Team
+   * @param githubID {GitHub User ID}
+   * @param org {GitHub Organization name}
+   * @param team {GitHub Team name}
+   * @returns nothing
    */
   async function addUser (githubID, org, team) {
     const octokit = await getApi(org)
@@ -346,7 +353,11 @@ function Github (appId, privateKey, secret, db) {
   }
 
   /**
-   * TODO comment
+   * Delete a GitHub user from a GitHub Team
+   * @param githubID {GitHub User ID}
+   * @param org {GitHub Organization name}
+   * @param team {GitHub Team name}
+   * @returns nothing
    */
   async function deleteUser (githubID, org, team) {
     const octokit = await getApi(org)
@@ -362,7 +373,10 @@ function Github (appId, privateKey, secret, db) {
   }
 
   /**
-   * TODO comment
+   * Create a GitHub Team if it does not exist
+   * @param org {GitHub Organization name}
+   * @param team {GitHub Team name}
+   * @returns nothing
    */
   async function createTeamIfNotExist (org, name) {
     const octokit = await getApi(org)
