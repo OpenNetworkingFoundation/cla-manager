@@ -31,7 +31,7 @@ const crowd = new Crowd(
   functions.config().crowd.app_password)
 
 const crowdWebhook = new CrowdWebhook(
-  functions.config().crowdGroupMappings,
+  functions.config().crowd_group_mappings,
   github)
 
 const backup = new Backup(
