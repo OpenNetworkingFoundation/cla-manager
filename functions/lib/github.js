@@ -3,6 +3,8 @@ const Cla = require('./cla')
 const App = require('@octokit/app')
 const { Octokit } = require('@octokit/rest')
 const WebhooksApi = require('@octokit/webhooks')
+const { request } = require('@octokit/request')
+// const { createTokenAuth } = require('@octokit/auth-token')
 const sha1 = require('sha1')
 const functions = require('firebase-functions')
 
@@ -273,10 +275,131 @@ function Github (appId, privateKey, secret, db) {
     }
   }
 
+  /**
+   * TODO comment
+   */
+  async function getInstallationToken (org) {
+    const jwt = ghApp.getSignedJsonWebToken()
+
+    // Experimental API to get the installation ID for an organization
+    // https://developer.github.com/v3/apps/#get-an-organization-installation-for-the-authenticated-app
+    const { data } = await request('GET /orgs/:org/installation', {
+      org,
+      headers: {
+        authorization: `Bearer ${jwt}`,
+        accept: 'application/vnd.github.machine-man-preview+json'
+      }
+    })
+    const installationId = data.id
+    // TODO: we should cache the org -> installationId mapping to prevent repeated requests
+
+    const installationAccessToken = await ghApp.getInstallationAccessToken({
+      installationId
+    })
+    return installationAccessToken
+  }
+
+  async function getApi (org) {
+    const installationToken = await getInstallationToken(org)
+    // const auth = createTokenAuth(installationToken);
+    // const authentication = await auth();
+    const octokit = new Octokit({
+      auth: installationToken
+    })
+    return octokit
+  }
+
+  /**
+   * TODO comment
+   */
+  async function getUsers (org, team) {
+    const octokit = await getApi(org)
+    const validUsers = []
+    try {
+      const { data: users } = await octokit.teams.listMembersInOrg({
+        org: org,
+        team_slug: team
+      })
+      for (const user of users) {
+        validUsers[user.login] = true
+      }
+    } catch (e) {
+      throw new functions.https.HttpsError('Fetching user list failed' + e)
+    }
+    return validUsers
+  }
+
+  /**
+   * TODO comment
+   */
+  async function addUser (githubID, org, team) {
+    const octokit = await getApi(org)
+    try {
+      await octokit.teams.addOrUpdateMembershipInOrg({
+        org: org,
+        team_slug: team,
+        username: githubID
+      })
+    } catch (e) {
+      throw new functions.https.HttpsError('Adding user failed ' + e)
+    }
+  }
+
+  /**
+   * TODO comment
+   */
+  async function deleteUser (githubID, org, team) {
+    const octokit = await getApi(org)
+    try {
+      await octokit.teams.removeMembershipInOrg({
+        org: org,
+        team_slug: team,
+        username: githubID
+      })
+    } catch (e) {
+      throw new functions.https.HttpsError('Deleting user failed ' + e)
+    }
+  }
+
+  /**
+   * TODO comment
+   */
+  async function createTeamIfNotExist (org, name) {
+    const octokit = await getApi(org)
+    try {
+      let check = false
+      const { data: teams } = await octokit.teams.list({
+        org: org
+      })
+
+      // Check the existence
+      for (const team of teams) {
+        if (team.name === name) {
+          check = true
+          break
+        }
+      }
+
+      // Create if necessary
+      if (!check) {
+        await octokit.teams.create({
+          org: org,
+          name: name
+        })
+      }
+    } catch (e) {
+      throw new functions.https.HttpsError('Creating team failed ' + e)
+    }
+  }
+
   return {
     receive: ghWebhooks.receive,
     handler: ghWebhooks.middleware,
     processEvent: processEvent,
-    setAppUserAccount: setAppUserAccount
+    setAppUserAccount: setAppUserAccount,
+    getUsers: getUsers,
+    addUser: addUser,
+    deleteUser: deleteUser,
+    createTeam: createTeamIfNotExist
   }
 }

@@ -1,0 +1,13 @@
+{
+  "type": "USER_ADDED_GROUP",
+  "user": {
+    "username": "test",
+    "email": "test@test2",
+    "name": "tester",
+    "groups": [
+      "foo"
+    ],
+    "githubId": "tester_github"
+  },
+  "groupName": "foo"
+}

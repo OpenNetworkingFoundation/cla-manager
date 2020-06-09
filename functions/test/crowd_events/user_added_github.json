@@ -1,0 +1,11 @@
+{
+  "type": "USER_ADDED_GITHUB",
+  "user": {
+    "username": "test",
+    "email": "test@test",
+    "name": "tester",
+    "groups": [],
+    "githubId": "tester_github"
+  },
+  "newGithubId": "tester_github"
+}
