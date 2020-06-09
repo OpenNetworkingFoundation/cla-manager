@@ -11,13 +11,11 @@ module.exports = CrowdToGitHub
  * @return {{getUsersWithGithubID: getUsersWithGithubID}}
  * @constructor
  */
-function CrowdToGitHub (crowdApp, crowdPassword, githubObj, period) {
-  const config = require('./crowd_webhook_config.json')
+function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj, period) {
   async function AuditFromCrowdToGitHub () {
     const crowd = new Crowd(null, crowdApp, crowdPassword)
-
     // Iterate all Crowd groups
-    for (const [crowdGroup, value] of Object.entries(config)) {
+    for (const [crowdGroup, value] of Object.entries(groupMappings)) {
       // Get all valid Users from Crowd serer (valid means the user has Github_id attribute)
       const crowdUsers = await crowd.getUsersWithGithubID(crowdGroup)
       // Iterate all github organization,

@@ -185,7 +185,7 @@ function Crowd (db, appName, appPassword) {
     try {
       users = await getUsersUnderGroup(group)
     } catch (e) {
-      throw new functions.https.HttpsError('Listing user failed' + e)
+      throw new Error('Listing user failed:' + e)
     }
     for (const user of users.users) {
       try {

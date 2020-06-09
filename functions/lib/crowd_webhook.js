@@ -5,19 +5,14 @@ function hasProperty (object, property) {
 }
 
 function CrowdWebhook (groupMappings, github) {
-  if (!groupMappings) {
-    // Use default mapping if one is not provided
-    groupMappings = require('./crowd_webhook_config')
-  }
-
   async function processMembership (user, group, filter, add) {
     const noFilter = !Array.isArray(filter) || !filter.length
     const mappings = groupMappings[group]
     for (const i in mappings) {
       const mapping = mappings[i]
       if (hasProperty(mapping, 'githubOrg') && // handle Github membership
-              (noFilter || filter.includes('github')) &&
-              hasProperty(user, 'githubId')) {
+        (noFilter || filter.includes('github')) &&
+        hasProperty(user, 'githubId')) {
         try {
           if (add) {
             console.log(`Adding ${user.githubId} to ${mapping.githubOrg}:${mapping.team}`)
