@@ -1,0 +1,12 @@
+{
+  "Members" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "Members"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "Members"
+    }
+  ]
+}

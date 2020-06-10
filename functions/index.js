@@ -31,8 +31,10 @@ const crowd = new Crowd(
   functions.config().crowd.app_name,
   functions.config().crowd.app_password)
 
+const crowdToGithubGroups = require('./conf/crowd_to_github_groups.json')
+
 const crowdWebhook = new CrowdWebhook(
-  functions.config().crowd_group_mappings,
+  crowdToGithubGroups,
   github)
 
 const backup = new Backup(
@@ -40,7 +42,7 @@ const backup = new Backup(
   functions.config().backup.period)
 
 const crowdAudit = new CrowdToGitHub(
-  functions.config().crowd_group_mappings,
+  crowdToGithubGroups,
   functions.config().crowd.app_name,
   functions.config().crowd.app_password,
   github,
