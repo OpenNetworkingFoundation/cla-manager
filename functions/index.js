@@ -5,7 +5,7 @@ const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
 const Backup = require('./lib/backup.js')
 // TODO: merge all crowd-related functions in the same lib/crowd.js file
-const Crowd = require('./lib/Crowd.js')
+const Crowd = require('./lib/crowd.js')
 const CrowdToGitHub = require('./crowd_to_github.js')
 const CrowdWebhook = require('./lib/crowd_webhook')
 const _ = require('lodash')
