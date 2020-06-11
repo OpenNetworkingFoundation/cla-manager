@@ -16,6 +16,7 @@ function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
     for (const [crowdGroup, value] of Object.entries(groupMappings)) {
       // Get all valid Users from Crowd serer (valid means the user has Github_id attribute)
       const crowdUsers = await crowd.getUsersWithGithubID(crowdGroup)
+      console.log(`Crowd Users: ${JSON.stringify(crowdUsers)}`)
       // Iterate all github organization,
       for (const github of value) {
         console.log(`mapping from Crowd ${crowdGroup} to ${github.githubOrg}/${github.team}`)
@@ -24,18 +25,29 @@ function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
 
         // Get all users under github team
         const githubUsers = await githubObj.getUsers(github.githubOrg, github.team)
+        console.log(`GitHub Users: ${JSON.stringify(githubUsers)}`)
         // For All Crowd Users
         for (const [key] of Object.entries(crowdUsers)) {
           // Add to Github if user is not in Github
           if (!(key in githubUsers)) {
-            githubObj.addUser(key, github.githubOrg, github.team)
+            try {
+              console.debug(`Adding ${key} to ${github.githubOrg}:${github.team}`)
+              await githubObj.addUser(key, github.githubOrg, github.team)
+            } catch (e) {
+              console.error(`Adding ${key} to ${github.githubOrg}:${github.team} failed:` + e)
+            }
           }
         }
         // For All Github Users
         for (const [key] of Object.entries(githubUsers)) {
           // Remove from Github if user is not in Crowd
           if (!(key in crowdUsers)) {
-            githubObj.deleteUser(key, github.githubOrg, github.team)
+            try {
+              console.debug(`Removing ${key} from ${github.githubOrg}:${github.team}`)
+              await githubObj.deleteUser(key, github.githubOrg, github.team)
+            } catch (e) {
+              console.error(`Removing ${key} from ${github.githubOrg}:${github.team} failed:` + e)
+            }
           }
         }
       }

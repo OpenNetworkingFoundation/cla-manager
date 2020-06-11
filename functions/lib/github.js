@@ -317,7 +317,7 @@ function Github (appId, privateKey, secret, db) {
    */
   async function getUsers (org, team) {
     const octokit = await getApi(org)
-    const validUsers = []
+    const validUsers = {}
     try {
       const { data: users } = await octokit.teams.listMembersInOrg({
         org: org,
