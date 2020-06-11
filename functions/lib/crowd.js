@@ -180,7 +180,7 @@ function Crowd (db, appName, appPassword) {
   }
 
   async function getUsersWithGithubID (group) {
-    const validUsers = []
+    const validUsers = {}
     let users = {}
     try {
       users = await getUsersUnderGroup(group)
