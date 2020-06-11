@@ -6,10 +6,10 @@ module.exports = Backup
 
 /**
  * Firestore backup related functions
- * @param bucket_name, schedule period
+ * @param bucket_name
  */
-function Backup (bucketName, period) {
-  return functions.pubsub.schedule(period).onRun((context) => {
+function Backup (bucketName) {
+  return functions.pubsub.schedule('every 24 hours').onRun((context) => {
     const projectId = process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT
     const databaseName = client.databasePath(projectId, '(default)')
     const bucket = 'gs://' + bucketName
