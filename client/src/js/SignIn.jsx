@@ -134,7 +134,7 @@ export default function SignIn () {
               autoFocus
             />
             <p>
-              <strong>IMPORTANT:</strong> if want to sign an agreement for your
+              <strong>IMPORTANT:</strong> If you want to sign an agreement for your
               company (Institutional CLA), please enter your work email address.
             </p>
             <p>
