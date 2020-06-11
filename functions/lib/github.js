@@ -319,14 +319,23 @@ function Github (appId, privateKey, secret, db) {
     const octokit = await getApi(org)
     const validUsers = {}
     try {
-      const { data: users } = await octokit.teams.listMembersInOrg({
+      //Get in-team users
+      var { data: users } = await octokit.teams.listMembersInOrg({
         org: org,
         team_slug: team
       })
       for (const user of users) {
         validUsers[user.login] = true
       }
-    } catch (e) {
+      //Get Pending users
+      var { data: users }= await octokit.teams.listPendingInvitationsInOrg({
+        org: org,
+        team_slug: team
+      })
+      for (const user of users) {
+        validUsers[user.login] = true
+      }
+   } catch (e) {
       throw new Error('Fetching user list failed:' + e)
     }
     return validUsers
