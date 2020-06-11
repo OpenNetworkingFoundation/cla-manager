@@ -1,5 +1,4 @@
 const Crowd = require('./crowd.js')
-const functions = require('firebase-functions')
 
 module.exports = CrowdToGitHub
 /**
@@ -7,11 +6,10 @@ module.exports = CrowdToGitHub
  * @param crowdApp {string} crowd app name
  * @param crowdPassword {string} crowd app password
  * @param githubToken {string} Github Access token
- * @param period {string} period for scheduled function
  * @return {{getUsersWithGithubID: getUsersWithGithubID}}
  * @constructor
  */
-function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj, period) {
+function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
   async function AuditFromCrowdToGitHub () {
     const crowd = new Crowd(null, crowdApp, crowdPassword)
     // Iterate all Crowd groups
@@ -44,13 +42,7 @@ function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj, perio
     }
   }
 
-  function PeriodicAudit () {
-    return functions.pubsub.schedule(period).onRun((context) => {
-      AuditFromCrowdToGitHub()
-    })
-  }
   return {
-    ManuallyAudit: AuditFromCrowdToGitHub,
-    PeriodicAudit: PeriodicAudit
+    ManuallyAudit: AuditFromCrowdToGitHub
   }
 };

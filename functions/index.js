@@ -38,15 +38,13 @@ const crowdWebhook = new CrowdWebhook(
   github)
 
 const backup = new Backup(
-  functions.config().backup.bucket_name,
-  functions.config().backup.period)
+  functions.config().backup.bucket_name)
 
 const crowdAudit = new CrowdToGitHub(
   crowdToGithubGroups,
   functions.config().crowd.app_name,
   functions.config().crowd.app_password,
-  github,
-  functions.config().crowd.github_sync_period)
+  github)
 
 /**
  * Handles the given event snapshot. The implementation is expected to update
@@ -195,4 +193,8 @@ exports.handleAppUserAccountUpdate = functions.firestore
 /**
  * Periodically Sync from Crowd to Github
  */
-exports.crowdToGithubPeriodicAudit = crowdAudit.PeriodicAudit
+exports.crowdToGithubPeriodicAudit = functions.pubsub
+  .schedule('every 24 hours')
+  .onRun(() => {
+    return crowdAudit.ManuallyAudit()
+  })

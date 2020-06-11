@@ -8,5 +8,15 @@
       "githubOrg": "onosproject",
       "team": "Members"
     }
+  ],
+  "ONFStaff" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "ONFStaff"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "ONFStaff"
+    }
   ]
 }
