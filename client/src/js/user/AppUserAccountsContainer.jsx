@@ -263,19 +263,25 @@ function AppUserAccountsContainer () {
       <Grid container xs={12}>
         <Grid item xs={12}>
           <Box textAlign='center'>
-            <h2 className={classes.h2}>Member-Only Access</h2>
+            <h2 className={classes.h2}>Link your Accounts</h2>
             <Typography variant={'body1'} gutterBottom>
-              Link your ONF account to other third-party
-              developer accounts owned by you (e.g., GitHub) to get access to
-              ONF's member-only resources.
+              If your employer is an <a
+              href="https://wiki.opennetworking.org/x/AoBODw">ONF Member</a>, you can link
+              your ONF account to your GitHub account to be granted access to Member-only
+              resources shared in GitHub.  Once both accounts are linked, you will receive
+              invitations from GitHub to Member-only teams.
             </Typography>
             <Typography variant={'body2'} gutterBottom>
-              The ONF account is the same used to access other
-              opennetworking.org services such as Gerrit, Jira, Confluence
-              (wiki), Jenkins, etc. If your employer is an ONF member, but you
-              don't have an ONF account,&nbsp; <a
-              href='https://www.opennetworking.org/register/' target='_blank'>
-              click here </a> to create one.
+              Your ONF account is the same account used to access other
+              opennetworking.org services such as Gerrit, Jira, Confluence, Jenkins, etc.
+              If your employer is already an ONF Member, but you don't have an ONF
+              account, please register using your work email address at:
+              <a href='https://www.opennetworking.org/register/' target='_blank'>
+              https://www.opennetworking.org/register/</a>.
+            </Typography>
+            <Typography variant={'body2'} gutterBottom>
+              <strong>Note:</strong> Browser pop-up windows are used when linking/unlinking
+              accounts, so allow your web browser to display these if prompted.
             </Typography>
           </Box>
         </Grid>
