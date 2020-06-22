@@ -1,6 +1,7 @@
 const rp = require('request-promise')
 const functions = require('firebase-functions')
 const sha1 = require('sha1')
+const admin = require('firebase-admin')
 
 module.exports = Crowd
 
@@ -9,7 +10,7 @@ module.exports = Crowd
  * @param db {FirebaseFirestore.Firestore}
  * @param appName {string} crowd app name
  * @param appPassword {string} crowd app password
- * @return {{setAppUserAccount: setAppUserAccount}}
+ * @return {setAppUserAccount: setAppUserAccount, getUsersWithGithubID: (function(*=): {}), updateCrowdUser: (function(string): Promise<* | void>)}}
  * @constructor
  */
 function Crowd (db, appName, appPassword) {
@@ -70,6 +71,7 @@ function Crowd (db, appName, appPassword) {
         active: crowdUser.active,
         name: crowdUser['display-name'],
         email: crowdUser.email,
+        verified_emails: [],
         updatedOn: new Date()
       }
       // We got what we needed. User logout.
@@ -104,12 +106,27 @@ function Crowd (db, appName, appPassword) {
     //  this we need the removed crowd username. This can be found in the
     //  Firestore document change snapshot (old value).
     const attributeMap = {
-      github_id: []
+      // A set because a Crowd attribute can hold many values, but in reality we
+      // support binding to only one github ID.
+      github_id: new Set(),
+      // We assume as verified the following email addresses:
+      // - The one used to sign up in the Firebase app
+      // - The public one from the Github profile
+      verified_emails: new Set()
     }
-    return db.collection('appUsers')
-      .doc(uid)
-      .collection('accounts')
-      .get()
+    // Fetch firebase user record from the admin SDK.
+    return admin.auth().getUser(uid)
+      .then(userRecord => {
+        if (userRecord.email && userRecord.emailVerified) {
+          attributeMap.verified_emails.add(userRecord.email)
+        }
+      })
+      .catch(error => {
+        console.log('Error fetching Firebase user record:', error)
+      })
+      // Fetch account data from firestore.
+      .then(() => db.collection('appUsers')
+        .doc(uid).collection('accounts').get())
       .then(query => {
         const accounts = query.docs.map(d => d.data())
         let crowdUsername = null
@@ -119,7 +136,10 @@ function Crowd (db, appName, appPassword) {
               crowdUsername = a.username
               break
             case 'github.com':
-              attributeMap.github_id = [a.username]
+              attributeMap.github_id.add(a.username)
+              if (a.email) {
+                attributeMap.verified_emails.add(a.email)
+              }
               break
             default:
               console.log(`Unrecognized account hostname ${a.hostname} for uid ${uid}, ignoring`, a)
@@ -135,7 +155,7 @@ function Crowd (db, appName, appPassword) {
         Object.keys(attributeMap).forEach(name => {
           attributes.push({
             name: name,
-            values: attributeMap[name]
+            values: Array.from(attributeMap[name])
           })
         })
         console.log(`Pushing attribute for crowd user ${crowdUsername}`, attributes)
