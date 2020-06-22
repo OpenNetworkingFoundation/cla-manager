@@ -110,8 +110,8 @@ function Crowd (db, appName, appPassword) {
       // support binding to only one github ID.
       github_id: new Set(),
       // We assume as verified the following email addresses:
-      // - Used for sign up in Firebase app
-      // - Public one from Github profile
+      // - The one used to sign up in the Firebase app
+      // - The public one from the Github profile
       verified_emails: new Set()
     }
     // Fetch firebase user record from the admin SDK.
