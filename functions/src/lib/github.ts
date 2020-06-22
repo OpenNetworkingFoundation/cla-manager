@@ -1,24 +1,38 @@
+import Firestore, {DocumentSnapshot} from "@google-cloud/firestore/build/src";
+import {CallableContext} from "firebase-functions/lib/providers/https";
+import * as http from "http";
+
 const util = require('./util')
 const Cla = require('./cla')
 const App = require('@octokit/app')
-const { Octokit } = require('@octokit/rest')
+const {Octokit} = require('@octokit/rest')
 const WebhooksApi = require('@octokit/webhooks')
-const { request } = require('@octokit/request')
-// const { createTokenAuth } = require('@octokit/auth-token')
+const {request} = require('@octokit/request')
 const sha1 = require('sha1')
 const functions = require('firebase-functions')
 
-module.exports = Github
+// TODO (carmelo): Rework Github library to be a class. This is a temporary
+//  workaround to get a type for the Github library to be used in other libs.
+export interface GithubLib {
+  receive: (options: { id: string; name: string; payload: any }) => Promise<void>;
+  handler: (request: http.IncomingMessage, response: http.ServerResponse, next?: (err?: any) => void) => (void | Promise<void>);
+  processEvent: (eventSnapshot: DocumentSnapshot) => Promise<unknown[] | void>;
+  setAppUserAccount: (data: { token: string }, context: CallableContext) => Promise<string | Uint8Array>;
+  getUsers: (org: string, team: string) => Promise<string[]>;
+  addUser: (githubID: string, org: string, team: string) => Promise<void>;
+  deleteUser: (githubID: string, org: string, team: string) => Promise<void>;
+  createTeam: (org: string, name: string) => Promise<void>;
+}
 
 /**
  * Github-related functions.
- * @param appId {number}
- * @param privateKey {string}
- * @param secret {string}
- * @param db {FirebaseFirestore.Firestore}
+ * @param appId {number} GitHub app ID
+ * @param privateKey {string} GitHub app private key
+ * @param secret {string} GitHub app secret
+ * @param db {firebase.Firestore}
  * @constructor
  */
-function Github (appId, privateKey, secret, db) {
+export function Github(appId: string, privateKey: string, secret: string, db: Firestore) {
   const ghHostname = 'github.com'
   const ghApp = new App({
     id: appId,
@@ -27,7 +41,7 @@ function Github (appId, privateKey, secret, db) {
     privateKey: privateKey.replace(/\\n/g, '\n')
   })
   // const jwt = app.getSignedJsonWebToken() // global app token
-  const ghWebhooks = new WebhooksApi(secret ? { secret } : {})
+  const ghWebhooks = new WebhooksApi(secret ? {secret} : {})
 
   ghWebhooks.on(
     [
@@ -35,7 +49,7 @@ function Github (appId, privateKey, secret, db) {
       'pull_request.reopened',
       'pull_request.synchronize',
       'pull_request.closed'
-    ], context => {
+    ], (context: any) => {
       // Store event int the db. We'll process it later.
       // TODO: check repo owner and discard if it's not managed by ONF
       const pr = context.payload.pull_request
@@ -46,14 +60,14 @@ function Github (appId, privateKey, secret, db) {
 
       console.log(`contributionKey=${contributionKey}, event=pull_request.${action}, sha=${pr.head.sha}, contributionId=${contributionId}`)
 
-      let contribPromise
+      let contribPromise: Promise<void>
       if (action === 'opened' || action === 'reopened') {
         contribPromise = contributionRef.set({
           key: contributionKey,
           provider: 'github',
           project: pr.base.repo.full_name,
           type: 'pull_request'
-        })
+        }).then(() => Promise.resolve())
       } else {
         // if synchronize, we should already have a doc in the DB.
         contribPromise = Promise.resolve()
@@ -62,7 +76,7 @@ function Github (appId, privateKey, secret, db) {
       if (action !== 'closed') {
         // Store payload in db and process later.
         return contribPromise
-          .then(async () => db.collection('events').add({
+          .then(() => db.collection('events').add({
             contributionId: contributionId,
             contributionKey: contributionKey,
             provider: 'github',
@@ -83,24 +97,26 @@ function Github (appId, privateKey, secret, db) {
 
   /**
    * Process an event from the database.
-   * @param eventSnapshot {DocumentSnapshot}
+   * @param eventSnapshot
    * @returns {Promise}
    */
-  async function processEvent (eventSnapshot) {
-    const event = eventSnapshot.data()
+  async function processEvent(eventSnapshot: DocumentSnapshot) {
+    const event = eventSnapshot.data() as any
 
     console.log(`eventId=${eventSnapshot.id}, contributionKey=${event.contributionKey}, event=${event.type}`)
 
     const pr = event.payload.pull_request
     const installationId = event.payload.installation.id
-    const accessToken = await ghApp.getInstallationAccessToken({ installationId })
-    const octokit = new Octokit({ auth: accessToken })
+    const accessToken = await ghApp.getInstallationAccessToken({installationId})
+    const octokit = new Octokit({auth: accessToken})
 
     // Info to post to GitHub.
     const status = {
-      state: null, // error, failure, success
-      description: null, // max 140 characters
-      comment: null // pull request comment
+      state: '', // error, failure, success
+      description: '', // max 140 characters
+      comment: '', // pull request comment
+      githubAck: false, // whether the status was updated on github
+      githubError: JSON
     }
 
     // Check whitelist
@@ -154,7 +170,7 @@ function Github (appId, privateKey, secret, db) {
       .then(() => {
         status.githubAck = true
       })
-      .catch(error => {
+      .catch((error: any) => {
         status.githubAck = false
         status.githubError = JSON.parse(JSON.stringify(error))
       })
@@ -167,20 +183,22 @@ function Github (appId, privateKey, secret, db) {
     const contribRef = db.collection('contributions')
       .doc(event.contributionId)
     const commentPromise = contribRef.get()
-      .then(snapshot => {
+      .then((snapshot: DocumentSnapshot<any>) => {
         // Retrieve existing comment_id (if any)
         if (!snapshot.exists) {
           console.warn(`Missing contribution ${event.contributionId} in DB`)
-          return null
+          return ''
         } else {
           return snapshot.data().githubCommentId
         }
       })
-      .then(commentId => {
+      .then((commentId: string) => {
         const commentData = {
           owner: pr.base.repo.owner.login,
           repo: pr.base.repo.name,
-          issue_number: pr.number
+          issue_number: pr.number,
+          body: '',
+          comment_id: ''
         }
         if (status.comment) {
           // Create or update existing comment.
@@ -198,6 +216,7 @@ function Github (appId, privateKey, secret, db) {
         }
         return Promise.resolve()
       })
+      // @ts-ignore
       .then(response => {
         if (!response) {
           // We didn't post any comment
@@ -233,11 +252,11 @@ function Github (appId, privateKey, secret, db) {
    *
    * This function can be called from the client.
    *
-   * @param data {{token: string}} github personal access token
-   * @param context {CallableContext} firebase context
+   * @param data github personal access token
+   * @param context firebase context
    * @return {string} account document ID
    */
-  async function setAppUserAccount (data, context) {
+  async function setAppUserAccount(data: { token: string }, context: CallableContext) {
     // Checking that the Firebase user is authenticated.
     if (!context.auth) {
       // Throwing an HttpsError so that the client gets the error details.
@@ -246,7 +265,7 @@ function Github (appId, privateKey, secret, db) {
     }
     const firebaseUid = context.auth.uid
     const userToken = data.token
-    const octokit = new Octokit({ auth: userToken })
+    const octokit = new Octokit({auth: userToken})
 
     try {
       // Get user info using provided personal access token.
@@ -278,12 +297,12 @@ function Github (appId, privateKey, secret, db) {
   /**
    * TODO comment
    */
-  async function getInstallationToken (org) {
+  async function getInstallationToken(org: string) {
     const jwt = ghApp.getSignedJsonWebToken()
 
     // Experimental API to get the installation ID for an organization
     // https://developer.github.com/v3/apps/#get-an-organization-installation-for-the-authenticated-app
-    const { data } = await request('GET /orgs/:org/installation', {
+    const {data} = await request('GET /orgs/:org/installation', {
       org,
       headers: {
         authorization: `Bearer ${jwt}`,
@@ -293,62 +312,60 @@ function Github (appId, privateKey, secret, db) {
     const installationId = data.id
     // TODO: we should cache the org -> installationId mapping to prevent repeated requests
 
-    const installationAccessToken = await ghApp.getInstallationAccessToken({
+    return await ghApp.getInstallationAccessToken({
       installationId
     })
-    return installationAccessToken
   }
 
-  async function getApi (org) {
+  async function getApi(org: string) {
     const installationToken = await getInstallationToken(org)
     // const auth = createTokenAuth(installationToken);
     // const authentication = await auth();
-    const octokit = new Octokit({
+    return new Octokit({
       auth: installationToken
     })
-    return octokit
   }
 
   /**
    * Fetch user list from a GitHub Team
-   * @param org {GitHub Organization name}
-   * @param team {GitHub Team name}
+   * @param org {string} organization name
+   * @param team {string} team name
    * @return {list} user list
    */
-  async function getUsers (org, team) {
+  async function getUsers(org: string, team: string): Promise<string[]> {
     const octokit = await getApi(org)
-    const validUsers = {}
+    const validUsers = new Set<string>()
     try {
       // Get in-team users
-      var { data: users } = await octokit.teams.listMembersInOrg({
+      const {data: users} = await octokit.teams.listMembersInOrg({
         org: org,
         team_slug: team
       })
       for (const user of users) {
-        validUsers[user.login] = true
+        validUsers.add(user.login)
       }
       // Get Pending users
-      var { data: pendingUsers } = await octokit.teams.listPendingInvitationsInOrg({
+      const {data: pendingUsers} = await octokit.teams.listPendingInvitationsInOrg({
         org: org,
         team_slug: team
       })
       for (const user of pendingUsers) {
-        validUsers[user.login] = true
+        validUsers.add(user.login)
       }
     } catch (e) {
       throw new Error('Fetching user list failed:' + e)
     }
-    return validUsers
+    return Array.from(validUsers)
   }
 
   /**
    * Add a GitHub user into a GitHub Team
-   * @param githubID {GitHub User ID}
-   * @param org {GitHub Organization name}
-   * @param team {GitHub Team name}
-   * @returns nothing
+   * @param githubID {string} GitHub user ID
+   * @param org {string} GitHub organization name
+   * @param team {string} GitHub team name
    */
-  async function addUser (githubID, org, team) {
+  async function addUser(githubID: string, org: string, team: string):
+    Promise<void> {
     const octokit = await getApi(org)
     try {
       await octokit.teams.addOrUpdateMembershipInOrg({
@@ -363,12 +380,12 @@ function Github (appId, privateKey, secret, db) {
 
   /**
    * Delete a GitHub user from a GitHub Team
-   * @param githubID {GitHub User ID}
-   * @param org {GitHub Organization name}
-   * @param team {GitHub Team name}
-   * @returns nothing
+   * @param githubID {string} GitHub user ID
+   * @param org {string} GitHub organization name
+   * @param team  {string} GitHub team name
    */
-  async function deleteUser (githubID, org, team) {
+  async function deleteUser(githubID: string, org: string, team: string):
+    Promise<void> {
     const octokit = await getApi(org)
     try {
       await octokit.teams.removeMembershipInOrg({
@@ -383,15 +400,14 @@ function Github (appId, privateKey, secret, db) {
 
   /**
    * Create a GitHub Team if it does not exist
-   * @param org {GitHub Organization name}
-   * @param team {GitHub Team name}
-   * @returns nothing
+   * @param org {string} GitHub organization name
+   * @param name {string} GitHub team name
    */
-  async function createTeamIfNotExist (org, name) {
+  async function createTeam(org: string, name: string): Promise<void> {
     const octokit = await getApi(org)
     try {
       let check = false
-      const { data: teams } = await octokit.teams.list({
+      const {data: teams} = await octokit.teams.list({
         org: org
       })
 
@@ -415,7 +431,7 @@ function Github (appId, privateKey, secret, db) {
     }
   }
 
-  return {
+  return <GithubLib>{
     receive: ghWebhooks.receive,
     handler: ghWebhooks.middleware,
     processEvent: processEvent,
@@ -423,6 +439,6 @@ function Github (appId, privateKey, secret, db) {
     getUsers: getUsers,
     addUser: addUser,
     deleteUser: deleteUser,
-    createTeam: createTeamIfNotExist
+    createTeam: createTeam
   }
 }

@@ -1,30 +1,20 @@
 {
-  "name": "cla-manager-functions",
-  "description": "Cloud Functions for Firebase",
-  "author": "Brian O'Connor <bocon@opennetworking.org> (http://localhost)",
-  "repository": "https://github.com/cla-manager.git",
-  "homepage": "https://github.com/cla-manager",
-  "bugs": "https://github.com/cla-manager/issues",
-  "keywords": [
-    "github"
-  ],
+  "name": "functions",
+  "main": "build/index.js",
   "scripts": {
-    "lint": "eslint .",
-    "lint-fix": "npx standard --fix",
-    "serve": "npx firebase serve --only functions",
-    "shell": "npx firebase functions:shell",
-    "start": "npm run shell",
-    "deploy": "npx firebase deploy --only functions",
-    "logs": "npx firebase functions:log",
+    "build": "./node_modules/.bin/tslint --project tsconfig.json && rm -rf ./build && ./node_modules/.bin/tsc && cp -r ./src/conf ./build/conf",
+    "lint": "eslint ./src",
+    "lint-fix": "npx standard --fix src/**/*.js",
+    "logs": "./node_modules/.bin/firebase functions:log",
     "pretest": "npm run lint",
-    "test": "npx firebase emulators:exec --only firestore 'jest'"
+    "test": "./node_modules/.bin/firebase emulators:exec --only firestore 'jest'"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^3.8.6",
     "@octokit/app": "^2.2.5",
     "@octokit/request": "^5.4.4",
     "@octokit/rest": "^16.43.1",
     "@octokit/webhooks": "^6.3.2",
-    "atlassian-crowd-client": "^2.0.0",
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
     "firebase-admin": "^8.12.1",
@@ -35,9 +25,15 @@
     "sha1": "^1.1.1"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.10.1",
     "@babel/preset-env": "^7.10.2",
     "@firebase/testing": "^0.19.6",
+    "@types/express": "^4.17.1",
     "@types/jest": "^25.2.3",
+    "@types/lodash": "^4.14.155",
+    "@types/request": "^2.48.5",
+    "@types/request-promise": "^4.1.46",
+    "@types/sha1": "^1.1.1",
     "babel": "^6.23.0",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^25.5.1",
@@ -51,7 +47,8 @@
     "firebase-tools": "^8.4.1",
     "jest": "^25.5.4",
     "nock": "^10.0.0",
-    "smee-client": "^1.0.2"
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.5"
   },
   "engines": {
     "node": "10"
@@ -66,9 +63,6 @@
   },
   "private": true,
   "standard": {
-    "ignore": [
-      "lib/common/"
-    ],
     "env": [
       "jest"
     ]

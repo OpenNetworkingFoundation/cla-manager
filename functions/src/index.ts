@@ -1,12 +1,16 @@
+import {DocumentSnapshot, QuerySnapshot} from "@google-cloud/firestore"
+import {Request, Response} from "express";
+import {Change, EventContext} from "firebase-functions/lib/cloud-functions";
+
 const admin = require('firebase-admin')
 const functions = require('firebase-functions')
 const Github = require('./lib/github')
 const Gerrit = require('./lib/gerrit')
 const Cla = require('./lib/cla')
-const Backup = require('./lib/backup.js')
-// TODO: merge all crowd-related functions in the same lib/crowd.js file
-const Crowd = require('./lib/crowd.js')
-const CrowdToGitHub = require('./lib/crowd_to_github.js')
+const Backup = require('./lib/backup')
+// TODO: merge all crowd-related functions in the same lib/crowd.ts file
+const Crowd = require('./lib/crowd')
+const CrowdToGitHub = require('./lib/crowd_to_github')
 const CrowdWebhook = require('./lib/crowd_webhook')
 const _ = require('lodash')
 
@@ -31,6 +35,7 @@ const crowd = new Crowd(
   functions.config().crowd.app_name,
   functions.config().crowd.app_password)
 
+// TODO: move config to firestore to avoid re-deploying the app when changing it
 const crowdToGithubGroups = require('./conf/crowd_to_github_groups.json')
 
 const crowdWebhook = new CrowdWebhook(
@@ -54,7 +59,7 @@ const crowdAudit = new CrowdToGitHub(
  * @param eventSnapshot
  * @returns {Promise}
  */
-const processEvent = async (eventSnapshot) => {
+const processEvent = async (eventSnapshot: DocumentSnapshot<any>) => {
   const event = eventSnapshot.data()
   if (!('provider' in event)) {
     return Promise.reject(new Error('missing provider key in request'))
@@ -82,11 +87,11 @@ exports.reconcileWhitelist = functions.pubsub
   .schedule('every 15 minutes')
   .onRun(() => {
     return db.collection('agreements').get()
-      .then(query => {
+      .then((query: QuerySnapshot) => {
         return Promise.all(query.docs
           .map(doc => clalib.updateWhitelist(null, doc.id)))
       })
-      .then(result => {
+      .then((result: any[]) => {
         console.info(`Successfully updated ${result.length} whitelists`)
       })
       .catch(console.error)
@@ -111,16 +116,14 @@ exports.handleEvent = functions.firestore
 //  outdated events.
 
 /**
- * Handles calls from the Gerrit hook.
- * @type {HttpsFunction}
+ * Handles HTTP requests from the Gerrit hook.
  */
 exports.gerritEndpoint = functions.https.onRequest(gerrit.app)
 
 /**
- * Handles calls from the Gerrit hook.
- * @type {HttpsFunction}
+ * Handles ONF Crowd webhooks.
  */
-exports.crowdEndpoint = functions.https.onRequest((req, res) => {
+exports.crowdEndpoint = functions.https.onRequest((req: Request, res: Response) => {
   if (req.method === 'POST' && req.get('content-type') === 'application/json') {
     const event = req.body
     console.log(event)
@@ -132,12 +135,12 @@ exports.crowdEndpoint = functions.https.onRequest((req, res) => {
 })
 
 /**
- * When a whitelist is updated, check for events in state failure that match the
- * added identities and re-process them.
+ * When a whitelist is updated, check for events that failed CLA validation
+ * and re-process them.
  */
 exports.handleWhitelistUpdate = functions.firestore
   .document('/whitelists/{id}')
-  .onWrite(snapshot => {
+  .onWrite((snapshot: Change<DocumentSnapshot>) => {
     const oldWhitelist = snapshot.before.data()
     const newWhitelist = snapshot.after.data()
     if (!newWhitelist) {
@@ -154,11 +157,11 @@ exports.handleWhitelistUpdate = functions.firestore
     // As such, we split identities in many arrays, each one with max
     // length 10.
     return Promise.all(_.chunk(addedIdentities, 10)
-      .map(identitiesChunk => {
+      .map((identitiesChunk: any[]) => {
         return db.collection('events')
           .where('status.state', '==', 'failure')
           .where('identity', 'in', identitiesChunk)
-          .get().then(query => {
+          .get().then((query: QuerySnapshot) => {
             return Promise.all(query.docs.map(processEvent))
           })
       })).catch(console.error)
@@ -167,7 +170,9 @@ exports.handleWhitelistUpdate = functions.firestore
 /**
  * Periodically backups firestore DB.
  */
-exports.scheduledFirestoreExport = backup
+exports.scheduledFirestoreExport = functions.pubsub
+  .schedule('every 24 hours')
+  .onRun(backup.backupDb)
 
 /**
  * Callable function to set ONF account for app user (via Crowd authentication)
@@ -185,7 +190,7 @@ exports.setAppUserGithubAccount = functions.https.onCall(github.setAppUserAccoun
  */
 exports.handleAppUserAccountUpdate = functions.firestore
   .document('/appUsers/{uid}/accounts/{accountId}')
-  .onWrite((change, context) => {
+  .onWrite((change: Change<DocumentSnapshot>, context: EventContext) => {
     const uid = context.params.uid
     return crowd.updateCrowdUser(uid)
   })
@@ -195,6 +200,4 @@ exports.handleAppUserAccountUpdate = functions.firestore
  */
 exports.crowdToGithubPeriodicAudit = functions.pubsub
   .schedule('every 24 hours')
-  .onRun(() => {
-    return crowdAudit.ManuallyAudit()
-  })
+  .onRun(crowdAudit.audit)
