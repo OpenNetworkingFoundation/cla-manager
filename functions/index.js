@@ -191,6 +191,19 @@ exports.handleAppUserAccountUpdate = functions.firestore
   })
 
 /**
+ * Periodically reconcile data in crowd in case of one-off errors with
+ * snapshot-based handleAppUserAccountUpdate.
+ */
+exports.reconcileCrowd = functions.pubsub
+  .schedule('every 24 hours')
+  .onRun(() => {
+    return db.collection('appUsers').get()
+      .then(query => {
+        return Promise.all(query.docs.map(d => crowd.updateCrowdUser(d.id)))
+      })
+  })
+
+/**
  * Periodically Sync from Crowd to Github
  */
 exports.crowdToGithubPeriodicAudit = functions.pubsub
