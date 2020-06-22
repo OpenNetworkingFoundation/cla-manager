@@ -10,7 +10,7 @@ module.exports = Crowd
  * @param db {FirebaseFirestore.Firestore}
  * @param appName {string} crowd app name
  * @param appPassword {string} crowd app password
- * @return  * @return {{setAppUserAccount: setAppUserAccount, getUsersWithGithubID: (function(*=): {}), updateCrowdUser: (function(string): Promise<* | void>)}}
+ * @return {setAppUserAccount: setAppUserAccount, getUsersWithGithubID: (function(*=): {}), updateCrowdUser: (function(string): Promise<* | void>)}}
  * @constructor
  */
 function Crowd (db, appName, appPassword) {
