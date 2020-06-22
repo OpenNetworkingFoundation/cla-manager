@@ -1,3 +1,6 @@
+import {Firestore} from "@google-cloud/firestore";
+import {CallableContext} from "firebase-functions/lib/providers/https";
+
 const rp = require('request-promise')
 const functions = require('firebase-functions')
 const sha1 = require('sha1')
@@ -6,13 +9,12 @@ module.exports = Crowd
 
 /**
  * Crowd-related functions.
- * @param db {FirebaseFirestore.Firestore}
- * @param appName {string} crowd app name
- * @param appPassword {string} crowd app password
- * @return {{setAppUserAccount: setAppUserAccount}}
+ * @param db Firestore instance
+ * @param appName crowd app name
+ * @param appPassword crowd app password
  * @constructor
  */
-function Crowd (db, appName, appPassword) {
+function Crowd(db: Firestore, appName: string, appPassword: string) {
   const onfHostname = 'opennetworking.org'
   const baseUri = `https://crowd.${onfHostname}/crowd/rest/usermanagement/1`
   const rpConf = {
@@ -35,11 +37,11 @@ function Crowd (db, appName, appPassword) {
    *
    * This function can be called from the client.
    *
-   * @param data {{username: string, password: string}} crowd credentials
-   * @param context {CallableContext} firebase context
-   * @return {string} account document ID
+   * @param data crowd credentials
+   * @param context firebase context
    */
-  async function setAppUserAccount (data, context) {
+  async function setAppUserAccount(data: { username: any; password: any; },
+                                   context: CallableContext): Promise<string> {
     // Checking that the Firebase user is authenticated.
     if (!context.auth) {
       // Throwing an HttpsError so that the client gets the error details.
@@ -92,10 +94,9 @@ function Crowd (db, appName, appPassword) {
   /**
    * Updates attributes for the user on Crowd based on the info stored in the DB
    * for the given Firebase app user ID.
-   * @param uid {string} Firebase UID, i.e. doc ID of appUsers collections
-   * @return {Promise<void>}
+   * @param uid Firebase UID, i.e. doc ID of appUsers collections
    */
-  async function updateCrowdUser (uid) {
+  async function updateCrowdUser(uid: string): Promise<void> {
     // Initialize some attributes to be empty, so to implicitly unset them on
     // Crowd if the corresponding value is not found in the DB. Crowd expects
     // an array for attribute values.
@@ -104,7 +105,7 @@ function Crowd (db, appName, appPassword) {
     //  this we need the removed crowd username. This can be found in the
     //  Firestore document change snapshot (old value).
     const attributeMap = {
-      github_id: []
+      github_id: [] as string[]
     }
     return db.collection('appUsers')
       .doc(uid)
@@ -126,25 +127,27 @@ function Crowd (db, appName, appPassword) {
               break
           }
         })
-        if (crowdUsername == null) {
+        if (crowdUsername === null) {
           console.log(`Cannot find Crowd account for uid ${uid}, aborting update`, accounts)
           return
         }
         // Transform attributeMap in an object understood by Crowd.
-        const attributes = []
+        const attributes: Object[] = []
         Object.keys(attributeMap).forEach(name => {
           attributes.push({
             name: name,
+            // @ts-ignore
             values: attributeMap[name]
           })
         })
         console.log(`Pushing attribute for crowd user ${crowdUsername}`, attributes)
         return setUserAttribute(crowdUsername, attributes)
       })
+      .then(() => Promise.resolve())
       .catch(console.error)
   }
 
-  async function createSession (username, password) {
+  async function createSession(username: string, password: string) {
     return rp.post({
       ...rpConf,
       uri: baseUri + '/session',
@@ -155,21 +158,21 @@ function Crowd (db, appName, appPassword) {
     })
   }
 
-  async function invalidateSession (token) {
+  async function invalidateSession(token: string) {
     return rp.del({
       ...rpConf,
       uri: baseUri + `/session/${token}`
     })
   }
 
-  async function getUser (username) {
+  async function getUser(username: string) {
     return rp.get({
       ...rpConf,
       uri: baseUri + `/user?username=${username}`
     })
   }
 
-  async function setUserAttribute (username, attributes) {
+  async function setUserAttribute(username: string, attributes: Object) {
     return rp.post({
       ...rpConf,
       uri: baseUri + `/user/attribute?username=${username}`,
@@ -179,55 +182,46 @@ function Crowd (db, appName, appPassword) {
     })
   }
 
-  async function getUsersWithGithubID (group) {
-    const validUsers = {}
-    let users = {}
-    try {
-      users = await getUsersUnderGroup(group)
-    } catch (e) {
-      throw new Error('Listing user failed:' + e)
-    }
-    for (const user of users.users) {
-      try {
-        const userAttribute = await getAttribute(user.name)
-        const result = await getGithubID(userAttribute.attributes)
-        if (result !== '') {
-          validUsers[result] = true
-        }
-      } catch (e) {
-        throw new functions.https.HttpsError('Getting user attribute failed' + e)
+  async function getGithubIdsOfUsersInGroup(group: string): Promise<string[]> {
+    const githubIds: Set<string> = new Set()
+    for (const user of await getAllUsersInGroup(group)) {
+      const userAttributes = await getAttributes(user.name)
+      const githubId = extractGithubIdFromAttributes(userAttributes.attributes)
+      if (githubId) {
+        githubIds.add(githubId)
       }
     }
 
-    return validUsers
+    return Array.from(githubIds)
   }
 
-  async function getUsersUnderGroup (group) {
+  async function getAllUsersInGroup(group: string) {
     return rp.get({
       ...rpConf,
       uri: baseUri + `/group/user/direct?groupname=${group}&max-results=3000`
     })
   }
 
-  async function getAttribute (name) {
+  async function getAttributes(name: string) {
     return rp.get({
       ...rpConf,
       uri: baseUri + `/user/attribute?username=${name}`
     })
   }
 
-  async function getGithubID (attributes) {
+  function extractGithubIdFromAttributes(
+    attributes: { name: string, values: string[] }[]): string | null {
     for (const attr of attributes) {
-      if (attr.name === 'github_id' && attr.values.length !== 0) {
+      if (attr.name === 'github_id' && attr.values.length > 0) {
         return attr.values[0]
       }
     }
-    return ''
+    return null
   }
 
   return {
     setAppUserAccount: setAppUserAccount,
     updateCrowdUser: updateCrowdUser,
-    getUsersWithGithubID: getUsersWithGithubID
+    getGithubIdsOfUsersInGroup: getGithubIdsOfUsersInGroup
   }
 }

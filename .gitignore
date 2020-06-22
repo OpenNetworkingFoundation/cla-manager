@@ -11,6 +11,7 @@ firestore-debug.log
 ui-debug.log
 
 client/build
+functions/build
 
 # gerrit hook
 gerrit/.tox

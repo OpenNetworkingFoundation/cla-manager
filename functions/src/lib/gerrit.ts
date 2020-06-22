@@ -1,3 +1,6 @@
+import Firestore from "@google-cloud/firestore/build/src";
+import {Request, Response} from "express";
+
 const express = require('express')
 const basicAuth = require('express-basic-auth')
 const Cla = require('./cla')
@@ -11,19 +14,19 @@ module.exports = Gerrit
  * @param user {string} to use for HTTP basic auth of all requests
  * @param password {string} to use for HTTP basic auth of all requests
  */
-function Gerrit (db, user, password) {
+function Gerrit(db: Firestore, user: string, password: string) {
   const app = express()
 
   /**
    * Express app to handle requests from the gerrit hook (gerrit/ref-update)
    */
   app.use(basicAuth({
-    users: { [user]: password }
-  })).get('/', (req, res) => {
-    if (!('email' in req.query)) {
+    users: {[user]: password}
+  })).get('/', (req: Request, res: Response) => {
+    if (!('email' in req.query) || !(typeof req.query.email === 'string')) {
       return res.json({
         status: 'error',
-        message: 'missing email in request'
+        message: 'missing or invalid email in request'
       })
     }
     return verifyEmail(req.query.email)
@@ -40,10 +43,9 @@ function Gerrit (db, user, password) {
 
   /**
    * Checks whether the given email is associated to a whitelisted identity.
-   * @param email {string}
-   * @returns {Promise<{message: string, status: string}>}
    */
-  async function verifyEmail (email) {
+  async function verifyEmail(email: string):
+    Promise<{ status: string, message: string }> {
     const status = {
       status: 'error',
       message: ''

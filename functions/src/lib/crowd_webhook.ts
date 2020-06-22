@@ -1,11 +1,11 @@
-module.exports = CrowdWebhook
+import {GithubLib} from "./github";
 
-function hasProperty (object, property) {
+function hasProperty (object: Object, property: string) {
   return Object.prototype.hasOwnProperty.call(object, property)
 }
 
-function CrowdWebhook (groupMappings, github) {
-  async function processMembership (user, group, filter, add) {
+export function CrowdWebhook (groupMappings: any, github: GithubLib) {
+  async function processMembership (user: any, group: string, filter: string[], add: boolean) {
     const noFilter = !Array.isArray(filter) || !filter.length
     const mappings = groupMappings[group]
     for (const i in mappings) {
@@ -33,15 +33,15 @@ function CrowdWebhook (groupMappings, github) {
     }
   }
 
-  async function addMembership (user, group, filter) {
+  async function addMembership (user: any, group: string, filter: string[]) {
     await processMembership(user, group, filter, true)
   }
 
-  async function removeMembership (user, group, filter) {
+  async function removeMembership (user: any, group: string, filter: string[]) {
     await processMembership(user, group, filter, false)
   }
 
-  async function processEvent (event) {
+  async function processEvent (event: any) {
     if (event.type === 'USER_ADDED' || event.type === 'USER_ADDED_GITHUB') {
       const filter = (event.type === 'USER_ADDED_GITHUB') ? ['github'] : []
       if (event.user && event.user.groups) {

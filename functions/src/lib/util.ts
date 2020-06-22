@@ -1,9 +1,8 @@
 /**
  * Returns a string that uniquely identifies the given identity object.
- * @param identityObj {{type: string, value: string}}
- * @returns {string}
+ * @param identityObj identity object
  */
-module.exports.identityKey = function (identityObj) {
+module.exports.identityKey = function (identityObj: {type: string, value: string}): string {
   if (!identityObj || !('type' in identityObj) || !('value' in identityObj)) {
     throw new Error('Invalid identity object')
   }
@@ -16,12 +15,9 @@ module.exports.identityKey = function (identityObj) {
  * @param identityKey {string}
  * @returns {{type: string, value: string}}
  */
-module.exports.identityObj = function (identityKey) {
+module.exports.identityObj = function (identityKey: string): {type: string, value: string} {
   if (!identityKey) {
     throw new Error('Identity key is falsy')
-  }
-  if (!(typeof identityKey === 'string' || identityKey instanceof String)) {
-    throw new Error('Invalid identity key is not a string')
   }
   const i = identityKey.indexOf(':')
   if (i < 0) {
