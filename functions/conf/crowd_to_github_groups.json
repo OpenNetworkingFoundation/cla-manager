@@ -17,6 +17,30 @@
     {
       "githubOrg": "onosproject",
       "team": "ONFStaff"
+    },
+    {
+      "githubOrg": "opennetworkinglab",
+      "team": "ONFStaff"
+    }
+  ],
+  "AetherAccess" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "AetherAccess"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "AetherAccess"
+    }
+  ],
+  "SDRANAccess" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "SDRANAccess"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "SDRANAccess"
     }
   ]
 }
