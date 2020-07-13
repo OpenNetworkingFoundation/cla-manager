@@ -10,10 +10,15 @@ You'll also need to setup Email/Password authentication in the `Authentication` 
 
 Once this is done you can start the application with the following command:
 
-```bash
+```shell script
 REACT_APP_FIREBASE_ENV=<ProjectId> REACT_APP_FIREBASE_API_KEY=<WebApiKey> npm start
 ```
 
+If you want to run the App against the firebase emulator you can add this variable:
+
+```shell script
+REACT_APP_FIREBASE_EMULATOR=true
+```
 
 # TLDR;
 

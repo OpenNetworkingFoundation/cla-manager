@@ -39,10 +39,10 @@ class agreement {
    * @param {Identity} signer the signer of the agreement
    * @param {string|null} organization organization covered by this agreement
    * @param {string|null} organizationAddress organization address
+   * @param {Date|null} dateSigned date on which this agreement has been signed (null if we're creating it)
    */
-  constructor (type, body, signer, organization = null, organizationAddress = null) {
+  constructor (type, body, signer, organization = null, organizationAddress = null, dateSigned = null) {
     this._id = null
-    this._dateSigned = new Date()
     this._type = type
     this._body = body
     this._signer = signer
@@ -57,6 +57,13 @@ class agreement {
       throw TypeError(`Agreement.type is ${type} and organizationAddress is missing`)
     }
     this._organizationAddress = organizationAddress
+
+    // If dateSigned is null this is a new agreement, so create a date, otherwise use the provided one
+    if (dateSigned !== null) {
+      this._dateSigned = dateSigned
+    } else {
+      this._dateSigned = new Date()
+    }
   }
 
   /**
@@ -179,6 +186,7 @@ class agreement {
   static fromDocumentSnapshot (doc) {
     const data = doc.data()
     const signer = Identity.fromJson(data.signer)
+    const dateSigned = new Date(data.dateSigned.seconds * 1000)
     // TODO: create new signer class that extends Identity and provides
     //  additional attributes such as title and phone numbe
     // For now augment instance with missing keys so we can show them in the UI.
@@ -186,9 +194,9 @@ class agreement {
     signer.phoneNumber = data.signer.phoneNumber
     let a
     if (data.type === AgreementType.INDIVIDUAL) {
-      a = new Agreement(data.type, data.body, signer)
+      a = new Agreement(data.type, data.body, signer, null, null, dateSigned)
     } else if (data.type === AgreementType.INSTITUTIONAL) {
-      a = new Agreement(data.type, data.body, signer, data.organization, data.organizationAddress)
+      a = new Agreement(data.type, data.body, signer, data.organization, data.organizationAddress, dateSigned)
     }
     a._id = doc.id
     return a

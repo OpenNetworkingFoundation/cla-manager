@@ -24,7 +24,7 @@ if (!process.env.REACT_APP_FIREBASE_ENV || !process.env.REACT_APP_FIREBASE_API_K
   HandleDevError(c => ReactDOM.render(c, document.getElementById('root')))
 }
 
-FirebaseAppInit(process.env.REACT_APP_FIREBASE_API_KEY, process.env.REACT_APP_FIREBASE_ENV)
+FirebaseAppInit(process.env.REACT_APP_FIREBASE_API_KEY, process.env.REACT_APP_FIREBASE_ENV, process.env.REACT_APP_FIREBASE_EMULATOR)
 
 const ErrorBoundary = bugsnagClient.getPlugin('react')
 

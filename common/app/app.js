@@ -4,7 +4,7 @@ import 'firebase/firestore'
 import 'firebase/functions'
 import bugsnag from '@bugsnag/js'
 
-export const FirebaseAppInit = function (apiKey, projectName) {
+export const FirebaseAppInit = function (apiKey, projectName, emulator = 'false') {
   firebase.initializeApp({
     apiKey: apiKey,
     databaseURL: `https://${projectName}.firebaseio.com`,
@@ -13,7 +13,9 @@ export const FirebaseAppInit = function (apiKey, projectName) {
     messagingSenderId: '232849741230',
     projectId: `${projectName}`
   })
-  if (location.hostname === 'localhost') {
+
+  if (emulator === 'true') {
+    console.info("Running the app using the Firebase emulator, make sure it's running")
     // Running in emulator.
     firebase.functions()
       .useFunctionsEmulator('http://localhost:5001')

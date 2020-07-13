@@ -260,7 +260,7 @@ function AppUserAccountsContainer () {
 
   return <div>
     <Paper elevation={23} className={classes.root}>
-      <Grid container xs={12}>
+      <Grid container>
         <Grid item xs={12}>
           <Box textAlign='center'>
             <h2 className={classes.h2}>Link your Accounts</h2>
