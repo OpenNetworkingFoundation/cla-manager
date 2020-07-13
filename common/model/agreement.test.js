@@ -63,6 +63,33 @@ describe('The Agreement model', () => {
     expect(create).toThrow(TypeError)
   })
 
+  describe('when a dateSinged is provided', () => {
+    const date = new Date('05/10/2020')
+    it('should correctly instantiate the class for INDIVIDUAL', () => {
+      const agreement = new Agreement(
+        AgreementType.INDIVIDUAL,
+        'TODO, add agreement body',
+        signer,
+        null,
+        null,
+        date
+      )
+      expect(agreement.dateSigned).toEqual(date)
+    })
+
+    it('should correctly instantiate the class for INSTITUTIONAL', () => {
+      const agreement = new Agreement(
+        AgreementType.INDIVIDUAL,
+        'TODO, add agreement body',
+        signer,
+        'ONF',
+        '1000 El Camino Real, 94025 Menlo Park (CA)',
+        date
+      )
+      expect(agreement.dateSigned).toEqual(date)
+    })
+  })
+
   describe('the toJson method', function () {
     it('should return a JSON object for the individualAgreement', () => {
       const json = individualAgreement.toJson()
