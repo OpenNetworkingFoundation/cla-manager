@@ -207,7 +207,7 @@ exports.reconcileCrowd = functions.pubsub
  * Periodically Sync from Crowd to Github
  */
 exports.crowdToGithubPeriodicAudit = functions.pubsub
-  .schedule('every 24 hours')
+  .schedule('every 60 minutes')
   .onRun(() => {
     return crowdAudit.ManuallyAudit()
   })
