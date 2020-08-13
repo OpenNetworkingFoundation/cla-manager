@@ -54,8 +54,8 @@ function CreateAgreementContainer () {
               <Typography variant="body2" component="div">
                 I should sign this CLA if:
                 <ul>
-                  <li>I'm making contributions on behalf of my employer</li>
-                  <li>I'm emplying (or contracting with) someone to contribute to the project</li>
+                  <li>Someone is paying me to contribute to the project</li>
+                  <li>I'm employing (or contracting with) someone to contribute to the project</li>
                 </ul>
               </Typography>
             </CardContent>
@@ -67,14 +67,14 @@ function CreateAgreementContainer () {
         <Grid item xs={12} md={6} className={classes.cell}>
           <Link to={`/sign/${AgreementType.INDIVIDUAL}`}>
             <Button variant='contained' color='primary' size='large'>
-              Only Yourself &rarr; Sign Individual CLA
+              Sign Individual CLA
             </Button>
           </Link>
         </Grid>
         <Grid item xs={12} md={6} className={classes.cell}>
           <Link to={`/sign/${AgreementType.INSTITUTIONAL}`}>
             <Button variant='contained' color='primary' size='large'>
-              Your Employer &rarr; Sign Institutional CLA
+              Sign Institutional CLA
             </Button>
           </Link>
         </Grid>
