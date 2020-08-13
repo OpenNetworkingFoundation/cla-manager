@@ -79,6 +79,7 @@ describe('CLAM Firestore rules TestSuite', () => {
     beforeEach(async () => {
       db = authedApp(AdminUser);
       const app = adminApp();
+
       myAgreement = await app.collection(agreementCollection).add({
         signer: {value: AdminUser.email},
       })
@@ -160,6 +161,7 @@ describe('CLAM Firestore rules TestSuite', () => {
       await firebase.assertFails(agreements.add({
         signer: {value: 'random@ong.org'}
       }));
+
     });
 
     describe('and is a co-signer of an Agreement', () => {
