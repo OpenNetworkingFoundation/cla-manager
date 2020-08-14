@@ -1,77 +1,78 @@
 // Note: CLAs and Addendums cannot be modified or deleted
 service cloud.firestore {
 
-    // Checks to see if the signer of the new CLA or Addendum is the authenticated user
-    function isSigner() {
-        return request.auth.token.email == request.resource.data.signer.value;
-    }
+    // Global checks
 
-    // Checks to see if the signer of the existing CLA or Addendum is the authenticated user
-    function didSign() {
-        return request.auth.token.email == resource.data.signer.value;
-    }
-
-
-    function isUidSigned(uid) {
-        return isSignedIn() && request.auth.uid == uid;
+    // checks if a user is signed in
+    function isSignedIn(auth) {
+        return auth != null;
     }
 
     // checks whether the user has admin privileges or not
-    function isAdmin() {
-        return request.auth.token.admin == true;
+    function isAdmin(auth) {
+        return 'admin' in auth.token && auth.token.admin == true;
     }
 
-    // the request object contains info about the authentication status of the requesting user
-    // if the .auth property is not set, the user is not signed in
-    function isSignedIn() {
-        return request.auth != null;
+    // Agreements
+
+    // Get an agreement starting from the ID
+    function getAgreement(database, agreementId) {
+        return get(/databases/$(database)/documents/agreements/$(agreementId)).data;
     }
 
-    function isOwner(database, request) {
-        return get(/databases/$(database)/documents/agreements/$(request.resource.data.agreementId)).data.signer.value
-                == request.resource.data.signer.value;
+    // Check if the authenticated users is the signer of an agreement
+    function isSigner(auth, agreement) {
+        return auth.token.email == agreement.signer.value
     }
 
-    // check whether the user can manage addendums for a given Agreement
-    // in order for this to happen the User needs to be listed in an Addendum with type "COSIGNER"
-    function isManager(database, request) {
-        return request.resource.data.signer.value in get(/databases/$(database)/documents/whitelists/$(request.resource.data.agreementId)).data.managers;
+    // Check if the authenticated users can manage an agreement
+    function isAgreementManager(auth, database, agreementId) {
+        // return agreementId != null;
+        return auth.token.email in get(/databases/$(database)/documents/whitelists/$(agreementId)).data.managers;
     }
 
-    // return wether a user can create an addendum for a given agreement
-    function canAmend(database, request) {
-        return isOwner(database, request) || isManager(database, request);
+    // Whitelists
+
+    // Check if a user is listed as a manager in a whitelist item
+    function isWhitelistManager(auth, whitelist) {
+        return auth.token.email in whitelist.managers;
+    }
+
+    // AppUsers
+
+    // AppUser documents are stored with the same uid as the logged in user,
+    // check that those match
+    function isAccountOwner(auth, userId) {
+        return auth.uid == userId
     }
 
     match /databases/{database}/documents {
         match /agreements/{agreementId} {
-            allow create: if isSignedIn() && isSigner();
-            allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #1)
+            allow read: if isSignedIn(request.auth) && (isSigner(request.auth, resource.data) || isAdmin(request.auth) || isAgreementManager(request.auth, database, agreementId));
+            allow create: if isSignedIn(request.auth) && isSigner(request.auth, request.resource.data);
             allow update: if false;
             allow delete: if false;
         }
+
         match /addendums/{addendumId} {
-            allow create: if isSignedIn() && isSigner() && canAmend(database, request);
-            allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #1)
+            allow read: if isSignedIn(request.auth) && (isAdmin(request.auth) || isSigner(request.auth, getAgreement(database, request.resource.data.agreementId)))
+            allow create: if isSignedIn(request.auth) && (isSigner(request.auth, getAgreement(database, request.resource.data.agreementId)) || isAgreementManager(request.auth, database, request.resource.data.agreementId));
             allow update: if false;
             allow delete: if false;
         }
+
         match /whitelists/{whitelistId} {
-            allow read:   if isSignedIn() && (didSign() || isAdmin() || isManager(database, request)); //TODO (see below #1)
+            allow read:   if isSignedIn(request.auth) && isWhitelistManager(request.auth, resource.data);
         }
+
         match /appUsers/{uid} {
-            match /accounts/{accountId} {
-                allow read, delete: if isUidSigned(uid);
-                // Only functions can write (verified) accounts
-            }
+            allow read, delete: if isSignedIn(request.auth) && isAccountOwner(request.auth, uid);
+            // Only functions can write (verified) accounts
         }
     }
 }
 
-/* Notes:
-1. We may also allow users that are named in corporate agreements
-to read, but not amend, the CLA that they are named on.
+// NOTES
+// - during read operations the current entry in the DB is stored in the "resource" variable
+// - during write operations the current entry in the DB is stored in the "request.resource" variable
 
-If this happens, we will need up update the read functions above.
-
-*/

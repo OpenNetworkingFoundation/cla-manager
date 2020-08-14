@@ -41,6 +41,7 @@ function adminApp () {
 const agreementCollection = 'agreements'
 const addendumCollection = 'addendums'
 const whitelistCollection = 'whitelists'
+const appuserCollection = 'appUsers'
 
 const AdminUser = {
   uid: 'admin',
@@ -48,9 +49,14 @@ const AdminUser = {
   email: 'admin@onf.org'
 }
 
-const AuthenticatedUser = {
-  uid: 'autheticatedUser',
-  email: 'authenticated@onf.org'
+const AuthenticatedOwner = {
+  uid: 'autheticatedOwner',
+  email: 'authenticatedOwner@onf.org'
+}
+
+const AuthenticatedManager = {
+  uid: 'autheticatedManager',
+  email: 'authenticatedManager@onf.org'
 }
 
 /*
@@ -59,6 +65,7 @@ const AuthenticatedUser = {
  * =============
  */
 describe('CLAM Firestore rules TestSuite', () => {
+
   beforeEach(async () => {
     // Clear the database between tests
     await firebase.clearFirestoreData({ projectId });
@@ -71,6 +78,30 @@ describe('CLAM Firestore rules TestSuite', () => {
   after(async () => {
     await Promise.all(firebase.apps().map(app => app.delete()));
     console.log(`View rule coverage information at ${coverageUrl}\n`);
+  });
+
+  describe('AppUsers', () => {
+    let admin, ownerDb, appUsers;
+    beforeEach(async () => {
+      admin = adminApp();
+      ownerDb = authedApp(AuthenticatedOwner);
+
+      await admin.collection(appuserCollection).doc(AuthenticatedOwner.uid).set({
+        accounts: ['foo', 'bar'],
+      });
+
+      await admin.collection(appuserCollection).doc(AuthenticatedManager.uid).set({
+        accounts: ['foo', 'bar'],
+      });
+    });
+
+    it('should be allowed to read its own AppUser.accounts', async () => {
+      await firebase.assertSucceeds(ownerDb.collection(appuserCollection).doc(AuthenticatedOwner.uid).get())
+    });
+
+    it('should not be allowed to read someone else\'s AppUser.accounts', async () => {
+      await firebase.assertSucceeds(ownerDb.collection(appuserCollection).doc(AuthenticatedOwner.uid).get())
+    });
   });
 
   describe('when a user is logged in as admin', () => {
@@ -90,14 +121,11 @@ describe('CLAM Firestore rules TestSuite', () => {
       })
     })
 
-    it('should be allowed to list all the Agreements', (done) => {
+    it('should be allowed to list all the Agreements', async () => {
       const agreements = db.collection(agreementCollection);
       const query = agreements.get();
-      firebase.assertSucceeds(query);
-      query.then(res => {
-        assert.equal(res.docs.length, 2);
-        done();
-      });
+      const res = await firebase.assertSucceeds(query);
+      assert.strictEqual(res.docs.length, 2);
     });
 
     it('should be allowed to create an addendum for Agreements he does own', async () => {
@@ -120,11 +148,11 @@ describe('CLAM Firestore rules TestSuite', () => {
   });
 
   describe('when a user is logged', () => {
-    let app, db, agreements, testAgreement;
+    let app, ownerDb, agreements, testAgreement;
 
     beforeEach(async () => {
-      db = authedApp(AuthenticatedUser);
-      agreements = db.collection(agreementCollection);
+      ownerDb = authedApp(AuthenticatedOwner);
+      agreements = ownerDb.collection(agreementCollection);
 
       app = adminApp();
       // create Agreements belonging to other users
@@ -137,7 +165,7 @@ describe('CLAM Firestore rules TestSuite', () => {
 
       // create an agreement for the authenticated user
       await app.collection(agreementCollection).add({
-        signer: {value: AuthenticatedUser.email}
+        signer: {value: AuthenticatedOwner.email}
       })
 
     });
@@ -147,17 +175,17 @@ describe('CLAM Firestore rules TestSuite', () => {
       const queryAll = agreements.get();
       firebase.assertFails(queryAll);
 
-      const queryMine = agreements.where('signer.value', '==', AuthenticatedUser.email).get();
+      const queryMine = agreements.where('signer.value', '==', AuthenticatedOwner.email).get();
       firebase.assertSucceeds(queryMine);
       queryMine.then(res => {
-        assert.equal(res.docs.length, 1);
+        assert.strictEqual(res.docs.length, 1);
         done();
       });
     });
 
     it('should be allowed to create Agreements only if he signed them', async () => {
       await firebase.assertSucceeds(agreements.add({
-        signer: {value: AuthenticatedUser.email}
+        signer: {value: AuthenticatedOwner.email}
       }));
 
       await firebase.assertFails(agreements.add({
@@ -167,31 +195,72 @@ describe('CLAM Firestore rules TestSuite', () => {
     });
 
     describe('and is a co-signer of an Agreement', () => {
+
+      let managerDb;
+
       beforeEach(async () => {
+        managerDb = authedApp(AuthenticatedManager);
         await app.collection(addendumCollection).add({
           type: 'cosigner',
           agreementId: testAgreement.id,
           added: [
-            {value: AuthenticatedUser.email}
+            {value: AuthenticatedOwner.email}
           ]
         });
 
-        // create a whitelist entry that sets AuthenticatedUser as manager for the testAgreement
+        // create a whitelist entry that sets AuthenticatedOwner as manager for the testAgreement
         await app.collection(whitelistCollection).doc(testAgreement.id).set({
-          managers: [AuthenticatedUser.email]
+          managers: [AuthenticatedManager.email]
         }, { merge: true })
+
+        const query = await app.collection(whitelistCollection).get()
+
+        // query.forEach(doc => console.log(doc.id, " => ", doc.data()));
+      });
+
+      it('should be able to list those Agreements', async () => {
+
+        const query = await managerDb.collection(whitelistCollection)
+          .where('managers', 'array-contains', AuthenticatedManager.email)
+          .get()
+
+        firebase.assertSucceeds(query)
+        assert.strictEqual(query.docs.length, 1)
+      });
+
+      it('should be able to read those Agreements', (done) => {
+        managerDb.collection(whitelistCollection)
+          .where('managers', 'array-contains', AuthenticatedManager.email)
+          .get()
+          .then(agreements => {
+            return agreements.docs.reduce((promises, a) => {
+              const query = managerDb.collection(agreementCollection).doc(a.id).get()
+              firebase.assertSucceeds(query)
+              promises.push(query)
+              return promises
+            }, [])
+          })
+          .then(promises => {
+            return Promise.all(promises)
+              .then(res => {
+                // we only have one agreement on which AuthenticatedManager is listed as a manager
+                const a = res[0].data()
+                assert.strictEqual(a.signer.value, AdminUser.email)
+                done()
+              })
+          })
+          .catch(done)
+
       });
 
       it('should be allowed to create Addendums for that Agreement', async () => {
 
         const addendum = {
-          signer: {value: AuthenticatedUser.email},
+          signer: {value: AuthenticatedManager.email},
           agreementId: testAgreement.id
         }
 
-        console.log(testAgreement.id)
-
-        await firebase.assertSucceeds(db.collection(addendumCollection).add(addendum))
+        await firebase.assertSucceeds(managerDb.collection(addendumCollection).add(addendum));
       });
     });
   });
