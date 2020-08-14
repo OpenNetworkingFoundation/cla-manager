@@ -40,6 +40,7 @@ function adminApp () {
 
 const agreementCollection = 'agreements'
 const addendumCollection = 'addendums'
+const whitelistCollection = 'whitelists'
 
 const AdminUser = {
   uid: 'admin',
@@ -138,6 +139,7 @@ describe('CLAM Firestore rules TestSuite', () => {
       await app.collection(agreementCollection).add({
         signer: {value: AuthenticatedUser.email}
       })
+
     });
 
     it('should only be allowed to list his own Agreements', (done) => {
@@ -173,13 +175,21 @@ describe('CLAM Firestore rules TestSuite', () => {
             {value: AuthenticatedUser.email}
           ]
         });
+
+        // create a whitelist entry that sets AuthenticatedUser as manager for the testAgreement
+        await app.collection(whitelistCollection).doc(testAgreement.id).set({
+          managers: [AuthenticatedUser.email]
+        }, { merge: true })
       });
 
       it('should be allowed to create Addendums for that Agreement', async () => {
+
         const addendum = {
           signer: {value: AuthenticatedUser.email},
           agreementId: testAgreement.id
         }
+
+        console.log(testAgreement.id)
 
         await firebase.assertSucceeds(db.collection(addendumCollection).add(addendum))
       });

@@ -34,14 +34,13 @@ service cloud.firestore {
 
     // check whether the user can manage addendums for a given Agreement
     // in order for this to happen the User needs to be listed in an Addendum with type "COSIGNER"
-    function isManager() {
-        // TODO implement
-        return false;
+    function isManager(database, request) {
+        return request.resource.data.signer.value in get(/databases/$(database)/documents/whitelists/$(request.resource.data.agreementId)).data.managers;
     }
 
     // return wether a user can create an addendum for a given agreement
     function canAmend(database, request) {
-        return isOwner(database, request) || isManager();
+        return isOwner(database, request) || isManager(database, request);
     }
 
     match /databases/{database}/documents {
@@ -58,7 +57,7 @@ service cloud.firestore {
             allow delete: if false;
         }
         match /whitelists/{whitelistId} {
-            allow read:   if isSignedIn() && (didSign() || isAdmin()); //TODO (see below #1)
+            allow read:   if isSignedIn() && (didSign() || isAdmin() || isManager(database, request)); //TODO (see below #1)
         }
         match /appUsers/{uid} {
             match /accounts/{accountId} {
