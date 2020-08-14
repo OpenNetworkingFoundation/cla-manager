@@ -63,10 +63,10 @@ function CreateAgreementContainer () {
                 I should sign this CLA if:
                 <ul>
                   <li>I'm making contributions as an employee or under a contract or other agreement with a company,
-                    and that company holds the copyright and patents rights on my contributions.
+                    and that company holds the copyright and any patents rights on my contributions.
                   </li>
                   <li>I'm employing (or contracting with) someone to contribute to the project and I hold the copyright
-                    on their contributions.
+                    and any patents rights on their contributions.
                   </li>
                 </ul>
               </Typography>
