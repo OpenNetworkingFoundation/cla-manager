@@ -38,10 +38,18 @@ function CreateAgreementContainer () {
               <Typography variant="body2" component="div">
                 I should sign this CLA if:
                 <ul>
-                  <li>I'm making contributions
-                    on my own free time and no-one is contracting me for them.</li>
+                  <li>I'm making contributions of code I've created in my free time (not under contract),
+                    and I hold the copyright on my contributions.
+                  </li>
                 </ul>
               </Typography>
+              <div className={classes.textCenter}>
+                <Link to={`/sign/${AgreementType.INDIVIDUAL}`}>
+                  <Button variant='contained' color='primary' size='large'>
+                    Sign Individual CLA
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </Grid>
@@ -54,29 +62,23 @@ function CreateAgreementContainer () {
               <Typography variant="body2" component="div">
                 I should sign this CLA if:
                 <ul>
-                  <li>Someone is paying me to contribute to the project</li>
-                  <li>I'm employing (or contracting with) someone to contribute to the project</li>
+                  <li>I'm making contributions as an employee or under a contract or other agreement with a company,
+                    and that company holds the copyright and patents rights on my contributions.
+                  </li>
+                  <li>I'm employing (or contracting with) someone to contribute to the project and I hold the copyright
+                    on their contributions.
+                  </li>
                 </ul>
               </Typography>
+              <div className={classes.textCenter}>
+                <Link to={`/sign/${AgreementType.INSTITUTIONAL}`}>
+                  <Button variant='contained' color='primary' size='large'>
+                    Sign Institutional CLA
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
-        </Grid>
-        <Grid item xs={12}>
-          <p className={classes.textCenter}>Who will you be submitting contributions on behalf of?</p>
-        </Grid>
-        <Grid item xs={12} md={6} className={classes.cell}>
-          <Link to={`/sign/${AgreementType.INDIVIDUAL}`}>
-            <Button variant='contained' color='primary' size='large'>
-              Sign Individual CLA
-            </Button>
-          </Link>
-        </Grid>
-        <Grid item xs={12} md={6} className={classes.cell}>
-          <Link to={`/sign/${AgreementType.INSTITUTIONAL}`}>
-            <Button variant='contained' color='primary' size='large'>
-              Sign Institutional CLA
-            </Button>
-          </Link>
         </Grid>
       </Grid>
     </Paper>
