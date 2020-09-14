@@ -42,5 +42,15 @@
       "githubOrg": "onosproject",
       "team": "SDRANAccess"
     }
+  ],
+  "ProntoAccess" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "SDRANAccess"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "SDRANAccess"
+    }
   ]
 }
