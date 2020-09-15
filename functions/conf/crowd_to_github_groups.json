@@ -46,11 +46,11 @@
   "ProntoAccess" : [
     {
       "githubOrg": "omec-project",
-      "team": "SDRANAccess"
+      "team": "ProntoAccess"
     },
     {
       "githubOrg": "onosproject",
-      "team": "SDRANAccess"
+      "team": "ProntoAccess"
     }
   ]
 }
