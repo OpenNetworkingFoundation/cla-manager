@@ -131,7 +131,6 @@ class addendum {
    */
   static get (agreement, type) {
     return DB.connection().collection(addendumCollection)
-      .where('signer.value', '==', agreement.signer.value)
       .where('agreementId', '==', agreement.id)
       .where('type', '==', type)
       .orderBy('dateSigned')

@@ -14,6 +14,7 @@ import IdentityCard from './IdentityCard'
 import * as _ from 'lodash'
 import { Alert } from '@material-ui/lab'
 import { Identity, IdentityType } from '../../common/model/identity'
+import { Whitelist } from '../../common/model/whitelists'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -31,9 +32,15 @@ class AddendumFormCtrl {
    * This may change when we support co-signers/managers.
    * @param user {{email: string}} The Firebase user object
    * @param agreement {Agreement} An Agreement object
-   * @returns {boolean}
+   * @returns {Promise<boolean>}
    */
-  static isOwner (user, agreement) {
+  static async isOwnerOrManager (user, agreement) {
+
+    const whitelist = await Whitelist.get(agreement.id)
+
+    if (whitelist && whitelist.data().managers.indexOf(user.email) > -1) {
+      return true
+    }
     return user.email === agreement.signer.value
   }
 }
@@ -50,9 +57,9 @@ function AddendumForm (props) {
   const [removedIdentities, setRemovedIdentities] = useState([])
   const [lastAddendum, setLastAddendum] = useState(null)
   const [error, setError] = useState(null)
+  const [canManage, setCanManage] = useState(false)
 
   React.useEffect(() => {
-    console.log(`props.addendumType: ${props.addendumType}`)
     props.agreement.getAddendums(props.addendumType)
       .then(setAddendums)
       .catch(console.error)
@@ -73,6 +80,15 @@ function AddendumForm (props) {
       setLastAddendum(null)
     }
   }, [addendums])
+
+  React.useEffect(() => {
+    (async () => {
+      AddendumFormCtrl.isOwnerOrManager(props.user, props.agreement)
+        .then(status => {
+          setCanManage(status)
+        })
+    })()
+  }, [props.agreement])
 
   const createAddendum = () => {
 
@@ -205,7 +221,8 @@ function AddendumForm (props) {
           under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
         <Grid container spacing={2}>
           {activeIdentities.map((a, i) =>
-            <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4} className="AddendumContainer__active-identity">
+            <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}
+                  className="AddendumContainer__active-identity">
               <IdentityCard key={i} identity={a}
                             callback={setRemovedIdentity} type={'default'}/>
             </Grid>
@@ -219,7 +236,7 @@ function AddendumForm (props) {
           on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}</p>
       </Grid>
       {/* TODO print a list of all the addendums if it's admin */}
-      {AddendumFormCtrl.isOwner(props.user, props.agreement) ? updateForm : null}
+      {canManage ? updateForm : null}
 
     </Grid>
   )
@@ -233,3 +250,4 @@ AddendumForm.propTypes = {
 }
 
 export default AddendumForm
+export { AddendumFormCtrl }

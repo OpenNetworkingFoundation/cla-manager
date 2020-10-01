@@ -1,6 +1,8 @@
-import { AddendumType } from '../../common/model/addendum'
-
 const util = require('./util')
+const AddendumType = {
+  CONTRIBUTOR: 'contributor',
+  COSIGNER: 'cosigner'
+}
 
 module.exports = Cla
 

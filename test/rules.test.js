@@ -269,6 +269,14 @@ describe('CLAM Firestore rules TestSuite', () => {
 
         await firebase.assertSucceeds(managerDb.collection(addendumCollection).add(addendum));
       });
+
+      it('should be allowed to read Addendums for that Agreement', async () => {
+        const query = await managerDb.collection(addendumCollection)
+          .where('agreementId', '==', testAgreement.id)
+          .get()
+
+        firebase.assertSucceeds(query)
+      });
     });
   });
 });

@@ -54,7 +54,7 @@ service cloud.firestore {
         }
 
         match /addendums/{addendumId} {
-            allow read: if isSignedIn(request.auth) && (isAdmin(request.auth) || isSigner(request.auth, getAgreement(database, request.resource.data.agreementId)))
+            allow read: if isSignedIn(request.auth) && (isAdmin(request.auth) || isSigner(request.auth, getAgreement(database, resource.data.agreementId)) || isAgreementManager(request.auth, database, resource.data.agreementId));
             allow create: if isSignedIn(request.auth) && (isSigner(request.auth, getAgreement(database, request.resource.data.agreementId)) || isAgreementManager(request.auth, database, request.resource.data.agreementId));
             allow update: if false;
             allow delete: if false;
