@@ -31,7 +31,7 @@ describe('AddendumFormCtrl Test Suite', () => {
 
     beforeEach(() => {
       getWhitelistMock = jest.spyOn(Whitelist, 'get').mockImplementation(() => {
-        return Promise.resolve({data: () => whitelist})
+        return Promise.resolve({ data: () => whitelist })
       })
     })
 
