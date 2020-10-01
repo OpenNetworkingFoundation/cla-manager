@@ -64,6 +64,20 @@ export class Whitelist {
   }
 
   /**
+   * Return the IDs of Agreements for which a certain email is listed in the managers
+   * @param {string} email
+   * @return {Promise<string[]>}
+   */
+  static getByManager (email) {
+    return DB.connection().collection(whitelistCollection)
+      .where('managers', 'array-contains', email)
+      .get()
+      .then(res => {
+        return res.docs.map(i => i.id)
+      })
+  }
+
+  /**
    * Get all the whitelisted identities with their Agreement ID
    * @returns {Promise<{identity: string, agreements: string[]}[]>}
    */

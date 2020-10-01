@@ -1,4 +1,4 @@
-const firebase = require('@firebase/testing');
+const firebase = require('@firebase/rules-unit-testing');
 const fs = require('fs');
 var assert = require('assert');
 
@@ -214,18 +214,25 @@ describe('CLAM Firestore rules TestSuite', () => {
         }, { merge: true })
 
         const query = await app.collection(whitelistCollection).get()
-
-        // query.forEach(doc => console.log(doc.id, " => ", doc.data()));
       });
 
       it('should be able to list those Agreements', async () => {
 
+        // get all the agreements this user can manage from the whitelist
         const query = await managerDb.collection(whitelistCollection)
           .where('managers', 'array-contains', AuthenticatedManager.email)
           .get()
-
         firebase.assertSucceeds(query)
         assert.strictEqual(query.docs.length, 1)
+
+        // query for those agreements
+        const managedIds = query.docs.reduce((ids, d) => [d.id, ...ids], [])
+        let itemRefs = managedIds.map(id => {
+          return managerDb.collection(agreementCollection).doc(id).get();
+        });
+        const agreementsQuery = await Promise.all(itemRefs)
+        firebase.assertSucceeds(agreementsQuery)
+        assert.strictEqual(agreementsQuery.length, 1)
       });
 
       it('should be able to read those Agreements', (done) => {

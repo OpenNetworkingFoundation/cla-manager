@@ -27,7 +27,6 @@ service cloud.firestore {
 
     // Check if the authenticated users can manage an agreement
     function isAgreementManager(auth, database, agreementId) {
-        // return agreementId != null;
         return auth.token.email in get(/databases/$(database)/documents/whitelists/$(agreementId)).data.managers;
     }
 

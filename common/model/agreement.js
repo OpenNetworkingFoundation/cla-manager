@@ -1,6 +1,7 @@
 import DB from '../db/db'
 import { Addendum } from './addendum'
 import { Identity, IdentityType } from './identity'
+import { Whitelist } from './whitelists'
 
 const agreementCollection = 'agreements'
 
@@ -160,7 +161,6 @@ class agreement {
    * @returns {Promise<Addendum[]>}
    */
   getAddendums (type) {
-    console.log(`Type: ${type}`)
     return Addendum.get(this, type)
   }
 
@@ -206,10 +206,38 @@ class agreement {
   }
 
   static subscribe (email, successCb, errorCb) {
+    const success = (data) => {
+      Whitelist.getByManager(email)
+        .then(agreementIds => {
+          if (agreementIds.length > 0) {
+            // fetch all the agreements for which I'm manager
+            return Agreement.getByIds(agreementIds)
+          }
+          return []
+        })
+        .then(managed => {
+          successCb([...data.docs, ...managed])
+        })
+        .catch(errorCb)
+    }
+
+    console.log(email)
+
     return DB.connection().collection(agreementCollection)
-      .where('signer.type', '==', IdentityType.EMAIL)
       .where('signer.value', '==', email)
-      .onSnapshot(successCb, errorCb)
+      .onSnapshot(success, errorCb)
+  }
+
+  /**
+   * Gets the agreements by multiple IDs
+   * @param {string[]} agreementIds
+   * @returns {Promise<Agreement[]>}
+   */
+  static getByIds (agreementIds) {
+    const itemRefs = agreementIds.map(id => {
+      return DB.connection().collection(agreementCollection).doc(id).get()
+    })
+    return Promise.all(itemRefs)
   }
 
   /**

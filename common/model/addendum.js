@@ -108,7 +108,7 @@ class addendum {
       removed: this.removed.map(i => i.toJson()),
       agreementId: this.agreementId,
       dateSigned: this.dateSigned,
-      type: this.type,
+      type: this.type
     }
   }
 

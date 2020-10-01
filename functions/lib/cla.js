@@ -1,3 +1,5 @@
+import { AddendumType } from '../../common/model/addendum'
+
 const util = require('./util')
 
 module.exports = Cla
@@ -43,23 +45,33 @@ function Cla (db) {
           // include the latest writes, such as the new addendum. We manually
           // append it to the results to always pass the tests.
           .concat([newAddendum || { added: [], removed: [] }])
-          .reduce((whitelist, addendum) => {
-            addendum.added.map(util.identityKey).forEach(val => {
-              whitelist.add(val)
-            })
-            addendum.removed.map(util.identityKey).forEach(val => {
-              whitelist.delete(val)
-            })
-            return whitelist
-          }, new Set())
+          .reduce((auth, addendum) => {
+            if (addendum.type === AddendumType.CONTRIBUTOR) {
+              addendum.added.map(util.identityKey).forEach(val => {
+                auth.whitelist.add(val)
+              })
+              addendum.removed.map(util.identityKey).forEach(val => {
+                auth.whitelist.delete(val)
+              })
+            } else if (addendum.type === AddendumType.COSIGNER) {
+              addendum.added.forEach(val => {
+                auth.managers.add(val.value)
+              })
+              addendum.removed.forEach(val => {
+                auth.managers.delete(val.value)
+              })
+            }
+            return auth
+          }, { whitelist: new Set(), managers: new Set() })
       })
-      .then(whitelist => {
+      .then(auth => {
         // Store the whitelist using the same ID as the agreement.
         return db.collection('whitelists')
           .doc(agreementId)
           .set({
             lastUpdated: new Date(),
-            values: Array.from(whitelist)
+            values: Array.from(auth.whitelist),
+            managers: Array.from(auth.managers)
           })
       })
       .then(writeResult => {

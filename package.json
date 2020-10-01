@@ -9,7 +9,8 @@
     "test": "mocha --timeout=10000"
   },
   "devDependencies": {
-    "@firebase/testing": "^0.15.0",
+    "@firebase/rules-unit-testing": "^1.0.4",
+    "firebase-admin": "^9.2.0",
     "mocha": "5.2.0",
     "prettier": "1.15.2"
   },

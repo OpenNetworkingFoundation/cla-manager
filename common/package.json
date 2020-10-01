@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@bugsnag/js": "^6.5.2",
-    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-env": "^7.8.7",
     "@types/jest": "^24.0.0",
     "babel": "^6.23.0",
     "babel-eslint": "^10.0.3",

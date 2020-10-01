@@ -1,5 +1,6 @@
 import { addAndGetSnapshot, setupEmulatorAdmin } from './helpers'
 import { assertFails, assertSucceeds } from '@firebase/testing'
+import { AddendumType } from '../../common/model/addendum'
 
 const Cla = require('../lib/cla')
 
@@ -25,7 +26,8 @@ const addendum1 = {
   added: [idJohnEmail, idEmmaEmail, idEmmaGithub],
   removed: [],
   agreementId: agreementId,
-  dateSigned: new Date()
+  dateSigned: new Date(),
+  type: AddendumType.CONTRIBUTOR
 }
 
 const addendum2 = {
@@ -33,7 +35,8 @@ const addendum2 = {
   added: [idGigiEmail, idGigiGithub],
   removed: [idEmmaEmail, idEmmaGithub],
   agreementId: agreementId,
-  dateSigned: new Date()
+  dateSigned: new Date(),
+  type: AddendumType.CONTRIBUTOR
 }
 
 const addendum3 = {
@@ -41,7 +44,26 @@ const addendum3 = {
   added: [],
   removed: [idGigiGithub, idEmmaGithub],
   agreementId: agreementId,
-  dateSigned: new Date()
+  dateSigned: new Date(),
+  type: AddendumType.CONTRIBUTOR
+}
+
+const managerAddendum1 = {
+  signer: idJohnEmail,
+  added: [idGigiEmail, idEmmaEmail],
+  removed: [],
+  agreementId: agreementId,
+  dateSigned: new Date(),
+  type: AddendumType.COSIGNER
+}
+
+const managerAddendum2 = {
+  signer: idJohnEmail,
+  added: [],
+  removed: [idEmmaEmail],
+  agreementId: agreementId,
+  dateSigned: new Date(),
+  type: AddendumType.COSIGNER
 }
 
 describe('Cla lib', () => {
@@ -70,7 +92,7 @@ describe('Cla lib', () => {
     await app.delete()
   })
 
-  it('should update whitelist', async () => {
+  it('should update whitelist values', async () => {
     // Add agreement
     expect(await assertSucceeds(agreementRef.set(agreement)))
     // Add addendum 1
@@ -116,6 +138,32 @@ describe('Cla lib', () => {
     whitelistDoc = (await whitelistRef.get()).data()
     // We removed all github IDs
     expect(!Array.isArray(whitelistDoc.github) || !whitelistDoc.github.length).toBe(true)
+  })
+
+  it('should update whitelist managers', async () => {
+    // Add agreement
+    expect(await assertSucceeds(agreementRef.set(agreement)))
+    // Add 2 emails to the managers
+    addendumSnapshot = await addAndGetSnapshot(addendumsRef, managerAddendum1)
+    // Update whitelist
+    expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+
+    // check that we have 2 entries in the managers
+    let whitelist = await whitelistRef.get()
+    expect(whitelist.data().managers.length).toEqual(2)
+    expect(whitelist.data().managers).toContain(idGigiEmail.value)
+    expect(whitelist.data().managers).toContain(idEmmaEmail.value)
+
+    // remove emma from the managers
+    addendumSnapshot = await addAndGetSnapshot(addendumsRef, managerAddendum2)
+    // Update whitelist
+    expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+
+    // check that we have 1 entry in the managers
+    whitelist = await whitelistRef.get()
+    expect(whitelist.data().managers.length).toEqual(1)
+    expect(whitelist.data().managers).toContain(idGigiEmail.value)
+    expect(whitelist.data().managers).not.toContain(idEmmaEmail.value)
   })
 
   it('should NOT be possible to update the whitelist for a non-existing agreement', async () => {

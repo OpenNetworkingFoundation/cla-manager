@@ -179,6 +179,7 @@ describe('The Agreement model', () => {
   describe('the subscribe method', () => {
     it('should get a list of models from the DB', (done) => {
       firestoreMock.mockOnSnaptshotSuccess = []
+      firestoreMock.mockGetReturn = { docs: [] }
       const email = 'info@onf.org'
       Agreement.subscribe(
         email,

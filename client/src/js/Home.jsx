@@ -55,8 +55,8 @@ export default class Home extends React.Component {
    * Renders the CLAs in the appropriate tables.
    */
   renderClaTables (snapshot) {
-    if (snapshot || snapshot.size) {
-      const agreements = snapshot.docs.reduce((obj, agr) => {
+    if (snapshot || snapshot.length) {
+      const agreements = snapshot.reduce((obj, agr) => {
         if (agr.data().type === AgreementType.INDIVIDUAL) {
           obj.individualCLATable.push(Agreement.fromDocumentSnapshot(agr))
         }
