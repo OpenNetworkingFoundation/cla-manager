@@ -20,6 +20,12 @@ const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
+  },
+  updateFormContainer: {
+    width: '100%'
+  },
+  bold: {
+    fontWeight: 'bold'
   }
 }))
 
@@ -36,12 +42,16 @@ class AddendumFormCtrl {
    */
   static async isOwnerOrManager (user, agreement) {
 
-    const whitelist = await Whitelist.get(agreement.id)
+    // if the user is the signer there's no need to check if he's a manager
+    if (user.email === agreement.signer.value) {
+      return true
+    }
 
+    const whitelist = await Whitelist.get(agreement.id)
     if (whitelist && whitelist.data().managers.indexOf(user.email) > -1) {
       return true
     }
-    return user.email === agreement.signer.value
+    return false
   }
 }
 
@@ -160,20 +170,37 @@ function AddendumForm (props) {
     props.updateStatus(value)
   }
 
+  const headers = {}
+  headers[AddendumType.CONTRIBUTOR] = 'Active contributors for this Agreement'
+  headers[AddendumType.COSIGNER] = 'Active managers for this Agreement'
+
+  const formTitle = {}
+  formTitle[AddendumType.CONTRIBUTOR] = 'Contributors'
+  formTitle[AddendumType.COSIGNER] = 'Managers'
+
+  const subtitle = {}
+  subtitle[AddendumType.CONTRIBUTOR] = 'Here is a list of identities that are authorized to contribute code under this agreement'
+  subtitle[AddendumType.COSIGNER] = 'Here is a list of users that are allowed to make changes to this Agreement'
+
+  const text = {}
+  text[AddendumType.CONTRIBUTOR] = 'Identities listed under "Contributors" for this Agreement will be allowed to contribute code.'
+  text[AddendumType.COSIGNER] = 'Identities listed under "Managers" for this Agreement will be allowed to make changes to the "Agreement".' +
+    'This means they will be able to add other "Managers" as well as adding and removing "Contributors"'
+
   const updateForm = (
-    <div className="AddendumContainer__update-form">
+    <div className={classes.updateFormContainer + ' AddendumContainer__update-form '}>
       <Grid item xs={12}>
         <Grid container spacing={2}>
 
           <Grid item xs={12}>
-            <h2>Update Agreement</h2>
+            <h2>Update {formTitle[props.addendumType]}</h2>
             <Box>
-              <p>
-                You can sign a new "addendum" to modify the identities allowed
-                to contribute under this agreement. Use the form below to add
-                identities, or select one from the above list to remove it.
+              <p className={classes.bold}>
+                {text[props.addendumType]}
               </p>
               <p>
+                Use the form below to add identities, or select one from the above list to remove it.
+                <br/>
                 Once done, make sure to click on &quot;Sign
                 Addendum&quot; below to apply your changes.
               </p>
@@ -213,12 +240,12 @@ function AddendumForm (props) {
       </Grid>
     </div>
   )
+
   return (
     <Grid container spacing={2} className="AddendumContainer">
       <Grid item xs={12} className="AddendumContainer__active-identities">
-        <h2>Active {props.addendumType.toString()}s for this Agreement</h2>
-        <p>Here is a list of identities that are authorized to contribute code
-          under this agreement: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
+        <h2>{headers[props.addendumType]}</h2>
+        <p>{subtitle[props.addendumType]}: {activeIdentities.length === 0 ? <strong>EMPTY</strong> : ''}</p>
         <Grid container spacing={2}>
           {activeIdentities.map((a, i) =>
             <Grid key={`container-${i}`} item xs={12} sm={12} md={6} lg={4}
