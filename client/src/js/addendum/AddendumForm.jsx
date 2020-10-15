@@ -171,21 +171,25 @@ function AddendumForm (props) {
   }
 
   const headers = {}
-  headers[AddendumType.CONTRIBUTOR] = 'Active contributors for this Agreement'
-  headers[AddendumType.COSIGNER] = 'Active managers for this Agreement'
+  headers[AddendumType.CONTRIBUTOR] = 'Active Contributors for this Agreement'
+  headers[AddendumType.COSIGNER] = 'Active Managers for this Agreement'
 
   const formTitle = {}
   formTitle[AddendumType.CONTRIBUTOR] = 'Contributors'
   formTitle[AddendumType.COSIGNER] = 'Managers'
 
+  const identityType = {}
+  identityType[AddendumType.CONTRIBUTOR] = 'Contributor'
+  identityType[AddendumType.COSIGNER] = 'Manager'
+
   const subtitle = {}
-  subtitle[AddendumType.CONTRIBUTOR] = 'Here is a list of identities that are authorized to contribute code under this agreement'
-  subtitle[AddendumType.COSIGNER] = 'Here is a list of users that are allowed to make changes to this Agreement'
+  subtitle[AddendumType.CONTRIBUTOR] = 'Here is a list of Users/Identities that are authorized to make contributions to ONF projects under this agreement'
+  subtitle[AddendumType.COSIGNER] = 'Here is a list of Users/Identities that are allowed to add and remove Contributor Identities to/from this Agreement'
 
   const text = {}
-  text[AddendumType.CONTRIBUTOR] = 'Identities listed under "Contributors" for this Agreement will be allowed to contribute code.'
-  text[AddendumType.COSIGNER] = 'Identities listed under "Managers" for this Agreement will be allowed to make changes to the "Agreement".' +
-    'This means they will be able to add other "Managers" as well as adding and removing "Contributors"'
+  text[AddendumType.CONTRIBUTOR] = 'Users/Identities listed under "Contributors" for this Agreement will be allowed to make contributions to ONF projects.'
+  text[AddendumType.COSIGNER] = 'Users/Identities listed under "Managers" for this Agreement will be allowed to add and remove Contributor ' +
+    'Identities to/from this Agreement AND to add and remove other Managers to/from this Agreement.'
 
   const updateForm = (
     <div className={classes.updateFormContainer + ' AddendumContainer__update-form '}>
@@ -199,7 +203,7 @@ function AddendumForm (props) {
                 {text[props.addendumType]}
               </p>
               <p>
-                Use the form below to add identities, or select one from the above list to remove it.
+                Use the form below to add {identityType[props.addendumType]} Identities, or select one from the above list to remove it.
                 <br/>
                 Once done, make sure to click on &quot;Sign
                 Addendum&quot; below to apply your changes.
