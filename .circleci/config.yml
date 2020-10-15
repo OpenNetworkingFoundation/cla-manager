@@ -29,12 +29,15 @@ jobs:
             - common-dependencies-{{ checksum "common/package.json" }}
             - common-dependencies-
       # install the new dependencies for all the packages
+      - run:
+          name: Install Firebase Tools
+          command: npm install --prefix=./firebase-emulator firebase-tools
       - run: npm install
       - run: npm --prefix ./functions install
       - run: npm --prefix ./client install
       - run: npm --prefix ./common install
       # run the tests
-      - run: firebase emulators:exec --only firestore 'npm test'
+      - run: ./firebase-emulator/node_modules/.bin/firebase emulators:exec --only firestore 'npm test'
       - run: npm --prefix ./common test
       - run: npm --prefix ./functions test
       - run: npm --prefix ./client test
