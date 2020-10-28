@@ -21,6 +21,10 @@
     {
       "githubOrg": "opennetworkinglab",
       "team": "ONFStaff"
+    },
+    {
+      "githubOrg": "stratum",
+      "team": "ONFStaff"
     }
   ],
   "AetherAccess" : [
@@ -41,6 +45,16 @@
     {
       "githubOrg": "onosproject",
       "team": "SDRANAccess"
+    }
+  ],
+  "ProntoAccess" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "ProntoAccess"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "ProntoAccess"
     }
   ]
 }
