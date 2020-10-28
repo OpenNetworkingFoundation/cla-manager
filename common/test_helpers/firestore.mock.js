@@ -4,6 +4,7 @@ export default class FirestoreMock {
     this.mockCollection = jest.fn(() => this)
     this.mockWhere = jest.fn(() => this)
     this.mockOrderBy = jest.fn(() => this)
+    this.mockDoc = jest.fn(() => this)
 
     // methods that return promises
     this.mockAdd = jest.fn(() => Promise.resolve(this._mockAddReturn))
@@ -29,6 +30,10 @@ export default class FirestoreMock {
 
   orderBy (...args) {
     return this.mockOrderBy(...args)
+  }
+
+  doc (...args) {
+    return this.mockDoc(...args)
   }
 
   add (a) {
