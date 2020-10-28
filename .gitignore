@@ -6,7 +6,6 @@ node_modules
 */node_modules
 */coverage-final.json
 
-package-lock.json
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
