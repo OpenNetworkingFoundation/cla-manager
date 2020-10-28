@@ -134,11 +134,11 @@ describe('The Agreement model', () => {
   })
 
   describe('the getAddendums method', () => {
-    it('should return a list of addendums', (done) => {
+    it('should return a list of CONTRIBUTOR addendums', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() },
         ]
       }
       individualAgreement.getAddendums(AddendumType.CONTRIBUTOR)
@@ -154,6 +154,23 @@ describe('The Agreement model', () => {
         })
         .catch(done)
     })
+    it('should return a list of COSIGNER addendums', (done) => {
+      firestoreMock.mockGetReturn = {
+        docs: [
+          { data: () => new Addendum(AddendumType.COSIGNER, 'test-id', signer, [user1], []).toJson() }
+        ]
+      }
+      individualAgreement.getAddendums(AddendumType.COSIGNER)
+        .then(res => {
+          expect(firestoreMock.mockWhere).toBeCalledWith('agreementId', '==', null)
+          expect(firestoreMock.mockWhere).toBeCalledWith('type', '==', AddendumType.COSIGNER)
+          expect(res.length).toEqual(1)
+          expect(res[0].added.length).toEqual(1)
+          expect(res[0].removed.length).toEqual(0)
+          done()
+        })
+        .catch(done)
+    })
   })
 
   describe('the getWhitelist method', () => {
@@ -164,7 +181,7 @@ describe('The Agreement model', () => {
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
         ]
       }
-      individualAgreement.getWhitelist()
+      individualAgreement.getWhitelist(AddendumType.CONTRIBUTOR)
         .then(res => {
           expect(res.length).toEqual(2)
           // NOTE user1 is removed in the second addendum
