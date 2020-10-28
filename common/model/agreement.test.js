@@ -141,10 +141,10 @@ describe('The Agreement model', () => {
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
         ]
       }
-      individualAgreement.getAddendums()
+      individualAgreement.getAddendums(AddendumType.CONTRIBUTOR)
         .then(res => {
-          expect(firestoreMock.mockWhere).toBeCalledWith('signer.value', '==', signer.value)
           expect(firestoreMock.mockWhere).toBeCalledWith('agreementId', '==', null)
+          expect(firestoreMock.mockWhere).toBeCalledWith('type', '==', AddendumType.CONTRIBUTOR)
           expect(res.length).toEqual(2)
           expect(res[0].added.length).toEqual(2)
           expect(res[0].removed.length).toEqual(0)
@@ -178,13 +178,13 @@ describe('The Agreement model', () => {
 
   describe('the subscribe method', () => {
     it('should get a list of models from the DB', (done) => {
-      firestoreMock.mockOnSnaptshotSuccess = []
+      firestoreMock.mockOnSnaptshotSuccess = { docs: [] }
       firestoreMock.mockGetReturn = { docs: [] }
       const email = 'info@onf.org'
       Agreement.subscribe(
         email,
         res => {
-          expect(firestoreMock.mockWhere).toBeCalledWith('signer.type', '==', 'email')
+          expect(firestoreMock.mockWhere).toBeCalledWith('managers', 'array-contains', 'info@onf.org')
           expect(firestoreMock.mockWhere).toBeCalledWith('signer.value', '==', 'info@onf.org')
           expect(res).toEqual([])
           done()

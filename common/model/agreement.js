@@ -1,6 +1,6 @@
 import DB from '../db/db'
 import { Addendum } from './addendum'
-import { Identity, IdentityType } from './identity'
+import { Identity } from './identity'
 import { Whitelist } from './whitelists'
 
 const agreementCollection = 'agreements'
