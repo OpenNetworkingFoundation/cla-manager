@@ -138,7 +138,7 @@ describe('The Agreement model', () => {
       firestoreMock.mockGetReturn = {
         docs: [
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() },
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
         ]
       }
       individualAgreement.getAddendums(AddendumType.CONTRIBUTOR)
