@@ -1,7 +1,7 @@
 const util = require('./util')
 const AddendumType = {
   CONTRIBUTOR: 'contributor',
-  COSIGNER: 'cosigner'
+  MANAGER: 'manager'
 }
 
 module.exports = Cla

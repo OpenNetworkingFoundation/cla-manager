@@ -16,7 +16,7 @@ const addendumType = {
   /**
    * Cosigner addendum.
    */
-  COSIGNER: 'cosigner'
+  MANAGER: 'manager'
 }
 
 /**

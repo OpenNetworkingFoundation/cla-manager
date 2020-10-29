@@ -201,7 +201,7 @@ describe('CLAM Firestore rules TestSuite', () => {
       beforeEach(async () => {
         managerDb = authedApp(AuthenticatedManager);
         await app.collection(addendumCollection).add({
-          type: 'cosigner',
+          type: 'manager',
           agreementId: testAgreement.id,
           added: [
             {value: AuthenticatedOwner.email}
