@@ -55,7 +55,7 @@ function Cla (db) {
               addendum.removed.map(util.identityKey).forEach(val => {
                 auth.whitelist.delete(val)
               })
-            } else if (addendum.type === AddendumType.COSIGNER) {
+            } else if (addendum.type === AddendumType.MANAGER) {
               addendum.added.forEach(val => {
                 auth.managers.add(val.value)
               })
