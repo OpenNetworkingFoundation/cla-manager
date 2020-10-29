@@ -20,10 +20,7 @@ function Backup (bucketName) {
       collectionIds: [
         'addendums',
         'agreements',
-        'appUsers',
-        'contributions',
-        'events',
-        'whitelists'
+        'appUsers'
       ]
     })
       .then(responses => {
