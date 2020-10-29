@@ -54,7 +54,7 @@ const managerAddendum1 = {
   removed: [],
   agreementId: agreementId,
   dateSigned: new Date(),
-  type: AddendumType.COSIGNER
+  type: AddendumType.MANAGER
 }
 
 const managerAddendum2 = {
@@ -63,7 +63,7 @@ const managerAddendum2 = {
   removed: [idEmmaEmail],
   agreementId: agreementId,
   dateSigned: new Date(),
-  type: AddendumType.COSIGNER
+  type: AddendumType.MANAGER
 }
 
 describe('Cla lib', () => {

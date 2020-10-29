@@ -58,7 +58,7 @@ function AddendumContainer (props) {
         <AddendumForm
           user={props.user}
           agreement={props.agreement}
-          addendumType={AddendumType.COSIGNER}
+          addendumType={AddendumType.MANAGER}
           updateStatus={setContributorUpdateStatus}
         />
       </Grid> : null}

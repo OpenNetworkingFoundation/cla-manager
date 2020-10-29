@@ -36,15 +36,15 @@ describe('AddendumFormCtrl Test Suite', () => {
     })
 
     it('should return true if the user is owner', async () => {
-      const success = await AddendumFormCtrl.isOwnerOrManager({ email: signer.value }, agreement)
+      const success = await AddendumFormCtrl.isSignerOrManager({ email: signer.value }, agreement)
       expect(success).toBeTruthy()
 
-      const failure = await AddendumFormCtrl.isOwnerOrManager({ email: 'invalid@onf.org' }, agreement)
+      const failure = await AddendumFormCtrl.isSignerOrManager({ email: 'invalid@onf.org' }, agreement)
       expect(failure).toBeFalsy()
     })
 
     it('should return true if the user is a manager', async () => {
-      const success = await AddendumFormCtrl.isOwnerOrManager({ email: 'manager@onf.org' }, agreement)
+      const success = await AddendumFormCtrl.isSignerOrManager({ email: 'manager@onf.org' }, agreement)
       expect(success).toBeTruthy()
     })
   })

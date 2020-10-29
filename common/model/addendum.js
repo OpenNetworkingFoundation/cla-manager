@@ -3,7 +3,7 @@ import { Identity, IdentityType } from './identity'
 
 /**
  * types of agreement addendums.
- * @type {{CONTRIBUTOR: string, COSIGNER: string}}
+ * @type {{CONTRIBUTOR: string, MANAGER: string}}
  */
 
 const addendumCollection = 'addendums'

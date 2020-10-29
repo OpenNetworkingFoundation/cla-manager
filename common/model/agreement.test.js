@@ -154,16 +154,16 @@ describe('The Agreement model', () => {
         })
         .catch(done)
     })
-    it('should return a list of COSIGNER addendums', (done) => {
+    it('should return a list of MANAGER addendums', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
-          { data: () => new Addendum(AddendumType.COSIGNER, 'test-id', signer, [user1], []).toJson() }
+          { data: () => new Addendum(AddendumType.MANAGER, 'test-id', signer, [user1], []).toJson() }
         ]
       }
-      individualAgreement.getAddendums(AddendumType.COSIGNER)
+      individualAgreement.getAddendums(AddendumType.MANAGER)
         .then(res => {
           expect(firestoreMock.mockWhere).toBeCalledWith('agreementId', '==', null)
-          expect(firestoreMock.mockWhere).toBeCalledWith('type', '==', AddendumType.COSIGNER)
+          expect(firestoreMock.mockWhere).toBeCalledWith('type', '==', AddendumType.MANAGER)
           expect(res.length).toEqual(1)
           expect(res[0].added.length).toEqual(1)
           expect(res[0].removed.length).toEqual(0)

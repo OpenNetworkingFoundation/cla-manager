@@ -40,7 +40,7 @@ class AddendumFormCtrl {
    * @param agreement {Agreement} An Agreement object
    * @returns {Promise<boolean>}
    */
-  static async isOwnerOrManager (user, agreement) {
+  static async isSignerOrManager (user, agreement) {
 
     // if the user is the signer there's no need to check if he's a manager
     if (user.email === agreement.signer.value) {
@@ -93,7 +93,7 @@ function AddendumForm (props) {
 
   React.useEffect(() => {
     (async () => {
-      AddendumFormCtrl.isOwnerOrManager(props.user, props.agreement)
+      AddendumFormCtrl.isSignerOrManager(props.user, props.agreement)
         .then(status => {
           setCanManage(status)
         })
@@ -172,23 +172,23 @@ function AddendumForm (props) {
 
   const headers = {}
   headers[AddendumType.CONTRIBUTOR] = 'Active Contributors for this Agreement'
-  headers[AddendumType.COSIGNER] = 'Active Managers for this Agreement'
+  headers[AddendumType.MANAGER] = 'Active Managers for this Agreement'
 
   const formTitle = {}
   formTitle[AddendumType.CONTRIBUTOR] = 'Contributors'
-  formTitle[AddendumType.COSIGNER] = 'Managers'
+  formTitle[AddendumType.MANAGER] = 'Managers'
 
   const identityType = {}
   identityType[AddendumType.CONTRIBUTOR] = 'Contributor'
-  identityType[AddendumType.COSIGNER] = 'Manager'
+  identityType[AddendumType.MANAGER] = 'Manager'
 
   const subtitle = {}
   subtitle[AddendumType.CONTRIBUTOR] = 'Here is a list of Users/Identities that are authorized to make contributions to ONF projects under this agreement'
-  subtitle[AddendumType.COSIGNER] = 'Here is a list of Users/Identities that are allowed to add and remove Contributor Identities to/from this Agreement'
+  subtitle[AddendumType.MANAGER] = 'Here is a list of Users/Identities that are allowed to add and remove Contributor Identities to/from this Agreement'
 
   const text = {}
   text[AddendumType.CONTRIBUTOR] = 'Users/Identities listed under "Contributors" for this Agreement will be allowed to make contributions to ONF projects.'
-  text[AddendumType.COSIGNER] = 'Users/Identities listed under "Managers" for this Agreement will be allowed to add and remove Contributor ' +
+  text[AddendumType.MANAGER] = 'Users/Identities listed under "Managers" for this Agreement will be allowed to add and remove Contributor ' +
     'Identities to/from this Agreement AND to add and remove other Managers to/from this Agreement.'
 
   const updateForm = (
@@ -276,7 +276,7 @@ function AddendumForm (props) {
 AddendumForm.propTypes = {
   user: PropTypes.object.isRequired,
   agreement: PropTypes.instanceOf(Agreement).isRequired,
-  addendumType: PropTypes.oneOf([AddendumType.CONTRIBUTOR, AddendumType.COSIGNER]).isRequired,
+  addendumType: PropTypes.oneOf([AddendumType.CONTRIBUTOR, AddendumType.MANAGER]).isRequired,
   updateStatus: PropTypes.func.isRequired
 }
 
