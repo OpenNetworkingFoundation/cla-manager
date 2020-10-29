@@ -8,7 +8,7 @@ from firebase_admin import credentials, firestore
 import argparse
 
 CONTRIBUTOR = u"contributor"
-COSIGNER = u"cosigner"
+MANAGER = u"manager"
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Manages and admin in your firebase app')
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     for addendum in addendums:
         a = addendum.to_dict()
-        if "type" in a and a["type"] in [CONTRIBUTOR, COSIGNER]:
+        if "type" in a and a["type"] in [CONTRIBUTOR, MANAGER]:
             # this addendum already has a type, do nothing
             print("Addendum %s has a type, doing nothing" %addendum.id)
             pass
