@@ -18,9 +18,9 @@ function Backup (bucketName) {
       name: databaseName,
       outputUriPrefix: bucket,
       collectionIds: [
-        'whitelists',
+        'addendums',
         'agreements',
-        'addendums'
+        'appUsers'
       ]
     })
       .then(responses => {
