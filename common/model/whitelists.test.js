@@ -68,12 +68,24 @@ describe('The Whitelist model', () => {
       .catch(done)
   })
 
+  it('should get a single whitelist', (done) => {
+    const id = '123'
+    Whitelist.get(id)
+      .then(res => {
+        expect(firestoreMock.mockDoc).toBeCalledWith(id)
+        expect(firestoreMock.mockGet).toBeCalled()
+        done()
+      })
+      .catch(done)
+  })
+
   it('should return a list of identities with the associated agreements', (done) => {
     firestoreMock.mockGetReturn = {
       docs: [wl1, wl2, wl3]
     }
     Whitelist.getWhitelistWithAgreementId()
       .then(res => {
+        expect(firestoreMock.mockWhere).not.toBeCalled()
         expect(res[0].identity).toEqual('wl1@opennetworking.org')
         expect(res[0].type).toEqual('email')
         expect(res[0].agreements).toEqual(['123'])
@@ -94,6 +106,20 @@ describe('The Whitelist model', () => {
         expect(res[4].type).toEqual('email')
         expect(res[4].agreements).toEqual(['789'])
 
+        done()
+      })
+      .catch(done)
+  })
+
+  it('should get all the Whitelists IDs for which an email address is listed as a manager', (done) => {
+    firestoreMock.mockGetReturn = {
+      docs: [wl1, wl2, wl3]
+    }
+    const email = 'test@onf.org'
+    Whitelist.getByManager(email)
+      .then(res => {
+        expect(firestoreMock.mockWhere).toBeCalledWith('managers', 'array-contains', email)
+        expect(res).toEqual([wl1.id, wl2.id, wl3.id])
         done()
       })
       .catch(done)

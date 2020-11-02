@@ -25,8 +25,15 @@ function AgreementsTable (props) {
 
   const cols = [
     { title: 'Organization', field: 'organization' },
-    { title: 'Signatory Name', field: 'signer.name' },
-    { title: 'Signatory Email', field: 'signer.value' },
+    // { title: 'Signatory Name', field: 'signer.name' },
+    // { title: 'Signatory Email', field: 'signer.value' },
+    {
+      title: 'Signatory',
+      sorting: false,
+      render: d => {
+        return <div>{d.signer.name} <br/> <i>{d.signer.value}</i></div>
+      }
+    },
     { title: 'Date Signed', field: 'dateSigned', type: 'date' },
     {
       title: 'Actions',
@@ -34,7 +41,7 @@ function AgreementsTable (props) {
       searchable: false,
       render: d => {
         return <Link href={`/view/${d.id}`}>
-          <Button variant='outlined' color='primary'>View/Edit</Button>
+          <Button variant='outlined' color='primary' size='small'>View/Edit</Button>
         </Link>
       }
     }

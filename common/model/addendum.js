@@ -3,7 +3,7 @@ import { Identity, IdentityType } from './identity'
 
 /**
  * types of agreement addendums.
- * @type {{CONTRIBUTOR: string, COSIGNER: string}}
+ * @type {{CONTRIBUTOR: string, MANAGER: string}}
  */
 
 const addendumCollection = 'addendums'
@@ -16,7 +16,7 @@ const addendumType = {
   /**
    * Cosigner addendum.
    */
-  COSIGNER: 'cosigner'
+  MANAGER: 'manager'
 }
 
 /**
@@ -107,7 +107,8 @@ class addendum {
       added: this.added.map(i => i.toJson()),
       removed: this.removed.map(i => i.toJson()),
       agreementId: this.agreementId,
-      dateSigned: this.dateSigned
+      dateSigned: this.dateSigned,
+      type: this.type
     }
   }
 
@@ -125,12 +126,13 @@ class addendum {
   /**
    * Retrieves addendums from the DB for the given agreement
    * @param {Agreement} agreement
+   * @param {AddendumType} type
    * @returns {Promise<Addendum[]>}
    */
-  static get (agreement) {
+  static get (agreement, type) {
     return DB.connection().collection(addendumCollection)
-      .where('signer.value', '==', agreement.signer.value)
       .where('agreementId', '==', agreement.id)
+      .where('type', '==', type)
       .orderBy('dateSigned')
       .get()
       .then(query => Array.from(query.docs.map(Addendum.fromDocumentSnapshot)))

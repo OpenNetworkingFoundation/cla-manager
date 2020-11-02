@@ -1,0 +1,3 @@
+ignore:
+  - "functions/test/helpers.js" # function test helpers, shouldn't count toward project coverage
+  - "**/*.test.js"

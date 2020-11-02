@@ -9,6 +9,7 @@ import { Agreement, AgreementType } from '../../common/model/agreement'
 import { Router } from 'react-router-dom'
 import IdentityCard from './IdentityCard'
 import { Addendum, AddendumType } from '../../common/model/addendum'
+import { Whitelist } from '../../../../common/model/whitelists'
 
 Enzyme.configure({ adapter: new Adapter() })
 
@@ -28,6 +29,13 @@ const addendums = [
   new Addendum(AddendumType.CONTRIBUTOR, 'test_id', signer, [identites[1]], [])
 ]
 
+const whitelist = new Whitelist(
+  1,
+  new Date(),
+  [],
+  ['manager@onf.org']
+)
+
 describe('AddendumContainer Component Test Suite', () => {
   jest.useFakeTimers()
 
@@ -42,7 +50,7 @@ describe('AddendumContainer Component Test Suite', () => {
     createHref: jest.fn()
   }
 
-  let getAddendumsMock, getWhitelistMock
+  let getAddendumsMock, getWhitelistMock, whitelistManagerMock
 
   beforeEach(async () => {
 
@@ -60,6 +68,10 @@ describe('AddendumContainer Component Test Suite', () => {
 
     getWhitelistMock = jest.spyOn(agreement, 'getWhitelist').mockImplementation((id) => {
       return Promise.resolve(identites)
+    })
+
+    whitelistManagerMock = jest.spyOn(Whitelist, 'get').mockImplementation(() => {
+      return Promise.resolve({ data: () => whitelist })
     })
 
     wrapper = mount(
@@ -83,6 +95,30 @@ describe('AddendumContainer Component Test Suite', () => {
   })
 
   describe('when I am the owner of the agreement', () => {
+    it('should render the update form', () => {
+      wrapper.update()
+      const updateForm = wrapper.find('.AddendumContainer__update-form')
+      expect(updateForm).toHaveLength(1)
+    })
+  })
+
+  describe('when I am a manager of the agreement', () => {
+    // render the component again by changing the user email address
+    // so that it does not match the signer
+    beforeEach(async () => {
+      user = {
+        email: 'manager@onf.org'
+      }
+      wrapper = mount(
+        <Router history={historyMock}>
+          <AddendumContainer user={user} agreement={agreement}/>
+        </Router>
+      )
+      await act(async () => {
+        jest.runAllTimers()
+      })
+    })
+
     it('should render the update form', () => {
       wrapper.update()
       const updateForm = wrapper.find('.AddendumContainer__update-form')

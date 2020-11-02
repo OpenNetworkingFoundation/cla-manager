@@ -1,6 +1,7 @@
 import DB from '../db/db'
 import { Addendum } from './addendum'
-import { Identity, IdentityType } from './identity'
+import { Identity } from './identity'
+import { Whitelist } from './whitelists'
 
 const agreementCollection = 'agreements'
 
@@ -156,20 +157,22 @@ class agreement {
 
   /**
    * Returns a list of Addendum associated with this list
+   * @param {AddendumType}  type  The type of addendums to load
    * @returns {Promise<Addendum[]>}
    */
-  getAddendums () {
-    return Addendum.get(this)
+  getAddendums (type) {
+    return Addendum.get(this, type)
   }
 
   /**
    * Returns all identities that are allowed to contribute under this
    * agreement. The implementation emulates the logic used by the Firebase
    * function to update the whitelist collection in the DB.
+   * @param {AddendumType}  type  The type of addendums to load
    * @returns {Promise<Identity[]>}
    */
-  getWhitelist () {
-    return this.getAddendums().then(addendums => {
+  getWhitelist (type) {
+    return this.getAddendums(type).then(addendums => {
       const whitelistMap = addendums.reduce((map, addendum) => {
         addendum.added.forEach(i => map.set(identityKey(i), i))
         addendum.removed.forEach(i => map.delete(identityKey(i)))
@@ -203,10 +206,38 @@ class agreement {
   }
 
   static subscribe (email, successCb, errorCb) {
+    const success = (data) => {
+      Whitelist.getByManager(email)
+        .then(agreementIds => {
+          if (agreementIds.length > 0) {
+            // fetch all the agreements for which I'm manager
+            return Agreement.getByIds(agreementIds)
+          }
+          return []
+        })
+        .then(managed => {
+          successCb([...data.docs, ...managed])
+        })
+        .catch(errorCb)
+    }
+
+    console.log(email)
+
     return DB.connection().collection(agreementCollection)
-      .where('signer.type', '==', IdentityType.EMAIL)
       .where('signer.value', '==', email)
-      .onSnapshot(successCb, errorCb)
+      .onSnapshot(success, errorCb)
+  }
+
+  /**
+   * Gets the agreements by multiple IDs
+   * @param {string[]} agreementIds
+   * @returns {Promise<Agreement[]>}
+   */
+  static getByIds (agreementIds) {
+    const itemRefs = agreementIds.map(id => {
+      return DB.connection().collection(agreementCollection).doc(id).get()
+    })
+    return Promise.all(itemRefs)
   }
 
   /**

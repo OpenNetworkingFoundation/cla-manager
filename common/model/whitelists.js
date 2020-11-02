@@ -12,11 +12,13 @@ export class Whitelist {
    * @param {string} id the whitelist ID
    * @param {date} lastUpdated when the whitelist was updated the last time
    * @param {string[]} values all the valid identities for the agreement
+   * @param {string[]} managers all the valid managers for the agreement
    */
-  constructor (id, lastUpdated, values) {
+  constructor (id, lastUpdated, values, managers) {
     this._id = id
     this._lastUpdated = lastUpdated
     this._values = values
+    this._managers = managers
   }
 
   /**
@@ -37,10 +39,18 @@ export class Whitelist {
 
   /**
    * Returns the whitelist values.
-   * @returns {AgreementType}
+   * @returns {string[]}
    */
   get values () {
     return this._values
+  }
+
+  /**
+   * Returns the whitelist managers.
+   * @returns {string[]}
+   */
+  get managers () {
+    return this._managers
   }
 
   /**
@@ -60,6 +70,30 @@ export class Whitelist {
       .get()
       .then(res => {
         return res.docs.map(i => Whitelist.fromDocumentSnapshot(i))
+      })
+  }
+
+  /**
+   * Return a specific Whitelist entry
+   * @param id
+   * @return {Promise<firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>>}
+   */
+  static get (id) {
+    return DB.connection().collection(whitelistCollection)
+      .doc(id).get()
+  }
+
+  /**
+   * Return the IDs of Agreements for which a certain email is listed in the managers
+   * @param {string} email
+   * @return {Promise<string[]>}
+   */
+  static getByManager (email) {
+    return DB.connection().collection(whitelistCollection)
+      .where('managers', 'array-contains', email)
+      .get()
+      .then(res => {
+        return res.docs.map(i => i.id)
       })
   }
 

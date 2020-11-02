@@ -1,6 +1,7 @@
 import React from 'react'
 import { Firebase } from '../common/app/app'
 import Grid from '@material-ui/core/Grid'
+import * as _ from 'lodash'
 
 import AgreementsTable from './agreement/AgreementsTable'
 import CreateAgreementContainer from './agreement/CreateAgreementContainer'
@@ -55,13 +56,15 @@ export default class Home extends React.Component {
    * Renders the CLAs in the appropriate tables.
    */
   renderClaTables (snapshot) {
-    if (snapshot || snapshot.size) {
-      const agreements = snapshot.docs.reduce((obj, agr) => {
+    if (snapshot || snapshot.length) {
+      const agreements = snapshot.reduce((obj, agr) => {
         if (agr.data().type === AgreementType.INDIVIDUAL) {
           obj.individualCLATable.push(Agreement.fromDocumentSnapshot(agr))
         }
         if (agr.data().type === AgreementType.INSTITUTIONAL) {
-          obj.institutionCLATable.push(Agreement.fromDocumentSnapshot(agr))
+          if (_.find(obj.institutionCLATable, { id: agr.id }) == undefined) {
+            obj.institutionCLATable.push(Agreement.fromDocumentSnapshot(agr))
+          }
         }
         return obj
       }, { individualCLATable: [], institutionCLATable: [] })

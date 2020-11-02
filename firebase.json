@@ -19,5 +19,10 @@
       "source": "!/@(js|css)/**",
       "destination": "/index.html"
     } ]
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8080
+    }
   }
 }

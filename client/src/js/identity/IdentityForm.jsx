@@ -47,7 +47,9 @@ function IdentityForm (props) {
             <Button
               onClick={() => setType(IdentityType.GITHUB)}
               variant={selectedButton(IdentityType.GITHUB)}
-              endIcon={<GitHubIcon/>}>
+              endIcon={<GitHubIcon/>}
+              disabled={!props.githubAllowed}
+            >
               GithubId
             </Button>
           </ButtonGroup>
@@ -109,7 +111,8 @@ function IdentityForm (props) {
 
 IdentityForm.propTypes = {
   callback: PropTypes.func.isRequired,
-  name: PropTypes.string
+  name: PropTypes.string,
+  githubAllowed: PropTypes.bool.isRequired
 }
 
 export default IdentityForm
