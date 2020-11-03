@@ -42,6 +42,7 @@ const agreementCollection = 'agreements'
 const addendumCollection = 'addendums'
 const whitelistCollection = 'whitelists'
 const appuserCollection = 'appUsers'
+const accountsCollection = 'accounts'
 
 const AdminUser = {
   uid: 'admin',
@@ -96,11 +97,13 @@ describe('CLAM Firestore rules TestSuite', () => {
     });
 
     it('should be allowed to read its own AppUser.accounts', async () => {
-      await firebase.assertSucceeds(ownerDb.collection(appuserCollection).doc(AuthenticatedOwner.uid).get())
+      await firebase.assertSucceeds(ownerDb.collection(appuserCollection).doc(AuthenticatedOwner.uid)
+        .collection(accountsCollection).get())
     });
 
     it('should not be allowed to read someone else\'s AppUser.accounts', async () => {
-      await firebase.assertSucceeds(ownerDb.collection(appuserCollection).doc(AuthenticatedOwner.uid).get())
+      await firebase.assertSucceeds(ownerDb.collection(appuserCollection).doc(AuthenticatedOwner.uid)
+        .collection(accountsCollection).get())
     });
   });
 

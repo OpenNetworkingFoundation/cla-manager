@@ -65,8 +65,10 @@ service cloud.firestore {
         }
 
         match /appUsers/{uid} {
-            allow read, delete: if isSignedIn(request.auth) && isAccountOwner(request.auth, uid);
-            // Only functions can write (verified) accounts
+            match /accounts/{accountId} {
+                allow read, delete: if isSignedIn(request.auth) && isAccountOwner(request.auth, uid);
+                // Only functions can write (verified) accounts
+            }
         }
     }
 }
