@@ -55,7 +55,7 @@ function CrowdWebhook (groupMappings, github) {
           console.log(`Received USER_UPDATED_GITHUB for ${event.user.username} ` +
                       `with same old and new Github IDs: ${event.user.githubId}. ` +
                       'Discarding event...')
-          return;
+          return
         }
         for (const group of event.user.groups) {
           await removeMembership({ githubId: event.oldGithubId }, group, ['github'])
