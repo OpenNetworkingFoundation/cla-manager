@@ -42,6 +42,7 @@ export class AppUser {
   }
 
   subscribeAccounts (successCb, errorCb) {
+    console.log(Firebase.auth().currentUser.uid, this._uid)
     return DB.connection().collection(userCollection)
       .doc(this._uid)
       .collection(accountsCollection)
@@ -54,5 +55,24 @@ export class AppUser {
     const data = doc.data()
     data.id = doc.id
     return data
+  }
+
+  static listAllAccounts () {
+    return DB.connection().collection(userCollection).get()
+      .then(entries => {
+        const p = []
+        entries.docs.forEach(e => {
+          p.push(DB.connection().collection(userCollection).doc(e.id).collection(accountsCollection).get())
+        })
+        return Promise.all(p)
+      })
+      .then(accounts => {
+        return accounts.reduce((list, res) => {
+          return [...res.docs.reduce((l, r) => {
+            return [r.data(), ...l]
+          }, []), ...list]
+        }, [])
+      })
+      .catch(console.error)
   }
 }

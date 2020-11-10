@@ -87,7 +87,7 @@ export class Identity {
   }
 
   /**
-   * Returns the list ov valid IdentityTypes.
+   * Returns the listAllAccounts ov valid IdentityTypes.
    *
    * @returns {string[]}
    */
