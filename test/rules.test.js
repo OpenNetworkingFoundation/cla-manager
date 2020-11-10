@@ -122,6 +122,11 @@ describe('CLAM Firestore rules TestSuite', () => {
       otherAgreement = await app.collection(agreementCollection).add({
         signer: {value: 'non-admin@onf.org'},
       })
+
+      // this entry in the whitelist is only used to test that the Admin can read it
+      await app.collection(whitelistCollection).doc("foo").set({
+        values: ['email:wl1@opennetworking.org', 'email:foo@opennetworking.org']
+      }, { merge: true })
     })
 
     it('should be allowed to list all the Agreements', async () => {
@@ -147,6 +152,13 @@ describe('CLAM Firestore rules TestSuite', () => {
       }
 
       await firebase.assertFails(db.collection(addendumCollection).add(addendum))
+    });
+
+    it('should be allowed to list all the identities', async () => {
+      const whitelist = db.collection(whitelistCollection);
+      const query = whitelist.get();
+      const res = await firebase.assertSucceeds(query);
+      assert.strictEqual(res.docs.length, 1);
     });
   });
 
