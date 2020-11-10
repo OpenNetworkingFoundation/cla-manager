@@ -107,9 +107,6 @@ export default class Home extends React.Component {
             />
           </Grid>
         </Grid>
-        <Grid container style={style}>
-          <AppUserAccountsContainer/>
-        </Grid>
       </main>
     )
   }

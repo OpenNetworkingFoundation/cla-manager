@@ -65,8 +65,10 @@ service cloud.firestore {
         }
 
         match /appUsers/{uid} {
+            allow read: if isSignedIn(request.auth) && isAdmin(request.auth);
             match /accounts/{accountId} {
-                allow read, delete: if isSignedIn(request.auth) && isAccountOwner(request.auth, uid);
+                allow read:   if isSignedIn(request.auth) && (isAdmin(request.auth) || isAccountOwner(request.auth, uid));
+                allow delete: if isSignedIn(request.auth) && isAccountOwner(request.auth, uid);
                 // Only functions can write (verified) accounts
             }
         }
