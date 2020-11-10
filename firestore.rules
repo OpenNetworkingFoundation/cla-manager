@@ -61,7 +61,7 @@ service cloud.firestore {
         }
 
         match /whitelists/{whitelistId} {
-            allow read:   if isSignedIn(request.auth) && isWhitelistManager(request.auth, resource.data);
+            allow read:   if isSignedIn(request.auth) && (isAdmin(request.auth) || isWhitelistManager(request.auth, resource.data));
         }
 
         match /appUsers/{uid} {
