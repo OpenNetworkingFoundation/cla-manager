@@ -5,7 +5,7 @@ import AppBar from '@material-ui/core/AppBar'
 import PropTypes from 'prop-types'
 import AdminNav from '../admin/AdminNavigation'
 import { Link, Button, Toolbar, Typography } from '@material-ui/core'
-import MenuIcon from '@material-ui/icons/Menu'
+import HomeIcon from '@material-ui/icons/Home'
 
 /**
  * Renders the standard header for pages within the CLA Manager application.
@@ -31,8 +31,13 @@ function Header (props) {
       <AppBar position='static'>
         <Toolbar>
           <Typography variant='h6' className={classes.title}>
-            <Link href='/' color='inherit'>
-              ONF CLA Manager
+            <Link href="/">
+              <Button
+                variant='contained'
+                color={'secondary'}
+                startIcon={<HomeIcon/>}>
+                ONF CLA Manager
+              </Button>
             </Link>
           </Typography>
           <Link href="https://wiki.opennetworking.org/x/BgCUI" target="_blank">
