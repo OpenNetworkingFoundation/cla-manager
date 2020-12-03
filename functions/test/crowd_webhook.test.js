@@ -122,4 +122,10 @@ describe('Crowd Webhook lib', () => {
       { org: 'github_org2', team: 'team2', user: 'tester_github' }
     ])
   })
+
+  test('user updated github with group without user change', async function () {
+    await crowdWebhook.processEvent(require('./crowd_events/user_updated_github_with_group_noop'))
+    expect(github.added).toEqual([])
+    expect(github.removed).toEqual([])
+  })
 })

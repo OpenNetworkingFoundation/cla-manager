@@ -1,0 +1,14 @@
+{
+  "type": "USER_UPDATED_GITHUB",
+  "user": {
+    "username": "test",
+    "email": "test@test",
+    "name": "tester",
+    "groups": [
+      "foo"
+    ],
+    "githubId": "tester_github"
+  },
+  "oldGithubId": "tester_github",
+  "newGithubId": "tester_github"
+}
