@@ -221,8 +221,6 @@ class agreement {
         .catch(errorCb)
     }
 
-    console.log(email)
-
     return DB.connection().collection(agreementCollection)
       .where('signer.value', '==', email)
       .onSnapshot(success, errorCb)

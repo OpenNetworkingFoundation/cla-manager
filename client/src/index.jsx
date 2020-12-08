@@ -11,6 +11,7 @@ import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
+import { BrowserRouter as Router } from 'react-router-dom'
 
 // For dev, no bugsnag key env should be set to avoid reporting errors.
 const bugnsnagApiKey = !process.env.REACT_APP_BUGSNAG_API_KEY
@@ -38,7 +39,9 @@ Firebase.auth().onAuthStateChanged((user) => {
       .then(token => {
         ReactDOM.render(
           <ErrorBoundary>
-            <AppRouter user={user} isAdmin={token.claims.admin || false}/>
+            <Router>
+              <AppRouter user={user} isAdmin={token.claims.admin || false}/>
+            </Router>
           </ErrorBoundary>,
           document.getElementById('root'))
       })

@@ -42,7 +42,6 @@ class AppRouter extends React.Component {
   render () {
     const user = this.props.user
     return (
-      <Router>
         <div>
           <Header
             user={user}
@@ -94,7 +93,6 @@ class AppRouter extends React.Component {
             />
           </Container>
         </div>
-      </Router>
     )
   }
 }
