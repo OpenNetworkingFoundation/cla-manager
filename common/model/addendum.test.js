@@ -33,7 +33,7 @@ describe('The Addendum model', () => {
     expect(model.dateSigned instanceof Date).toBe(true)
   })
 
-  describe('the list method', () => {
+  describe('the listAllAccounts method', () => {
     it('should return all the agreements in the DB', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [

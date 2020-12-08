@@ -129,7 +129,7 @@ describe('CLAM Firestore rules TestSuite', () => {
       }, { merge: true })
     })
 
-    it('should be allowed to list all the Agreements', async () => {
+    it('should be allowed to listAllAccounts all the Agreements', async () => {
       const agreements = db.collection(agreementCollection);
       const query = agreements.get();
       const res = await firebase.assertSucceeds(query);
@@ -153,12 +153,18 @@ describe('CLAM Firestore rules TestSuite', () => {
 
       await firebase.assertFails(db.collection(addendumCollection).add(addendum))
     });
-
+    
     it('should be allowed to list all the identities', async () => {
       const whitelist = db.collection(whitelistCollection);
       const query = whitelist.get();
       const res = await firebase.assertSucceeds(query);
       assert.strictEqual(res.docs.length, 1);
+    });
+
+    it('should be allowed to read someone else\'s AppUser.accounts', async () => {
+      await firebase.assertSucceeds(db.collection(appuserCollection).get())
+      await firebase.assertSucceeds(db.collection(appuserCollection).doc(AuthenticatedOwner.uid)
+        .collection(accountsCollection).get())
     });
   });
 
@@ -185,7 +191,7 @@ describe('CLAM Firestore rules TestSuite', () => {
 
     });
 
-    it('should only be allowed to list his own Agreements', (done) => {
+    it('should only be allowed to listAllAccounts his own Agreements', (done) => {
 
       const queryAll = agreements.get();
       firebase.assertFails(queryAll);
@@ -231,7 +237,7 @@ describe('CLAM Firestore rules TestSuite', () => {
         const query = await app.collection(whitelistCollection).get()
       });
 
-      it('should be able to list those Agreements', async () => {
+      it('should be able to listAllAccounts those Agreements', async () => {
 
         // get all the agreements this user can manage from the whitelist
         const query = await managerDb.collection(whitelistCollection)

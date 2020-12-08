@@ -1,12 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Button from '@material-ui/core/Button'
+import { Link, Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
+import AccountBox from '@material-ui/icons/AccountBox'
 
 const useStyles = makeStyles(theme => ({
   loggedInAs: {
     paddingRight: theme.spacing(2)
+  },
+  link: {
+    color: theme.palette.common.black
   }
 }))
 
@@ -20,6 +24,13 @@ function SignOutContainer (props) {
       <span className={classes.loggedInAs}>
         Logged in as {props.user.email}
       </span>
+      <Button
+        variant='outlined'
+        startIcon={<AccountBox/>}>
+        <Link className={classes.link} href="/linked-accounts">
+          Linked Accounts
+        </Link>
+      </Button>
       <Button
         id='sign-out'
         name='signout'

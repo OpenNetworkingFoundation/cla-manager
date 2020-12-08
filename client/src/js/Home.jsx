@@ -7,7 +7,6 @@ import AgreementsTable from './agreement/AgreementsTable'
 import CreateAgreementContainer from './agreement/CreateAgreementContainer'
 
 import { Agreement, AgreementType } from '../common/model/agreement'
-import AppUserAccountsContainer from './user/AppUserAccountsContainer'
 
 /**
  * User home screen for this CLA Manager application.
@@ -106,9 +105,6 @@ export default class Home extends React.Component {
               data={this.state.institutionCLATable}
             />
           </Grid>
-        </Grid>
-        <Grid container style={style}>
-          <AppUserAccountsContainer/>
         </Grid>
       </main>
     )

@@ -156,7 +156,7 @@ class agreement {
   }
 
   /**
-   * Returns a list of Addendum associated with this list
+   * Returns a listAllAccounts of Addendum associated with this listAllAccounts
    * @param {AddendumType}  type  The type of addendums to load
    * @returns {Promise<Addendum[]>}
    */
@@ -220,8 +220,6 @@ class agreement {
         })
         .catch(errorCb)
     }
-
-    console.log(email)
 
     return DB.connection().collection(agreementCollection)
       .where('signer.value', '==', email)

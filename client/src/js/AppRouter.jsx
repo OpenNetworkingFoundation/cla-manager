@@ -9,6 +9,9 @@ import AgreementContainer from './agreement/AgreementContainer'
 import SignCheck from './helpers/SignCheck'
 import AdminAgreementsList from './admin/AdminAgreementsList'
 import AdminIdentitiesList from './admin/AdminIdentitiesList'
+import AppUserAccountsContainer from './user/AppUserAccountsContainer'
+import PermissionDenied from './admin/PermissionDenied'
+import AdminLinkedAccountList from './admin/AdminLinkedAccountsList'
 
 class AppRouter extends React.Component {
   constructor (props) {
@@ -17,8 +20,8 @@ class AppRouter extends React.Component {
   }
 
   /**
-     * Handles the sign out button press.
-     */
+   * Handles the sign out button press.
+   */
   handleSignOut () {
     Firebase.auth().signOut().catch((error) => {
       this.handleAuthError(error)
@@ -26,8 +29,8 @@ class AppRouter extends React.Component {
   }
 
   /**
-     * Handles Errors from various Promises.
-     */
+   * Handles Errors from various Promises.
+   */
   handleAuthError (error) {
     // Display Error.
     alert('Error: ' + error.message)
@@ -39,7 +42,6 @@ class AppRouter extends React.Component {
   render () {
     const user = this.props.user
     return (
-      <Router>
         <div>
           <Header
             user={user}
@@ -49,36 +51,48 @@ class AppRouter extends React.Component {
           <Container>
             <Route
               path='/' exact render={() => (
-                <Home user={user} />
-              )}
+              <Home user={user}/>
+            )}
             />
             <Route
               path='/sign/:type' render={props => (
-                <SignCheck agreementType={props.match.params.type} user={user} />
-              )}
+              <SignCheck agreementType={props.match.params.type} user={user}/>
+            )}
             />
             <Route
               path='/view/:id' render={props => (
-                <AgreementContainer user={user} agreementId={props.match.params.id} />
-              )}
-            />
-            <Route
-              path='/admin/agreements' exact render={() => (
-              // FIXME check user is admin or send him to a permission denied page
-              // this.props.isAdmin
-              <AdminAgreementsList/>
+              <AgreementContainer user={user} agreementId={props.match.params.id}/>
             )}
             />
             <Route
-              path='/admin/identities' exact render={() => (
-              // FIXME check user is admin or send him to a permission denied page
-              // this.props.isAdmin
-              <AdminIdentitiesList/>
-            )}
+              path='/linked-accounts' exact render={() => <AppUserAccountsContainer/>}
+            />
+            <Route
+              path='/admin/agreements' exact render={() => {
+              if (this.props.isAdmin) {
+                return <AdminAgreementsList/>
+              }
+              return <PermissionDenied/>
+            }}
+            />
+            <Route
+              path='/admin/identities' exact render={() => {
+              if (this.props.isAdmin) {
+                return <AdminIdentitiesList/>
+              }
+              return <PermissionDenied/>
+            }}
+            />
+            <Route
+              path='/admin/linked-accounts' exact render={() => {
+              if (this.props.isAdmin) {
+                return <AdminLinkedAccountList/>
+              }
+              return <PermissionDenied/>
+            }}
             />
           </Container>
         </div>
-      </Router>
     )
   }
 }
