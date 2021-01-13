@@ -55,6 +55,10 @@
     {
       "githubOrg": "onosproject",
       "team": "ProntoAccess"
+    },
+    {
+      "githubOrg": "stratum",
+      "team": "ProntoAccess"
     }
   ]
 }
