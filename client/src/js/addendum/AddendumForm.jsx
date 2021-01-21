@@ -192,7 +192,7 @@ function AddendumForm (props) {
     'Identities to/from this Agreement AND to add and remove other Managers to/from this Agreement.'
 
   const updateForm = (
-    <div className={classes.updateFormContainer + ' AddendumContainer__update-form '}>
+    <div className={classes.updateFormContainer + ' AddendumContainer__update-form print-hidden'}>
       <Grid item xs={12}>
         <Grid container spacing={2}>
 

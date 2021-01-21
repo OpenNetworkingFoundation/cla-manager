@@ -48,7 +48,7 @@ class AppRouter extends React.Component {
             onSignOut={this.signOut}
             isAdmin={this.props.isAdmin}
           />
-          <Container>
+          <Container className={'print-no-shade print-no-padding'}>
             <Route
               path='/' exact render={() => (
               <Home user={user}/>

@@ -92,7 +92,7 @@ function AddendumContainer (props) {
         </Dialog>
         <Link to="#" onClick={goBack}>
           <Button
-            className={classes.back}
+            className={'print-hidden'}
             variant='contained'
             color='primary'
             size='large'

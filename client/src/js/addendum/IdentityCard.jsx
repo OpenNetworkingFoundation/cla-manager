@@ -81,7 +81,7 @@ function IdentityCard (props) {
         {props.callback
           ? <Grid item xs={2}>
             <CardContent>
-              <Box textAlign='right' m={1}>
+              <Box textAlign='right' m={1} className={'print-hidden'}>
                 <Link href='#' onClick={props.callback(props.identity)}>
                   <IconButton size='small' color='primary'>
                     {props.type === 'default' ? <DeleteIcon/> : null}
