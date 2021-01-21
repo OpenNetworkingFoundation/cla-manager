@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
 function AgreementDisplay (props) {
   const classes = useStyles()
   return (
-    <Card variant='outlined' className={classes.root}>
+    <Card variant='outlined' className={classes.root + ' cla-text-container'}>
       <ReactMarkdown source={props.text} />
     </Card>
   )

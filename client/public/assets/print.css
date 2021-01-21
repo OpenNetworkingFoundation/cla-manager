@@ -1,0 +1,18 @@
+@media print {
+    header, .print-hidden {
+        display: none !important;
+    }
+
+    .cla-text-container {
+        overflow-y: visible !important;
+        max-height: max-content !important;
+    }
+
+    .print-no-shade * {
+        box-shadow: none !important;
+    }
+
+    .print-no-padding {
+        padding: 0 !important;
+    }
+}
