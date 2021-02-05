@@ -1,5 +1,23 @@
 import { Identity, IdentityType } from './identity'
 
+// define a custom validator for whitespaces
+expect.extend({
+  toHaveWhitespaces (received) {
+    const pass = (received.indexOf(' ') !== -1)
+    if (pass) {
+      return {
+        pass: true,
+        message: () => `expected "${received}" not to have whitespaces`
+      }
+    } else {
+      return {
+        pass: false,
+        message: () => `expected "${received}" to have whitespaces`
+      }
+    }
+  }
+})
+
 describe('The Identity model', () => {
   let emailModel, githubModel
   beforeEach(() => {
@@ -15,6 +33,12 @@ describe('The Identity model', () => {
     expect(githubModel.type).toEqual(IdentityType.GITHUB)
     expect(githubModel.name).toEqual('githubModel')
     expect(githubModel.value).toEqual('githubId')
+  })
+
+  it('should trim whitespaces from values', () => {
+    const contributorWithSpaces = new Identity(IdentityType.GITHUB, 'Mike', '   i-have-some-spaces   ')
+
+    expect(contributorWithSpaces.value).not.toHaveWhitespaces()
   })
 
   it('should not accept an invalid type', function () {

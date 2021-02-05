@@ -33,8 +33,8 @@ export class Identity {
     }
 
     this._type = type
-    this._name = name
-    this._value = value
+    this._name = name.trim()
+    this._value = value.trim()
   }
 
   /**
