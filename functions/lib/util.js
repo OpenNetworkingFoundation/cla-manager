@@ -8,7 +8,7 @@ module.exports.identityKey = function (identityObj) {
     throw new Error('Invalid identity object')
   }
   const lcValue = identityObj.value.toLowerCase()
-  return `${identityObj.type}:${lcValue}`
+  return `${identityObj.type}:${lcValue.trim()}`
 }
 
 /**
