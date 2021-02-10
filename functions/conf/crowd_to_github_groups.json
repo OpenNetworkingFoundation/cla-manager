@@ -60,5 +60,23 @@
       "githubOrg": "stratum",
       "team": "ProntoAccess"
     }
+  ],
+  "StatsAccess" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "StatsAccess"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "StatsAccess"
+    },
+    {
+      "githubOrg": "stratum",
+      "team": "StatsAccess"
+    },
+    {
+      "githubOrg": "opennetworkinglab",
+      "team": "StatsAccess"
+    },
   ]
 }
