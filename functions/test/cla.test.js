@@ -10,8 +10,27 @@ const sameAsIdEmmaEmail = { type: 'email', name: 'Emma', value: 'emma@onf.dev' }
 const idEmmaGithub = { type: 'github', name: 'Emma', value: 'emma' }
 const idGigiEmail = { type: 'email', name: 'Gigi', value: 'gigi@onf.dev' }
 const idGigiGithub = { type: 'github', name: 'Gigi', value: 'gigi' }
+const idSpaceGithub = { type: 'github', name: 'Space', value: '   i-have-some-spaces   ' }
 
 const agreementId = 'the-agreement'
+
+// define a custom validator for whitespaces
+expect.extend({
+  toHaveWhitespaces (received) {
+    const pass = (received.indexOf(' ') !== -1)
+    if (pass) {
+      return {
+        pass: true,
+        message: () => `expected "${received}" not to have whitespaces`
+      }
+    } else {
+      return {
+        pass: false,
+        message: () => `expected "${received}" to have whitespaces`
+      }
+    }
+  }
+})
 
 // TODO: use model classes for agreement and addendum
 const agreement = {
@@ -66,6 +85,15 @@ const managerAddendum2 = {
   type: AddendumType.MANAGER
 }
 
+const addendumWithSpaces = {
+  signer: idJohnEmail,
+  added: [idSpaceGithub],
+  removed: [],
+  agreementId: agreementId,
+  dateSigned: new Date(),
+  type: AddendumType.CONTRIBUTOR
+}
+
 describe('Cla lib', () => {
   let app
   let db
@@ -92,88 +120,106 @@ describe('Cla lib', () => {
     await app.delete()
   })
 
-  it('should update whitelist values', async () => {
-    // Add agreement
-    expect(await assertSucceeds(agreementRef.set(agreement)))
-    // Add addendum 1
-    addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum1)
-    // Update whitelist
-    expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
-    // Verify whitelist
-    expect(await cla.isIdentityWhitelisted(idJohnEmail)).toBe(true)
-    expect(await cla.isIdentityWhitelisted(sameAsIdEmmaEmail)).toBe(true)
-    expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBe(true)
-    expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBe(true)
+  describe('when updating the whitelist values', () => {
+    it('should correctly update whitelist values', async () => {
+      // Add agreement
+      expect(await assertSucceeds(agreementRef.set(agreement)))
+      // Add addendum 1
+      addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum1)
+      // Update whitelist
+      expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+      // Verify whitelist
+      expect(await cla.isIdentityWhitelisted(idJohnEmail)).toBe(true)
+      expect(await cla.isIdentityWhitelisted(sameAsIdEmmaEmail)).toBe(true)
+      expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBe(true)
+      expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBe(true)
 
-    // Add addendum
-    addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum2)
-    // Update whitelist
-    expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
-    // Verify whitelist
-    expect(await cla.isIdentityWhitelisted(sameAsIdEmmaEmail)).toBe(false)
-    expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBe(false)
-    expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBe(false)
-    expect(await cla.isIdentityWhitelisted(idGigiEmail)).toBe(true)
-    expect(await cla.isIdentityWhitelisted(idGigiGithub)).toBe(true)
+      // Add addendum
+      addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum2)
+      // Update whitelist
+      expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+      // Verify whitelist
+      expect(await cla.isIdentityWhitelisted(sameAsIdEmmaEmail)).toBe(false)
+      expect(await cla.isIdentityWhitelisted(idEmmaEmail)).toBe(false)
+      expect(await cla.isIdentityWhitelisted(idEmmaGithub)).toBe(false)
+      expect(await cla.isIdentityWhitelisted(idGigiEmail)).toBe(true)
+      expect(await cla.isIdentityWhitelisted(idGigiGithub)).toBe(true)
 
-    expect(await cla.checkIdentities([
-      idJohnEmail, idGigiGithub, idGigiEmail])).toEqual({
-      allWhitelisted: true,
-      missingIdentities: []
+      expect(await cla.checkIdentities([
+        idJohnEmail, idGigiGithub, idGigiEmail])).toEqual({
+        allWhitelisted: true,
+        missingIdentities: []
+      })
+
+      expect(await cla.checkIdentities([
+        idJohnEmail, idEmmaGithub])).toEqual({
+        allWhitelisted: false,
+        // FIXME: missingIdentities should contain the same identity object used
+        //  as input
+        missingIdentities: ['github:emma']
+      })
+
+      // Add addendum
+      addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum3)
+      // Update whitelist
+      expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+      // Verify whitelist
+      whitelistDoc = (await whitelistRef.get()).data()
+      // We removed all github IDs
+      expect(!Array.isArray(whitelistDoc.github) || !whitelistDoc.github.length).toBe(true)
     })
 
-    expect(await cla.checkIdentities([
-      idJohnEmail, idEmmaGithub])).toEqual({
-      allWhitelisted: false,
-      // FIXME: missingIdentities should contain the same identity object used
-      //  as input
-      missingIdentities: ['github:emma']
+    it('should trim whitespaces from identities', async () => {
+      // Add agreement
+      expect(await assertSucceeds(agreementRef.set(agreement)))
+      // Add identity with a whitespace (the client should trim, but better be safe)
+      addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendumWithSpaces)
+
+      // Update whitelist
+      expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+
+      // check the whitespace is not there
+      const whitelist = await whitelistRef.get()
+      expect(whitelist.data().values.length).toEqual(1)
+      // indexOf returns -1 if the chart is not found in the string
+      expect(whitelist.data().values[0]).not.toHaveWhitespaces()
     })
 
-    // Add addendum
-    addendumSnapshot = await addAndGetSnapshot(addendumsRef, addendum3)
-    // Update whitelist
-    expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
-    // Verify whitelist
-    whitelistDoc = (await whitelistRef.get()).data()
-    // We removed all github IDs
-    expect(!Array.isArray(whitelistDoc.github) || !whitelistDoc.github.length).toBe(true)
-  })
+    it('should correctly update whitelist managers', async () => {
+      // Add agreement
+      expect(await assertSucceeds(agreementRef.set(agreement)))
+      // Add 2 emails to the managers
+      addendumSnapshot = await addAndGetSnapshot(addendumsRef, managerAddendum1)
+      // Update whitelist
+      expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
 
-  it('should update whitelist managers', async () => {
-    // Add agreement
-    expect(await assertSucceeds(agreementRef.set(agreement)))
-    // Add 2 emails to the managers
-    addendumSnapshot = await addAndGetSnapshot(addendumsRef, managerAddendum1)
-    // Update whitelist
-    expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+      // check that we have 2 entries in the managers
+      let whitelist = await whitelistRef.get()
+      expect(whitelist.data().managers.length).toEqual(2)
+      expect(whitelist.data().managers).toContain(idGigiEmail.value)
+      expect(whitelist.data().managers).toContain(idEmmaEmail.value)
 
-    // check that we have 2 entries in the managers
-    let whitelist = await whitelistRef.get()
-    expect(whitelist.data().managers.length).toEqual(2)
-    expect(whitelist.data().managers).toContain(idGigiEmail.value)
-    expect(whitelist.data().managers).toContain(idEmmaEmail.value)
+      // remove emma from the managers
+      addendumSnapshot = await addAndGetSnapshot(addendumsRef, managerAddendum2)
+      // Update whitelist
+      expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
 
-    // remove emma from the managers
-    addendumSnapshot = await addAndGetSnapshot(addendumsRef, managerAddendum2)
-    // Update whitelist
-    expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
+      // check that we have 1 entry in the managers
+      whitelist = await whitelistRef.get()
+      expect(whitelist.data().managers.length).toEqual(1)
+      expect(whitelist.data().managers).toContain(idGigiEmail.value)
+      expect(whitelist.data().managers).not.toContain(idEmmaEmail.value)
+    })
 
-    // check that we have 1 entry in the managers
-    whitelist = await whitelistRef.get()
-    expect(whitelist.data().managers.length).toEqual(1)
-    expect(whitelist.data().managers).toContain(idGigiEmail.value)
-    expect(whitelist.data().managers).not.toContain(idEmmaEmail.value)
-  })
-
-  it('should NOT be possible to update the whitelist for a non-existing agreement', async () => {
-    // Add mock addendum referencing a non-existing agreement
-    const mockAddendum = { ...addendum1 }
-    mockAddendum.agreementId = 'i-dont-exist'
-    const mockSnapshot = await addAndGetSnapshot(addendumsRef, mockAddendum)
-    // Update whitelist
-    expect(await assertFails(cla.updateWhitelist(mockSnapshot)))
-    expect(await assertFails(cla.updateWhitelist(null, 'i-dont-exist')))
+    it('should NOT be possible to update the whitelist for a non-existing agreement', async () => {
+      // Add mock addendum referencing a non-existing agreement
+      const mockAddendum = { ...addendum1 }
+      mockAddendum.agreementId = 'i-dont-exist'
+      const mockSnapshot = await addAndGetSnapshot(addendumsRef, mockAddendum)
+      // Update whitelist
+      expect(await assertFails(cla.updateWhitelist(mockSnapshot)))
+      expect(await assertFails(cla.updateWhitelist(null, 'i-dont-exist')))
+    })
   })
 
   it('should fail checking an invalid identity', async () => {
