@@ -46,6 +46,11 @@ describe('The Identity model', () => {
     expect(makeModel).toThrow(TypeError)
   })
 
+  it('should throw and error if no value is used', function () {
+    const makeModel = () => new Identity('foo', 'bar', '')
+    expect(makeModel).toThrow(Error)
+  })
+
   describe(`when the type is ${IdentityType.EMAIL}`, () => {
     it('should not accept a value that is not a proper email', () => {
       const makeModel = () => new Identity(IdentityType.EMAIL, 'bar', 'notanemailaddress')
