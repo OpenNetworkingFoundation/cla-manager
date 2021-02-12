@@ -32,8 +32,12 @@ export class Identity {
       }
     }
 
+    if (value === '' || value === null || value === undefined) {
+      throw Error('A value must be provided to initialize an Identity')
+    }
+
     this._type = type
-    this._name = name.trim()
+    this._name = name ? name.trim() : ''
     this._value = value.trim()
   }
 
