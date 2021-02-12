@@ -35,6 +35,14 @@ describe('The Identity model', () => {
     expect(githubModel.value).toEqual('githubId')
   })
 
+  it('should instantiate a model without optional fields', () => {
+    const noName = new Identity(IdentityType.GITHUB, undefined, 'githubId')
+
+    expect(noName.type).toEqual(IdentityType.GITHUB)
+    expect(noName.name).toEqual('')
+    expect(noName.value).toEqual('githubId')
+  })
+
   it('should trim whitespaces from values', () => {
     const contributorWithSpaces = new Identity(IdentityType.GITHUB, 'Mike', '   i-have-some-spaces   ')
 
