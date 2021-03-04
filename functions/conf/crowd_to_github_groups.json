@@ -35,6 +35,10 @@
     {
       "githubOrg": "onosproject",
       "team": "AetherAccess"
+    },
+    {
+      "githubOrg": "stratum",
+      "team": "AetherAccess"
     }
   ],
   "SDRANAccess" : [
