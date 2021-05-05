@@ -134,7 +134,7 @@ describe('The Agreement model', () => {
   })
 
   describe('the getAddendums method', () => {
-    it('should return a listAllAccounts of CONTRIBUTOR addendums', (done) => {
+    it('should return a list of CONTRIBUTOR addendums', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
@@ -154,7 +154,7 @@ describe('The Agreement model', () => {
         })
         .catch(done)
     })
-    it('should return a listAllAccounts of MANAGER addendums', (done) => {
+    it('should return a list of MANAGER addendums', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
           { data: () => new Addendum(AddendumType.MANAGER, 'test-id', signer, [user1], []).toJson() }
@@ -174,7 +174,7 @@ describe('The Agreement model', () => {
   })
 
   describe('the getWhitelist method', () => {
-    it('should return a listAllAccounts of valid users for an agreement ', (done) => {
+    it('should return a list of valid users for an agreement ', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
           { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
@@ -194,7 +194,7 @@ describe('The Agreement model', () => {
   })
 
   describe('the subscribe method', () => {
-    it('should get a listAllAccounts of models from the DB', (done) => {
+    it('should get a list of models from the DB', (done) => {
       firestoreMock.mockOnSnaptshotSuccess = { docs: [] }
       firestoreMock.mockGetReturn = { docs: [] }
       const email = 'info@onf.org'
@@ -213,7 +213,7 @@ describe('The Agreement model', () => {
     })
   })
 
-  describe('the listAllAccounts method', () => {
+  describe('the list method', () => {
     it('should return all the agreements in the DB', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [

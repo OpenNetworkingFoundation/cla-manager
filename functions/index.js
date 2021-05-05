@@ -68,7 +68,7 @@ const processEvent = async (eventSnapshot) => {
 
 /**
  * When a new addendum is created, update the whitelists collection with the
- * listAllAccounts of allowed identities for the parent agreement.
+ * list of allowed identities for the parent agreement.
  */
 exports.updateWhitelist = functions.firestore
   .document('/addendums/{id}')

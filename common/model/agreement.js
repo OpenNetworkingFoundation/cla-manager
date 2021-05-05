@@ -156,7 +156,7 @@ class agreement {
   }
 
   /**
-   * Returns a listAllAccounts of Addendum associated with this listAllAccounts
+   * Returns a list of Addendum associated with this list
    * @param {AddendumType}  type  The type of addendums to load
    * @returns {Promise<Addendum[]>}
    */

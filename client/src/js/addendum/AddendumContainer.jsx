@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 /**
- * Component which given an Agreement displays a listAllAccounts of associated addendums
+ * Component which given an Agreement displays a list of associated addendums
  */
 function AddendumContainer (props) {
 
