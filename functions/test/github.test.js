@@ -20,6 +20,8 @@ const githubApi = 'https://api.github.com'
 const statusUri = '/repos/bocon13/cla-test/statuses/2129e453f6d652badfb353c510a3669873a15f7c'
 const createCommentUri = '/repos/bocon13/cla-test/issues/3/comments'
 const existingCommentUri = '/repos/bocon13/cla-test/issues/comments/1'
+const createLabelUri = '/repos/pins/cla-test/issues/3/labels'
+const deleteLabelUri = '/repos/pins/cla-test/issues/3/labels/'
 
 const appId = 123
 
@@ -220,5 +222,72 @@ describe('Github lib', () => {
     expect(updatedEvent.status.githubError).toBeFalsy()
     expect(updatedContrib.githubCommentId).toBe(1)
     expect.assertions(7)
+  })
+
+  test('PR label cla:no added', async () => {
+    nock(githubApi).post(statusUri.replace('bocon13', 'pins'), (body) => {
+      expect(body.state).toEqual('failure')
+      return true
+    }).reply(201)
+    nock(githubApi).post(createCommentUri.replace('bocon13', 'pins'), (req) => {
+      expect(req.body.length).toBeGreaterThan(0)
+      return true
+    }).reply(201, { id: 1 })
+    nock(githubApi).post(createLabelUri, (body) => {
+      expect(body.labels).toEqual(['cla:no'])
+      return true
+    }).reply(200)
+    mockEvent.payload.pull_request.base.repo.owner.login = 'pins'
+    await setAndGetSnapshot(contribsRef, mockContribution, contributionId)
+    const eventSnapshot = await addAndGetSnapshot(eventsRef, mockEvent)
+    await github.processEvent(eventSnapshot)
+    const updatedEvent = (await eventSnapshot.ref.get()).data()
+    expect(updatedEvent.status.state).toBe('failure')
+    expect.assertions(4)
+  })
+
+  test('PR label cla:yes added if identity is whitelisted', async () => {
+    await whitelistsRef.add({
+      values: [identity]
+    })
+    nock(githubApi).post(statusUri.replace('bocon13', 'pins'), (body) => {
+      expect(body.state).toEqual('success')
+      return true
+    }).reply(201)
+    nock(githubApi).post(createLabelUri, (body) => {
+      expect(body.labels).toEqual(['cla:yes'])
+      return true
+    }).reply(200)
+    mockEvent.payload.pull_request.base.repo.owner.login = 'pins'
+    await setAndGetSnapshot(contribsRef, mockContribution, contributionId)
+    const eventSnapshot = await addAndGetSnapshot(eventsRef, mockEvent)
+    await github.processEvent(eventSnapshot)
+    const updatedEvent = (await eventSnapshot.ref.get()).data()
+    expect(updatedEvent.status.state).toBe('success')
+    expect.assertions(3)
+  })
+
+  test('PR label cla:[no,yes] swapped when whitelisted', async () => {
+    await whitelistsRef.add({
+      values: [identity]
+    })
+    nock(githubApi).post(statusUri.replace('bocon13', 'pins'), (body) => {
+      expect(body.state).toEqual('success')
+      return true
+    }).reply(201)
+    const deleteLabel = nock(githubApi).delete(deleteLabelUri + 'cla:no').reply(204)
+    nock(githubApi).post(createLabelUri, (body) => {
+      expect(body.labels).toEqual(['cla:yes'])
+      return true
+    }).reply(200)
+    mockEvent.payload.pull_request.base.repo.owner.login = 'pins'
+    mockEvent.payload.pull_request.labels = ['cla:no']
+    await setAndGetSnapshot(contribsRef, mockContribution, contributionId)
+    const eventSnapshot = await addAndGetSnapshot(eventsRef, mockEvent)
+    await github.processEvent(eventSnapshot)
+    const updatedEvent = (await eventSnapshot.ref.get()).data()
+    expect(updatedEvent.status.state).toBe('success')
+    expect(deleteLabel.isDone()).toBe(true)
+    expect.assertions(4)
   })
 })
