@@ -320,21 +320,25 @@ function Github (appId, privateKey, secret, db) {
     const validUsers = {}
     try {
       // Get in-team users
-      var { data: users } = await octokit.teams.listMembersInOrg({
-        org: org,
-        team_slug: team
-      })
-      for (const user of users) {
-        validUsers[user.login] = true
-      }
+      await octokit.paginate(
+        "GET /orgs/{org}/teams/{team_slug}/members",
+        {
+          org: org,
+          team_slug: team,
+          per_page: 100,
+        },
+        (response) => response.data.map((member) => validUsers[member.login] = true)
+      );
       // Get Pending users
-      var { data: pendingUsers } = await octokit.teams.listPendingInvitationsInOrg({
-        org: org,
-        team_slug: team
-      })
-      for (const user of pendingUsers) {
-        validUsers[user.login] = true
-      }
+      await octokit.paginate(
+        "GET /orgs/{org}/teams/{team_slug}/invitations",
+        {
+          org: org,
+          team_slug: team,
+          per_page: 100,
+        },
+        (response) => response.data.map((member) => validUsers[member.login] = true)
+      );
     } catch (e) {
       throw new Error('Fetching user listAllAccounts failed:' + e)
     }
