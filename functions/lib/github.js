@@ -321,24 +321,24 @@ function Github (appId, privateKey, secret, db) {
     try {
       // Get in-team users
       await octokit.paginate(
-        "GET /orgs/{org}/teams/{team_slug}/members",
+        'GET /orgs/{org}/teams/{team_slug}/members',
         {
           org: org,
           team_slug: team,
-          per_page: 100,
+          per_page: 100
         },
-        (response) => response.data.map((member) => validUsers[member.login] = true)
-      );
+        (response) => response.data.map((member) => (validUsers[member.login] = true))
+      )
       // Get Pending users
       await octokit.paginate(
-        "GET /orgs/{org}/teams/{team_slug}/invitations",
+        'GET /orgs/{org}/teams/{team_slug}/invitations',
         {
           org: org,
           team_slug: team,
-          per_page: 100,
+          per_page: 100
         },
-        (response) => response.data.map((member) => validUsers[member.login] = true)
-      );
+        (response) => response.data.map((member) => (validUsers[member.login] = true))
+      )
     } catch (e) {
       throw new Error('Fetching user listAllAccounts failed:' + e)
     }
