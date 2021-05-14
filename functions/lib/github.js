@@ -395,17 +395,21 @@ function Github (appId, privateKey, secret, db) {
     const octokit = await getApi(org)
     try {
       let check = false
-      const { data: teams } = await octokit.teams.list({
-        org: org
-      })
-
-      // Check the existence
-      for (const team of teams) {
-        if (team.name === name) {
-          check = true
-          break
+      await octokit.paginate(
+        'GET /orgs/{org}/teams',
+        {
+          org: org,
+          per_page: 100
+        },
+        (response) => response.data.map((team) => team.name)
+      ).then((teams) => {
+        for (const team of teams) {
+          if (team === name) {
+            check = true // exist
+            break
+          }
         }
-      }
+      })
 
       // Create if necessary
       if (!check) {
