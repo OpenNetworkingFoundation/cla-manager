@@ -51,6 +51,26 @@
       "team": "SDRANAccess"
     }
   ],
+  "SDCoreAccess" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "SDCoreAccess"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "SDCoreAccess"
+    }
+  ],
+  "SDFabricAccess" : [
+    {
+      "githubOrg": "omec-project",
+      "team": "SDFabricAccess"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "SDFabricAccess"
+    }
+  ],
   "ProntoAccess" : [
     {
       "githubOrg": "omec-project",
