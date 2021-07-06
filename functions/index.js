@@ -197,8 +197,10 @@ exports.handleAppUserAccountUpdate = functions.firestore
 exports.reconcileCrowd = functions.pubsub
   .schedule('every 24 hours')
   .onRun(() => {
+    console.info('reconciling-crowd-accounts')
     return db.collection('appUsers').get()
       .then(query => {
+        console.info(`reconciling-${query.size}-crowd-accounts`)
         return Promise.all(query.docs.map(d => crowd.updateCrowdUser(d.id)))
       })
   })

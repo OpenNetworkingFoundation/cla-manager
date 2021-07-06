@@ -16,10 +16,10 @@ function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
     for (const [crowdGroup, value] of Object.entries(groupMappings)) {
       // Get all valid Users from Crowd serer (valid means the user has Github_id attribute)
       const crowdUsers = await crowd.getUsersWithGithubID(crowdGroup)
-      console.log(`Crowd Users: ${JSON.stringify(crowdUsers)}`)
+      console.info(`Crowd Users: ${JSON.stringify(crowdUsers)}`)
       // Iterate all github organization,
       for (const github of value) {
-        console.log(`mapping from Crowd ${crowdGroup} to ${github.githubOrg}/${github.team}`)
+        console.info(`mapping from Crowd ${crowdGroup} to ${github.githubOrg}/${github.team}`)
         // Create the Team if necessary
         await githubObj.createTeam(github.githubOrg, github.team)
 

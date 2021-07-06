@@ -85,7 +85,7 @@ function Crowd (db, appName, appPassword) {
         .set(result)
       return accountDocId
     } catch (e) {
-      console.log(e)
+      console.error(e)
       throw new functions.https.HttpsError('internal',
         'An internal error occurred while evaluating the request')
     }
@@ -105,6 +105,7 @@ function Crowd (db, appName, appPassword) {
     //  should be resetting all attributes (e.g., remove the github_id), but for
     //  this we need the removed crowd username. This can be found in the
     //  Firestore document change snapshot (old value).
+    console.info(`updating-crowd-user-with-id: ${uid}`)
     const attributeMap = {
       // A set because a Crowd attribute can hold many values, but in reality we
       // support binding to only one github ID.
@@ -122,7 +123,7 @@ function Crowd (db, appName, appPassword) {
         }
       })
       .catch(error => {
-        console.log('Error fetching Firebase user record:', error)
+        console.error('Error fetching Firebase user record:', error)
       })
       // Fetch account data from firestore.
       .then(() => db.collection('appUsers')
@@ -142,12 +143,12 @@ function Crowd (db, appName, appPassword) {
               }
               break
             default:
-              console.log(`Unrecognized account hostname ${a.hostname} for uid ${uid}, ignoring`, a)
+              console.error(`Unrecognized account hostname ${a.hostname} for uid ${uid}, ignoring`, a)
               break
           }
         })
         if (crowdUsername == null) {
-          console.log(`Cannot find Crowd account for uid ${uid}, aborting update`, accounts)
+          console.error(`Cannot find Crowd account for uid ${uid}, aborting update`, accounts)
           return
         }
         // Transform attributeMap in an object understood by Crowd.
@@ -158,7 +159,7 @@ function Crowd (db, appName, appPassword) {
             values: Array.from(attributeMap[name])
           })
         })
-        console.log(`Pushing attribute for crowd user ${crowdUsername}`, attributes)
+        console.info(`Pushing attribute for crowd user ${crowdUsername}`, attributes)
         return setUserAttribute(crowdUsername, attributes)
       })
       .catch(console.error)
