@@ -25,7 +25,7 @@ function Backup (bucketName) {
     })
       .then(responses => {
         const response = responses[0]
-        console.log(`Operation Name: ${response.name}`)
+        console.info(`Operation Name: ${response.name}`)
         return response
       })
       .catch(err => {
