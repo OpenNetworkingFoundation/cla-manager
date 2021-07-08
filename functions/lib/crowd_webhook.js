@@ -15,18 +15,18 @@ function CrowdWebhook (groupMappings, github) {
         hasProperty(user, 'githubId')) {
         try {
           if (add) {
-            console.log(`Adding ${user.githubId} to ${mapping.githubOrg}:${mapping.team}`)
+            console.info(`Adding ${user.githubId} to ${mapping.githubOrg}:${mapping.team}`)
             // TODO: save some API calls by not always calling this
             await github.createTeam(mapping.githubOrg, mapping.team)
             await github.addUser(user.githubId, mapping.githubOrg, mapping.team)
             // TODO: handle response?
           } else {
-            console.log(`Removing ${user.githubId} from ${mapping.githubOrg}:${mapping.team}`)
+            console.info(`Removing ${user.githubId} from ${mapping.githubOrg}:${mapping.team}`)
             await github.deleteUser(user.githubId, mapping.githubOrg, mapping.team)
             // TODO: handle response?
           }
         } catch (e) {
-          console.log(e)
+          console.error(e)
         }
       } // else if gerrit mapping
       // TODO: implement this
@@ -52,7 +52,7 @@ function CrowdWebhook (groupMappings, github) {
     } else if (event.type === 'USER_UPDATED_GITHUB') {
       if (event.user && event.user.groups) {
         if (event.oldGithubId === event.newGithubId) {
-          console.log(`Received USER_UPDATED_GITHUB for ${event.user.username} ` +
+          console.info(`Received USER_UPDATED_GITHUB for ${event.user.username} ` +
                       `with same old and new Github IDs: ${event.user.githubId}. ` +
                       'Discarding event...')
           return
