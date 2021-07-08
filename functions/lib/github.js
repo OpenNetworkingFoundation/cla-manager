@@ -44,7 +44,7 @@ function Github (appId, privateKey, secret, db) {
       const contributionRef = db.collection('contributions').doc(contributionId)
       const action = context.payload.action
 
-      console.log(`contributionKey=${contributionKey}, event=pull_request.${action}, sha=${pr.head.sha}, contributionId=${contributionId}`)
+      console.info(`contributionKey=${contributionKey}, event=pull_request.${action}, sha=${pr.head.sha}, contributionId=${contributionId}`)
 
       let contribPromise
       if (action === 'opened' || action === 'reopened') {
@@ -71,7 +71,7 @@ function Github (appId, privateKey, secret, db) {
             createdOn: new Date()
           }))
           .then(result => {
-            console.log(`created event eventId=${result.id}`)
+            console.info(`created event eventId=${result.id}`)
           })
           .catch(console.error)
       } else {
@@ -89,7 +89,7 @@ function Github (appId, privateKey, secret, db) {
   async function processEvent (eventSnapshot) {
     const event = eventSnapshot.data()
 
-    console.log(`eventId=${eventSnapshot.id}, contributionKey=${event.contributionKey}, event=${event.type}`)
+    console.info(`eventId=${eventSnapshot.id}, contributionKey=${event.contributionKey}, event=${event.type}`)
 
     const pr = event.payload.pull_request
     const installationId = event.payload.installation.id
@@ -267,9 +267,10 @@ function Github (appId, privateKey, secret, db) {
         .collection('accounts')
         .doc(accountDocId)
         .set(result)
+      console.info(`Added github_id ${info.data.login} to user ${context.auth.uid} with email ${info.data.email}`)
       return accountDocId
     } catch (e) {
-      console.log(e)
+      console.error(e)
       throw new functions.https.HttpsError('internal',
         'An internal error occurred while evaluating the request')
     }

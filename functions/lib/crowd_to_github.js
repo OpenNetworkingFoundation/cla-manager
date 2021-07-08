@@ -25,7 +25,7 @@ function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
 
         // Get all users under github team
         const githubUsers = await githubObj.getUsers(github.githubOrg, github.team)
-        console.log(`GitHub Users: ${JSON.stringify(githubUsers)}`)
+        console.info(`GitHub Users: ${JSON.stringify(githubUsers)}`)
         // For All Crowd Users
         for (const [key] of Object.entries(crowdUsers)) {
           // Add to Github if user is not in Github

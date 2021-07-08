@@ -28,7 +28,7 @@ describe('Gerrit lib', () => {
     db = firebase.db
     gerritApp = Gerrit(db, httpUser, httpPassword).app
     server = gerritApp.listen(port, () => {
-      // console.log('App listening on port ' + port)
+      // console.info('App listening on port ' + port)
       done()
     })
   })

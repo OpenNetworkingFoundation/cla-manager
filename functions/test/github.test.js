@@ -113,7 +113,7 @@ describe('Github lib', () => {
       return true
     }).reply(201)
     nock(githubApi).post(createCommentUri, (req) => {
-      // console.log(`CREATE COMMENT => ${req.body}`)
+      // console.info(`CREATE COMMENT => ${req.body}`)
       expect(req.body.length).toBeGreaterThan(0)
       return true
     }).reply(201, { id: 1 })
@@ -156,7 +156,7 @@ describe('Github lib', () => {
       return true
     }).reply(500)
     nock(githubApi).post(createCommentUri, (req) => {
-      // console.log(`CREATE COMMENT => ${req.body}`)
+      // console.info(`CREATE COMMENT => ${req.body}`)
       expect(req.body.length).toBeGreaterThan(0)
       return true
     }).reply(201, { id: 1 })
@@ -203,7 +203,7 @@ describe('Github lib', () => {
       return true
     }).reply(201)
     nock(githubApi).patch(existingCommentUri, (req) => {
-      // console.log(`UPDATE COMMENT => ${req.body}`)
+      // console.info(`UPDATE COMMENT => ${req.body}`)
       expect(req.body.length).toBeGreaterThan(0)
       return true
     }).reply(200, { id: 1 })
