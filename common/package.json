@@ -7,8 +7,8 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@bugsnag/js": "^6.5.2",
     "@babel/preset-env": "^7.8.7",
+    "@bugsnag/js": "^6.5.2",
     "@types/jest": "^24.0.0",
     "babel": "^6.23.0",
     "babel-eslint": "^10.0.3",
@@ -19,7 +19,7 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "firebase": "^7.8.2",
+    "firebase": "^7.24.0",
     "jest": "^24.0.0"
   },
   "engines": {
