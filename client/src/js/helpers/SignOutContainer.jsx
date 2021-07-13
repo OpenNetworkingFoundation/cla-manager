@@ -10,7 +10,8 @@ const useStyles = makeStyles(theme => ({
     paddingRight: theme.spacing(2)
   },
   link: {
-    color: theme.palette.common.black
+    color: theme.palette.common.white,
+    borderColor: theme.palette.common.white,
   }
 }))
 
@@ -26,7 +27,8 @@ function SignOutContainer (props) {
       </span>
       <Button
         variant='outlined'
-        startIcon={<AccountBox/>}>
+        startIcon={<AccountBox/>}
+        className={classes.link}>
         <Link className={classes.link} href="/linked-accounts">
           Linked Accounts
         </Link>
@@ -37,6 +39,7 @@ function SignOutContainer (props) {
         variant='outlined'
         endIcon={<ExitToAppIcon/>}
         onClick={props.onSignOut}
+        className={classes.link}
       >
         Sign Out
       </Button>

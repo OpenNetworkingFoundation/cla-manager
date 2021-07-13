@@ -2,6 +2,15 @@ import React, { useState } from 'react'
 import { Menu, MenuItem, Button } from '@material-ui/core'
 import { useHistory } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
+import { makeStyles } from '@material-ui/core/styles'
+
+
+const useStyles = makeStyles(theme => ({
+  link: {
+    color: theme.palette.common.white,
+    borderColor: theme.palette.common.white,
+  }
+}))
 
 function AdminNav (props) {
   const history = useHistory()
@@ -17,10 +26,12 @@ function AdminNav (props) {
       setAnchorEl(null)
     }
   }
+  const classes = useStyles()
 
   return (
     <div>
       <Button
+        className={classes.link}
         variant='outlined'
         startIcon={<MenuIcon />}
         onClick={handleClick}>
