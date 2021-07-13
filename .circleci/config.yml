@@ -127,12 +127,21 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      - test-node
-      - test-py
+      - test-node:
+          filters:
+              branches:
+                ignore: /dependabot.*/
+      - test-py:
+          filters:
+              branches:
+                ignore: /dependabot.*/
       - build:
           requires:
             - test-node
             - test-py
+          filters:
+            branches:
+              ignore: /dependabot.*/
       - backup:
           requires:
             - build
