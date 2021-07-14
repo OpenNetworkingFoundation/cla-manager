@@ -41,6 +41,7 @@ function CreateAgreementContainer () {
                   <li>I'm making contributions of code I've created in my free time (not under contract),
                     and I hold the copyright on my contributions.
                   </li>
+                  <br></br><br></br><br></br>
                 </ul>
               </Typography>
               <div className={classes.textCenter}>
