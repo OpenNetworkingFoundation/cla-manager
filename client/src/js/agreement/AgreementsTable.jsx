@@ -32,9 +32,12 @@ function AgreementsTable (props) {
       sorting: false,
       render: d => {
         return <div>{d.signer.name} <br/> <i>{d.signer.value}</i></div>
+      },
+      customFilterAndSearch: (query, data) => {
+        return data.signer.name.indexOf(query) > -1 || data.signer.value.indexOf(query) > -1
       }
     },
-    { title: 'Date Signed', field: 'dateSigned', type: 'date' },
+    { title: 'Date Signed', field: 'dateSigned', type: 'date'},
     {
       title: 'Actions',
       sorting: false,
