@@ -183,8 +183,8 @@ function AddendumForm (props) {
   identityType[AddendumType.MANAGER] = 'Manager'
 
   const subtitle = {}
-  subtitle[AddendumType.CONTRIBUTOR] = 'Here is a listAllAccounts of Users/Identities that are authorized to make contributions to ONF projects under this agreement'
-  subtitle[AddendumType.MANAGER] = 'Here is a listAllAccounts of Users/Identities that are allowed to add and remove Contributor Identities to/from this Agreement'
+  subtitle[AddendumType.CONTRIBUTOR] = 'Here is a list of Users/Identities that are authorized to make contributions to ONF projects under this agreement'
+  subtitle[AddendumType.MANAGER] = 'Here is a list of Users/Identities that are allowed to add and remove Contributor Identities to/from this Agreement'
 
   const text = {}
   text[AddendumType.CONTRIBUTOR] = 'Users/Identities listed under "Contributors" for this Agreement will be allowed to make contributions to ONF projects.'
