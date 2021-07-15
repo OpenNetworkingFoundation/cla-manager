@@ -226,7 +226,7 @@ function Crowd (db, appName, appPassword) {
   async function getUsersUnderGroup (group) {
     return rp.get({
       ...rpConf,
-      uri: baseUri + `/group/user/direct?groupname=${group}&max-results=3000`
+      uri: baseUri + `/group/user/nested?groupname=${group}&max-results=3000`
     })
   }
 

@@ -85,6 +85,16 @@
       "team": "ProntoAccess"
     }
   ],
+  "GSLabsContractors" : [
+   {
+      "githubOrg": "omec-project",
+      "team": "GSLabsContractors"
+    },
+    {
+      "githubOrg": "onosproject",
+      "team": "GSLabsContractors"
+    }
+  ],
   "StatsAccess" : [
     {
       "githubOrg": "omec-project",
