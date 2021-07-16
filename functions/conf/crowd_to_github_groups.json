@@ -69,6 +69,10 @@
     {
       "githubOrg": "onosproject",
       "team": "SDFabricAccess"
+    },
+    {
+      "githubOrg": "stratum",
+      "team": "SDFabricAccess"
     }
   ],
   "ProntoAccess" : [
