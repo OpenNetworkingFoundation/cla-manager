@@ -16,6 +16,26 @@ const useStyles = makeStyles(theme => ({
   textCenter: {
     textAlign: 'center'
   },
+  cardContainer: {
+    display: "grid",
+    gridGap: theme.spacing(2),
+    gridTemplateColumns: "repeat(2, 1fr)"
+  },
+  card: {
+    display: "grid",
+    gridTemplateRows: "1fr auto",
+    gridGap: theme.spacing(2),
+    minHeight: 280,
+    padding:theme.spacing(2)
+  },
+  cardBody: {
+    alignSelf: "start",
+    // textAlign: "center",
+  },
+  cardButton: {
+    display: "flex",
+    justifyContent: "center",
+  }
 }))
 
 /**
@@ -29,9 +49,9 @@ function CreateAgreementContainer () {
         <Grid item xs={12}>
           <h2 className={classes.h2}>Sign a CLA</h2>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
+        <Grid item xs={12} md={12} className={classes.cardContainer}>
+          <Card className={classes.card}>
+            <div className={classes.cardBody}>
               <Typography variant="h5" component="h2" className={classes.textCenter}>
                 When to sign an Individual CLA?
               </Typography>
@@ -41,22 +61,19 @@ function CreateAgreementContainer () {
                   <li>I'm making contributions of code I've created in my free time (not under contract),
                     and I hold the copyright on my contributions.
                   </li>
-                  <br></br><br></br><br></br>
                 </ul>
               </Typography>
-              <div className={classes.textCenter}>
-                <Link to={`/sign/${AgreementType.INDIVIDUAL}`}>
-                  <Button variant='contained' color='primary' size='large'>
-                    Sign Individual CLA
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
+            </div>
+            <div className={classes.cardButton}>
+              <Link to={`/sign/${AgreementType.INDIVIDUAL}`}>
+                <Button variant='contained' color='primary' size='large' className={classes.test}>
+                  Sign Individual CLA
+                </Button>
+              </Link>
+            </div>
           </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
+          <Card className={classes.card}>
+            <div className={classes.cardBody}>  
               <Typography variant="h5" component="h2" className={classes.textCenter}>
                 When to sign an Institutional CLA?
               </Typography>
@@ -71,14 +88,14 @@ function CreateAgreementContainer () {
                   </li>
                 </ul>
               </Typography>
-              <div className={classes.textCenter}>
-                <Link to={`/sign/${AgreementType.INSTITUTIONAL}`}>
-                  <Button variant='contained' color='primary' size='large'>
-                    Sign Institutional CLA
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
+            </div>
+            <div className={classes.cardButton}>
+              <Link to={`/sign/${AgreementType.INSTITUTIONAL}`}>
+                <Button variant='contained' color='primary' size='large'>
+                  Sign Institutional CLA
+                </Button>
+              </Link>
+            </div>
           </Card>
         </Grid>
       </Grid>
