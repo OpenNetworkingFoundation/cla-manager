@@ -266,7 +266,7 @@ function AppUserAccountsContainer () {
             <h2 className={classes.h2}>Link your Accounts</h2>
             <Typography variant={'body1'} gutterBottom>
               If your employer is an <a
-              href="https://opennetworking.org/member-listing/">ONF Member</a>, you can link
+              href="https://opennetworking.org/member-listing/" target='_blank' >ONF Member</a>, you can link
               your ONF account to your GitHub account to be granted access to Member-only
               resources shared in GitHub.  Once both accounts are linked, you will receive
               invitations from GitHub to Member-only teams.
