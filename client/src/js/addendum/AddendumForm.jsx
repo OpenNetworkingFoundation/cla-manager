@@ -119,7 +119,7 @@ function AddendumForm (props) {
       addedIdentities,
       removedIdentities
     )
-
+    
     markUpdateStatus(true)
     addendum.save()
       .then(res => {

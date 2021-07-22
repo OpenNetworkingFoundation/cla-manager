@@ -32,10 +32,10 @@ function AddendumsTable (props) {
         title: 'Date Signed',
         sorting: true,
         render: d => {
-          return <div>{d.dateSigned.toString()}</div>
+          return <div>{d.dateSigned.toLocaleString()}</div>
         },
         customFilterAndSearch: (query, data) => {
-          return data.dateSigned.toString().toLowerCase().indexOf(query.toLowerCase()) > -1
+          return data.dateSigned.toLocaleString().toLowerCase().indexOf(query.toLowerCase()) > -1
         }
       },
     {
