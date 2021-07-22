@@ -15,6 +15,11 @@ import * as _ from 'lodash'
 import { Alert } from '@material-ui/lab'
 import { Identity, IdentityType } from '../../common/model/identity'
 import { Whitelist } from '../../common/model/whitelists'
+import AddendumsTable from '../addendum/AddendumsTable'
+import Fade from '@material-ui/core/Fade';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
+import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -68,7 +73,7 @@ function AddendumForm (props) {
   const [lastAddendum, setLastAddendum] = useState(null)
   const [error, setError] = useState(null)
   const [canManage, setCanManage] = useState(false)
-
+ 
   React.useEffect(() => {
     props.agreement.getAddendums(props.addendumType)
       .then(setAddendums)
@@ -170,6 +175,12 @@ function AddendumForm (props) {
     props.updateStatus(value)
   }
 
+  const [checked, setChecked] = React.useState(false);
+
+  const handleChange = () => {
+    setChecked((prev) => !prev);
+  };
+
   const headers = {}
   headers[AddendumType.CONTRIBUTOR] = 'Active Contributors for this Agreement'
   headers[AddendumType.MANAGER] = 'Active Managers for this Agreement'
@@ -264,11 +275,27 @@ function AddendumForm (props) {
         <p>
           We have {addendums ? addendums.length : 0} addendums on file for this
           agreement. The last one was signed
-          on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}</p>
+          on: {lastAddendum ? lastAddendum.dateSigned.toString() : 'NEVER'}
+        </p>
+        <div className={classes.root}>
+          <FormControlLabel
+            control={<Switch checked={checked} onChange={handleChange} />}
+            label="See All Addendums"
+          />
+          <div className={classes.container}>
+            <Fade in={checked} unmountOnExit timeout="auto">
+              <Grid item xs={12}>
+                <AddendumsTable
+                  header='All Addendums'
+                  data={addendums}
+                />
+              </Grid>
+            </Fade>
+          </div>
+        </div>
       </Grid>
       {/* TODO print a listAllAccounts of all the addendums if it's admin */}
       {canManage ? updateForm : null}
-
     </Grid>
   )
 }
