@@ -19,7 +19,6 @@ import AddendumsTable from '../addendum/AddendumsTable'
 import Fade from '@material-ui/core/Fade';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -283,7 +282,7 @@ function AddendumForm (props) {
             label="See All Addendums"
           />
           <div className={classes.container}>
-            <Fade in={checked} unmountOnExit timeout="auto">
+            <Fade in={checked} unmountOnExit>
               <Grid item xs={12}>
                 <AddendumsTable
                   header='All Addendums'

@@ -1,12 +1,12 @@
 import React from 'react'
 import PropTypes, { instanceOf } from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
-import { Addendum, AddendumType } from '../../common/model/addendum'
+import { Addendum } from '../../common/model/addendum'
 import MaterialTable from 'material-table'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
 import GitHubIcon from '@material-ui/icons/GitHub'
-import { Identity, IdentityType } from '../../common/model/identity'
-import { Box, Card, Grid, Link, Typography, CardContent, IconButton } from '@material-ui/core'
+import { IdentityType } from '../../common/model/identity'
+import { Grid, Typography, CardContent } from '@material-ui/core'
 
 
 const useStyles = makeStyles(theme => ({
@@ -124,7 +124,6 @@ function AddendumsTable (props) {
 AddendumsTable.propTypes = {
   header: PropTypes.string.isRequired,
   data: PropTypes.arrayOf(instanceOf(Addendum)).isRequired,
-  type: PropTypes.oneOf(Object.keys(AddendumType).map(i => AddendumType[i])).isRequired
 }
 
 export default AddendumsTable
