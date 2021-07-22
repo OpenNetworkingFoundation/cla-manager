@@ -3,6 +3,11 @@ import PropTypes, { instanceOf } from 'prop-types'
 import { makeStyles } from '@material-ui/core/styles'
 import { Addendum, AddendumType } from '../../common/model/addendum'
 import MaterialTable from 'material-table'
+import MailOutlineIcon from '@material-ui/icons/MailOutline'
+import GitHubIcon from '@material-ui/icons/GitHub'
+import { Identity, IdentityType } from '../../common/model/identity'
+import { Box, Card, Grid, Link, Typography, CardContent, IconButton } from '@material-ui/core'
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,18 +52,58 @@ function AddendumsTable (props) {
         title: 'Added',
         sorting: false,
         render: d => {
-            return (<div>{d.added.map(account => <div>{account.value}</div>)}</div>);
+            return (
+            <div>          
+              {d.added.map(account => 
+                <Grid container spacing={1}>
+                <Grid item xs={2}>
+                  <CardContent>
+                    {account.type === IdentityType.GITHUB ? <GitHubIcon fontSize={'small'}/> : null}
+                    {account.type === IdentityType.EMAIL ? <MailOutlineIcon fontSize={'small'}/> : null}
+                  </CardContent>
+                </Grid>
+                <Grid item xs={8}>
+                  <CardContent>
+                    <Typography>
+                      {account.value}
+                    </Typography>
+                  </CardContent>
+                </Grid>
+                </Grid>
+              )}
+            </div>
+            );
         },
         customFilterAndSearch: (query, data) => {
             return data.added.find(element => element._value.indexOf(query) > -1)
         }
     },
     {
-        title: 'Removed',
-        sorting: false,
-        render: d => {
-            return (<div>{d.removed.map(account => <div>{account.value}</div>)}</div>);
-        },
+      title: 'Removed',
+      sorting: false,
+      render: d => {
+          return (
+          <div>          
+            {d.removed.map(account => 
+              <Grid container spacing={2}>
+              <Grid item xs={2}>
+                <CardContent>
+                  {account.type === IdentityType.GITHUB ? <GitHubIcon fontSize={'small'}/> : null}
+                  {account.type === IdentityType.EMAIL ? <MailOutlineIcon fontSize={'small'}/> : null}
+                </CardContent>
+              </Grid>
+              <Grid item xs={8}>
+                <CardContent>
+                  <Typography>
+                    {account.value}
+                  </Typography>
+                </CardContent>
+              </Grid>
+              </Grid>
+            )}
+          </div>
+          );
+      },
         customFilterAndSearch: (query, data) => {
             return data.removed.find(element => element._value.indexOf(query) > -1)
         }
