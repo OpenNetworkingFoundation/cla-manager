@@ -4,6 +4,7 @@ import { Link, Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { Agreement, AgreementType } from '../../common/model/agreement'
 import MaterialTable from 'material-table'
+import PatchedPagination from '../helpers/Table'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,6 +62,9 @@ function AgreementsTable (props) {
         columns={cols}
         data={props.data}
         title={props.header}
+        components={{
+          Pagination: PatchedPagination,
+        }}
       />
     </div>
   )
