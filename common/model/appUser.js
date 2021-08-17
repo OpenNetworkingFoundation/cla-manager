@@ -58,20 +58,9 @@ export class AppUser {
   }
 
   static listAllAccounts () {
-    return DB.connection().collection(userCollection).get()
-      .then(entries => {
-        const p = []
-        entries.docs.forEach(e => {
-          p.push(DB.connection().collection(userCollection).doc(e.id).collection(accountsCollection).get())
-        })
-        return Promise.all(p)
-      })
-      .then(accounts => {
-        return accounts.reduce((list, res) => {
-          return [...res.docs.reduce((l, r) => {
-            return [r.data(), ...l]
-          }, []), ...list]
-        }, [])
+    return DB.connection().collectionGroup(accountsCollection).get()
+      .then(query => {
+        return query.docs.map(d => d.data())
       })
       .catch(console.error)
   }
