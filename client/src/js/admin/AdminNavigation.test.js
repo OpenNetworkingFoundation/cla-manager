@@ -22,7 +22,7 @@ describe('AdminNav Component Test Suite', () => {
   it('renders one button and one menu with two items', () => {
     expect(wrapper.find(Button)).toHaveLength(1)
     expect(wrapper.find(Menu)).toHaveLength(1)
-    expect(wrapper.find(MenuItem)).toHaveLength(3)
+    expect(wrapper.find(MenuItem)).toHaveLength(4)
   })
 
   describe('when clicking on a menu item', () => {

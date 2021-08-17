@@ -12,6 +12,7 @@ import AdminIdentitiesList from './admin/AdminIdentitiesList'
 import AppUserAccountsContainer from './user/AppUserAccountsContainer'
 import PermissionDenied from './admin/PermissionDenied'
 import AdminLinkedAccountList from './admin/AdminLinkedAccountsList'
+import AdminDomains from './admin/AdminDomains'
 
 class AppRouter extends React.Component {
   constructor (props) {
@@ -87,6 +88,14 @@ class AppRouter extends React.Component {
               path='/admin/linked-accounts' exact render={() => {
               if (this.props.isAdmin) {
                 return <AdminLinkedAccountList/>
+              }
+              return <PermissionDenied/>
+            }}
+            />
+            <Route
+              path='/admin/manage-domains' exact render={() => {
+              if (this.props.isAdmin) {
+                return <AdminDomains/>
               }
               return <PermissionDenied/>
             }}

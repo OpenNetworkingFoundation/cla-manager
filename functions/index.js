@@ -28,6 +28,7 @@ const gerrit = new Gerrit(
 
 const crowd = new Crowd(
   db,
+  functions.config().crowd.url,
   functions.config().crowd.app_name,
   functions.config().crowd.app_password)
 
@@ -42,6 +43,7 @@ const backup = new Backup(
 
 const crowdAudit = new CrowdToGitHub(
   crowdToGithubGroups,
+  functions.config().crowd.url,
   functions.config().crowd.app_name,
   functions.config().crowd.app_password,
   github)
@@ -212,4 +214,52 @@ exports.crowdToGithubPeriodicAudit = functions.pubsub
   .schedule('every 60 minutes')
   .onRun(() => {
     return crowdAudit.ManuallyAudit()
+  })
+
+/**
+ * Reacts to changes to the linked accounts for an app user
+ */
+exports.handleCrowdMemberLink = functions.firestore
+  .document('/appUsers/{uid}/accounts/{accountId}')
+  .onCreate((snapshot, context) => {
+    const data = snapshot.data()
+    const username = data.username
+    const email = data.email
+    const uid = context.params.uid
+    return crowd.addMemberToGroup(uid, username, email)
+  })
+
+/**
+ * Reacts to a removal in the linked accounts for an app user
+ */
+exports.handleCrowdMemberUnlink = functions.firestore
+  .document('/appUsers/{uid}/accounts/{accountId}')
+  .onDelete((snapshot, context) => {
+    const data = snapshot.data()
+    const username = data.username
+    const hostname = data.hostname
+    if (hostname === 'opennetworking.org') {
+      return crowd.removeUserFromGroup(username)
+    }
+  })
+
+/**
+ * Reacts to changes to an addition to the approved domains
+ */
+exports.linkAllExisitingAccountsUnderDomain = functions.firestore
+  .document('/domains/{uid}')
+  .onCreate((snapshot, context) => {
+    const data = snapshot.data()
+    const domain = data.name
+    return crowd.editAllUsersUnderDomain(domain, true)
+  })
+
+/**
+ * Reacts to changes to a change in approved domains
+ */
+exports.unlinkAllExisitingAccountsUnderDomain = functions.firestore
+  .document('/domains/{uid}')
+  .onUpdate((change, context) => {
+    const domain = change.after._fieldsProto.name.stringValue
+    return crowd.editAllUsersUnderDomain(domain, false)
   })

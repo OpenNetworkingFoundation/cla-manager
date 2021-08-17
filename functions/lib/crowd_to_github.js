@@ -9,9 +9,9 @@ module.exports = CrowdToGitHub
  * @return {{getUsersWithGithubID: getUsersWithGithubID}}
  * @constructor
  */
-function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
+function CrowdToGitHub (groupMappings, crowdUrl, crowdApp, crowdPassword, githubObj) {
   async function AuditFromCrowdToGitHub () {
-    const crowd = new Crowd(null, crowdApp, crowdPassword)
+    const crowd = new Crowd(null, crowdUrl, crowdApp, crowdPassword)
     // Iterate all Crowd groups
     for (const [crowdGroup, value] of Object.entries(groupMappings)) {
       // Get all valid Users from Crowd serer (valid means the user has Github_id attribute)
