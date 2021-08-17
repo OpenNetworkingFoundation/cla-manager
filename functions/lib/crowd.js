@@ -245,6 +245,15 @@ function Crowd (db, onfHostname, appName, appPassword) {
     return ''
   }
 
+  /**
+   * This function adds a user to the crowd group if they link their ONF account.
+   * It checks to make sure the their email domain is in the list of valid domains and
+   * then it adds the user to the group.
+   * @param uid {string} Firebase UID, i.e. doc ID of appUsers collections
+   * @param username {string} username of user in crowd
+   * @param email {string} email of the user
+   * @return {Promise<void>}
+   */
   async function addMemberToGroup (uid, username, email) {
     // Check if email is being linked
     return admin.auth().getUser(uid)
@@ -282,6 +291,13 @@ function Crowd (db, onfHostname, appName, appPassword) {
       })
   }
 
+  /**
+   * This function adds or removes all users in the Crowd member group
+   * that have email domains that match the given domain argument
+   * @param domain {string} name of the domain that is being edited in the main list
+   * @param addDomain {boolean} true if domain is being added, false if it is being removed
+   * @return {Promise<void>}
+   */
   async function editAllUsersUnderDomain (domain, addDomain) {
     return db.collectionGroup('accounts')
       .where('hostname', '==', 'opennetworking.org')
@@ -321,6 +337,11 @@ function Crowd (db, onfHostname, appName, appPassword) {
     })
   }
 
+  /**
+   * Checks if the given user is present in the crowd group
+   * @param username username of the crowd user
+   * @return {boolean} whether the username was found in the crowd group
+   */
   async function userExists (username) {
     return await rp.get({
       ...rpConf,

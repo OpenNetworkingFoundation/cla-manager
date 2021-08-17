@@ -217,7 +217,7 @@ exports.crowdToGithubPeriodicAudit = functions.pubsub
   })
 
 /**
- * Reacts to changes to the linked accounts for an app user
+ * Reacts to a newly linked account for an app user
  */
 exports.handleCrowdMemberLink = functions.firestore
   .document('/appUsers/{uid}/accounts/{accountId}')
@@ -230,7 +230,7 @@ exports.handleCrowdMemberLink = functions.firestore
   })
 
 /**
- * Reacts to a removal in the linked accounts for an app user
+ * Reacts to an unlink of an account for an app user
  */
 exports.handleCrowdMemberUnlink = functions.firestore
   .document('/appUsers/{uid}/accounts/{accountId}')
@@ -244,7 +244,7 @@ exports.handleCrowdMemberUnlink = functions.firestore
   })
 
 /**
- * Reacts to changes to an addition to the approved domains
+ * Reacts to an addition to the approved domains list
  */
 exports.linkAllExisitingAccountsUnderDomain = functions.firestore
   .document('/domains/{uid}')
@@ -255,7 +255,7 @@ exports.linkAllExisitingAccountsUnderDomain = functions.firestore
   })
 
 /**
- * Reacts to changes to a change in approved domains
+ * Reacts to a removal of a domain from the approved list
  */
 exports.unlinkAllExisitingAccountsUnderDomain = functions.firestore
   .document('/domains/{uid}')
