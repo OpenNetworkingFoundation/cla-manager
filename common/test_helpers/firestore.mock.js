@@ -2,6 +2,7 @@ export default class FirestoreMock {
   constructor () {
     // mocked methods that return the class
     this.mockCollection = jest.fn(() => this)
+    this.mockCollectionGroup = jest.fn(() => this)
     this.mockWhere = jest.fn(() => this)
     this.mockOrderBy = jest.fn(() => this)
     this.mockDoc = jest.fn(() => this)
@@ -22,6 +23,10 @@ export default class FirestoreMock {
 
   collection (c) {
     return this.mockCollection(c)
+  }
+
+  collectionGroup (c) {
+    return this.mockCollectionGroup(c)
   }
 
   where (...args) {
@@ -68,6 +73,7 @@ export default class FirestoreMock {
 
     // reset all the mocked functions
     this.mockCollection.mockClear()
+    this.mockCollectionGroup.mockClear()
     this.mockWhere.mockClear()
     this.mockOrderBy.mockClear()
     this.mockAdd.mockClear()
