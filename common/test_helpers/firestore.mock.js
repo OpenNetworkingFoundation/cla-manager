@@ -11,6 +11,7 @@ export class FirestoreMock {
     this.mockAdd = jest.fn(() => Promise.resolve(this._mockAddReturn))
     this.mockGet = jest.fn(() => Promise.resolve(this._mockGetReturn))
     this.mockDelete = jest.fn(() => Promise.resolve(this._mockDeleteReturn))
+    this.mockUpdate = jest.fn(() => Promise.resolve(this._mockUpdateReturn))
 
     // methods that accepts callbacks
     this.mockOnSnaptshot = jest.fn((success, error) => success(this._mockOnSnaptshotSuccess))
@@ -20,6 +21,7 @@ export class FirestoreMock {
     this._mockGetReturn = null
     this._mockDeleteReturn = null
     this._mockOnSnaptshotSuccess = null
+    this._mockUpdateReturn = null
     // TODO add _mockOnSnaptshotError to return error results
   }
 
@@ -59,6 +61,10 @@ export class FirestoreMock {
     return this.mockOnSnaptshot(success, error)
   }
 
+  update () {
+    return this.mockUpdate()
+  }
+
   set mockAddReturn (val) {
     this._mockAddReturn = val
   }
@@ -76,7 +82,8 @@ export class FirestoreMock {
     this._mockAddReturn = null
     this._mockGetReturn = null
     this._mockOnSnaptshotSuccess = null
-
+    this._mockUpdateReturn = null
+    this._mockDeleteReturn = null
     // reset all the mocked functions
     this.mockCollection.mockClear()
     this.mockCollectionGroup.mockClear()
