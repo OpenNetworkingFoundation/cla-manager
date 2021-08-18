@@ -5,7 +5,7 @@ const domainCollection = 'domains'
 /**
  * Domain model class.
  */
-class domain {
+export class Domain {
   /**
    * Creates a new domain
    * @param {string} id id of domain
@@ -70,7 +70,8 @@ class domain {
     return {
       name: this.name,
       valid: this.valid,
-      createdOn: this.createdOn
+      createdOn: this.createdOn,
+      deletedOn: this.deletedOn
     }
   }
 
@@ -157,5 +158,3 @@ class domain {
       })
   }
 }
-
-export const Domain = domain
