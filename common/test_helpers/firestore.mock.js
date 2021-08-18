@@ -10,6 +10,7 @@ export default class FirestoreMock {
     // methods that return promises
     this.mockAdd = jest.fn(() => Promise.resolve(this._mockAddReturn))
     this.mockGet = jest.fn(() => Promise.resolve(this._mockGetReturn))
+    this.mockDelete = jest.fn(() => Promise.resolve(this._mockDeleteReturn))
 
     // methods that accepts callbacks
     this.mockOnSnaptshot = jest.fn((success, error) => success(this._mockOnSnaptshotSuccess))
@@ -17,6 +18,7 @@ export default class FirestoreMock {
     // return values
     this._mockAddReturn = null
     this._mockGetReturn = null
+    this._mockDeleteReturn = null
     this._mockOnSnaptshotSuccess = null
     // TODO add _mockOnSnaptshotError to return error results
   }
@@ -47,6 +49,10 @@ export default class FirestoreMock {
 
   get () {
     return this.mockGet()
+  }
+
+  delete () {
+    return this.mockDelete()
   }
 
   onSnapshot (success, error) {

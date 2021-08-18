@@ -63,7 +63,7 @@ describe('The AppUser model', () => {
   })
 
   it('should correctly instantiate the class for user', () => {
-    expect(user._uid).toEqual('UID')
+    expect(user.uid).toEqual('UID')
   })
 
   describe('the listAllAccounts method', () => {
@@ -100,6 +100,19 @@ describe('The AppUser model', () => {
           expect(res[2].name).toEqual(account3.data().name)
           expect(res[2].updatedOn).toEqual(account3.data().updatedOn)
 
+          done()
+        })
+        .catch(done)
+    })
+  })
+
+  describe('the deleteAccount method', () => {
+    it('should delete the account of the user in database', (done) => {
+      user.deleteAccount(account1.id)
+        .then(res => {
+          expect(DB.connection).toHaveBeenCalledTimes(1)
+          expect(firestoreMock.mockCollection).toBeCalledWith('accounts')
+          expect(firestoreMock.mockCollection).toBeCalledWith('appUsers')
           done()
         })
         .catch(done)
