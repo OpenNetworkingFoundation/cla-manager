@@ -32,13 +32,13 @@ class addendum {
    * @param {Identity[]} added array of identities added by the addendum
    * @param {Identity[]} removed array of identities removed by the addendum
    */
-  constructor (type, agreementId, signer, added, removed) {
+  constructor (type, agreementId, signer, added, removed, dateSigned = new Date()) {
     this._type = type
     this._agreementId = agreementId
     this._signer = signer
     this._added = added
     this._removed = removed
-    this._dateSigned = new Date()
+    this._dateSigned = dateSigned
   }
 
   /**
@@ -151,10 +151,11 @@ class addendum {
     const signer = Identity.fromJson(data.signer)
     const added = data.added.map(Identity.fromJson)
     const removed = data.removed.map(Identity.fromJson)
+    const dateSigned = data.dateSigned.toDate().toLocaleString()
     // Older addendums were stored in the DB without a type. Assume CONTRIBUTOR
     // as the default one.
     const type = data.type || AddendumType.CONTRIBUTOR
-    return new Addendum(type, data.agreementId, signer, added, removed)
+    return new Addendum(type, data.agreementId, signer, added, removed, dateSigned)
   }
 
   /**

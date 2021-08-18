@@ -1,5 +1,5 @@
 import DB from '../db/db'
-import FirestoreMock from '../test_helpers/firestore.mock'
+import { FirestoreMock } from '../test_helpers/firestore.mock'
 
 import { Whitelist } from './whitelists'
 

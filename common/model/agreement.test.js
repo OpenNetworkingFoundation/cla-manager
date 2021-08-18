@@ -1,10 +1,9 @@
 import DB from '../db/db'
 
-import FirestoreMock from '../test_helpers/firestore.mock'
-
 import { Agreement, AgreementType } from './agreement'
 import { Addendum, AddendumType } from './addendum'
 import { Identity, IdentityType } from './identity'
+import { FirestoreDate, FirestoreMock } from '../test_helpers/firestore.mock'
 
 const signer = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev')
 const user1 = new Identity(IdentityType.EMAIL, 'Felix', 'felix@onf.dev')
@@ -137,8 +136,8 @@ describe('The Agreement model', () => {
     it('should return a listAllAccounts of CONTRIBUTOR addendums', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], [], new FirestoreDate(new Date())).toJson() },
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1], new FirestoreDate(new Date())).toJson() }
         ]
       }
       individualAgreement.getAddendums(AddendumType.CONTRIBUTOR)
@@ -157,7 +156,7 @@ describe('The Agreement model', () => {
     it('should return a listAllAccounts of MANAGER addendums', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
-          { data: () => new Addendum(AddendumType.MANAGER, 'test-id', signer, [user1], []).toJson() }
+          { data: () => new Addendum(AddendumType.MANAGER, 'test-id', signer, [user1], [], new FirestoreDate(new Date())).toJson() }
         ]
       }
       individualAgreement.getAddendums(AddendumType.MANAGER)
@@ -177,8 +176,8 @@ describe('The Agreement model', () => {
     it('should return a listAllAccounts of valid users for an agreement ', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], []).toJson() },
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1]).toJson() }
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], [], new FirestoreDate(new Date())).toJson() },
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user3], [user1], new FirestoreDate(new Date())).toJson() }
         ]
       }
       individualAgreement.getWhitelist(AddendumType.CONTRIBUTOR)
