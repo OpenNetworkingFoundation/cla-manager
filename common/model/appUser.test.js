@@ -118,6 +118,10 @@ describe('The AppUser model', () => {
           expect(DB.connection).toHaveBeenCalledTimes(1)
           expect(firestoreMock.mockCollection).toBeCalledWith('accounts')
           expect(firestoreMock.mockCollection).toBeCalledWith('appUsers')
+          expect(firestoreMock.mockDoc).toBeCalledTimes(2)
+          expect(firestoreMock.mockDoc).toBeCalledWith(user.uid)
+          expect(firestoreMock.mockDoc).toBeCalledWith(account1.id)
+          expect(firestoreMock.mockDelete).toBeCalledTimes(1)
           done()
         })
         .catch(done)
@@ -125,7 +129,7 @@ describe('The AppUser model', () => {
   })
 
   describe('the accountFromSnapshot method', () => {
-    it('should return a the data from the snapshot', (done) => {
+    it('should return a the data from the snapshot', () => {
       const res = AppUser.accountFromSnapshot(account1)
       expect(DB.connection).toHaveBeenCalledTimes(0)
       expect(res.id).toEqual(account1.id)
@@ -136,15 +140,13 @@ describe('The AppUser model', () => {
       expect(res.key).toEqual(account1.data().key)
       expect(res.name).toEqual(account1.data().name)
       expect(res.updatedOn).toEqual(account1.data().updatedOn)
-      done()
     })
   })
 
   describe('the current method', () => {
-    it('should return the current user object', (done) => {
+    it('should return the current user object', () => {
       const user = AppUser.current()
       expect(user.uid).toEqual('uid')
-      done()
     })
   })
 
@@ -153,12 +155,14 @@ describe('The AppUser model', () => {
       firestoreMock.mockOnSnaptshotSuccess = {
         docs: [account1]
       }
-      const test = (docs) => {}
-      user.subscribeAccounts(test, console.log())
-      expect(DB.connection).toHaveBeenCalledTimes(1)
-      expect(firestoreMock.mockCollection).toBeCalledWith('accounts')
-      expect(firestoreMock.mockCollection).toBeCalledWith('appUsers')
-      done()
+      user.subscribeAccounts((res) => {
+        expect(DB.connection).toHaveBeenCalledTimes(1)
+        expect(firestoreMock.mockCollection).toBeCalledWith('accounts')
+        expect(firestoreMock.mockCollection).toBeCalledWith('appUsers')
+        expect(firestoreMock.mockOnSnaptshot).toHaveBeenCalledTimes(1)
+        expect(res.length).toEqual(1)
+        done()
+      }, console.error)
     })
   })
 })
