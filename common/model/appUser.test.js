@@ -118,4 +118,20 @@ describe('The AppUser model', () => {
         .catch(done)
     })
   })
+
+  describe('the accountFromSnapshot method', () => {
+    it('should return a the data from the snapshot', (done) => {
+      const res = AppUser.accountFromSnapshot(account1)
+      expect(DB.connection).toHaveBeenCalledTimes(0)
+      expect(res.id).toEqual(account1.id)
+      expect(res.username).toEqual(account1.data().username)
+      expect(res.active).toEqual(account1.data().active)
+      expect(res.email).toEqual(account1.data().email)
+      expect(res.hostname).toEqual(account1.data().hostname)
+      expect(res.key).toEqual(account1.data().key)
+      expect(res.name).toEqual(account1.data().name)
+      expect(res.updatedOn).toEqual(account1.data().updatedOn)
+      done()
+    })
+  })
 })
