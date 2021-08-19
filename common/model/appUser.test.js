@@ -1,6 +1,6 @@
 import DB from '../db/db'
 import { AppUser } from './appUser.js'
-import FirestoreMock from '../test_helpers/firestore.mock'
+import { FirestoreMock } from '../test_helpers/firestore.mock'
 import { Firebase } from '../app/app'
 
 const toUnixTimestap = (date) => {
