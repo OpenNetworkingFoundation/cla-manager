@@ -1,4 +1,4 @@
-export default class FirestoreMock {
+export class FirestoreMock {
   constructor () {
     // mocked methods that return the class
     this.mockCollection = jest.fn(() => this)
@@ -84,5 +84,16 @@ export default class FirestoreMock {
     this.mockOrderBy.mockClear()
     this.mockAdd.mockClear()
     this.mockGet.mockClear()
+  }
+}
+
+export class FirestoreDate {
+  constructor (date) {
+    this.seconds = date.getTime()
+    this.date = date
+  }
+
+  toDate () {
+    return this.date
   }
 }

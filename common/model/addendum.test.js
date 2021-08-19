@@ -1,7 +1,7 @@
 import { Addendum, AddendumType } from './addendum'
 import { Identity, IdentityType } from './identity'
-import FirestoreMock from '../test_helpers/firestore.mock'
 import DB from '../db/db'
+import { FirestoreDate, FirestoreMock } from '../test_helpers/firestore.mock'
 
 const signer = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev')
 const contributor1 = new Identity(IdentityType.EMAIL, 'Emma', 'emma@onf.dev')
@@ -37,8 +37,8 @@ describe('The Addendum model', () => {
     it('should return all the agreements in the DB', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [contributor1, contributor2], []).toJson() },
-          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [contributor1, contributor3], [contributor1]).toJson() }
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [contributor1, contributor2], [], new FirestoreDate(new Date())).toJson() },
+          { data: () => new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [contributor1, contributor3], [contributor1], new FirestoreDate(new Date())).toJson() }
         ]
       }
 
