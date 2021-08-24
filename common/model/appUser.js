@@ -51,6 +51,18 @@ export class AppUser {
       }, errorCb)
   }
 
+  // Returns all of the accounts associated with the current user
+  listAccounts () {
+    return DB.connection().collection(userCollection)
+      .doc(this._uid)
+      .collection(accountsCollection)
+      .get()
+      .then(query => {
+        return query.docs.map(d => d.data())
+      })
+      .catch(console.error)
+  }
+
   static accountFromSnapshot (doc) {
     const data = doc.data()
     data.id = doc.id

@@ -1,7 +1,8 @@
 import DB from '../db/db'
-import { Addendum } from './addendum'
+import { Addendum, AddendumType } from './addendum'
 import { Identity } from './identity'
 import { Whitelist } from './whitelists'
+import { AppUser } from './appUser.js'
 
 const agreementCollection = 'agreements'
 
@@ -258,6 +259,45 @@ class agreement {
       .get()
       .then(res => {
         return res.docs.map(i => Agreement.fromDocumentSnapshot(i))
+      })
+  }
+
+  /**
+   * Gets all the agreements that covers the current user and returns them in an array
+   * @returns {Agreement[]}
+   */
+  static getCoveredCLAs () {
+    const user = AppUser.current()
+    // Initialize to empty strings so we don't get an error when we try to toLowerCase()
+    let githubID = ''
+    let email = ''
+
+    return user.listAccounts().then(accounts => {
+      accounts.forEach(account => {
+        if (account.hostname === 'opennetworking.org') {
+          email = account.email
+        } else if (account.hostname === 'github.com') {
+          githubID = account.username
+        }
+      })
+    })
+      .then(() => {
+        // Get a list of all agreements and then iterate through every addendum and
+        // check if there exists an identity that matches the current user
+        return this.list().then(async (agreements) => {
+          const covered = []
+          await Promise.all(agreements.map(async (agreement) => {
+            await agreement.getWhitelist(AddendumType.CONTRIBUTOR).then(identities => {
+              for (const identity of identities) {
+                if (identity.value.toLowerCase() === githubID.toLowerCase() || identity.value.toLowerCase() === email.toLowerCase()) {
+                  covered.push(agreement)
+                  break
+                }
+              }
+            })
+          }))
+          return covered
+        })
       })
   }
 }
