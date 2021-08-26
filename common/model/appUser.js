@@ -52,7 +52,7 @@ export class AppUser {
   }
 
   // Returns all of the accounts associated with the current user
-  listAccounts () {
+  async listAccounts () {
     return DB.connection().collection(userCollection)
       .doc(this._uid)
       .collection(accountsCollection)

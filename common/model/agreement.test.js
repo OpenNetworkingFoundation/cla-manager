@@ -4,11 +4,46 @@ import { Agreement, AgreementType } from './agreement'
 import { Addendum, AddendumType } from './addendum'
 import { Identity, IdentityType } from './identity'
 import { FirestoreDate, FirestoreMock } from '../test_helpers/firestore.mock'
+import { Firebase } from '../app/app'
 
 const signer = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev')
 const user1 = new Identity(IdentityType.EMAIL, 'Felix', 'felix@onf.dev')
 const user2 = new Identity(IdentityType.EMAIL, 'Martha', 'martha@onf.dev')
 const user3 = new Identity(IdentityType.EMAIL, 'Felipe', 'felipe@onf.dev')
+
+const toUnixTimestap = (date) => {
+  return new Date(date).getTime() / 1000
+}
+
+const account1 = {
+  id: '123',
+  data: () => {
+    return {
+      active: true,
+      username: 'user1',
+      email: null,
+      hostname: 'github.com',
+      key: 123,
+      name: 'User1',
+      updatedOn: { seconds: toUnixTimestap('2020/03/03') }
+    }
+  }
+}
+
+const account2 = {
+  id: '456',
+  data: () => {
+    return {
+      active: true,
+      username: 'user2',
+      email: 'user2@opennetworking.org',
+      hostname: 'opennetworking.org',
+      key: '2222:test',
+      name: 'User2',
+      updatedOn: { seconds: toUnixTimestap('2020/03/04') }
+    }
+  }
+}
 
 describe('The Agreement model', () => {
   let individualAgreement, institutionalAgreement
@@ -16,7 +51,11 @@ describe('The Agreement model', () => {
 
   beforeEach(() => {
     const DBSpy = jest.spyOn(DB, 'connection').mockImplementation(() => firestoreMock)
+    const authSpy = jest.spyOn(Firebase, 'auth').mockImplementation(() => {
+      return { currentUser: { uid: 'uid' } }
+    })
     DBSpy.mockClear()
+    authSpy.mockClear()
     firestoreMock.reset()
 
     individualAgreement = new Agreement(
@@ -230,6 +269,27 @@ describe('The Agreement model', () => {
           expect(res[1].signer).toEqual(signer)
           expect(res[1].organization).toEqual('ONF')
           expect(res[1].organizationAddress).toEqual('1000 El Camino Real, 94025 Menlo Park (CA)')
+          done()
+        })
+        .catch(done)
+    })
+  })
+
+  describe('the getCoveredCLAs method', () => {
+    it('should return all the agreements in the DB that cover the current user', (done) => {
+      firestoreMock.mockGetReturn = {
+        docs: [
+          [account1, account2]
+        ]
+      }
+
+      Agreement.getCoveredCLAs()
+        .then(res => {
+          expect(DB.connection).toHaveBeenCalledTimes(3)
+          expect(firestoreMock.mockCollectionGroup).toBeCalledWith('accounts')
+          expect(firestoreMock.mockCollection).toBeCalledWith('agreements')
+          expect(firestoreMock.mockCollection).toBeCalledWith('addendums')
+          expect(firestoreMock.mockOrderBy).toBeCalledWith('dateSigned')
           done()
         })
         .catch(done)
