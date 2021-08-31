@@ -31,11 +31,13 @@ function AdminDomains (props) {
 
   const validDomainColumns = [
     { title: 'Company Domain Name', field: 'name' },
-    { title: 'Validated On', field: 'createdOn', type: 'date', editable: 'never'},
+    { title: 'Crowd Group Name', field: 'crowdGroupName', editable: 'never'},
+    { title: 'Validated On', field: 'createdOn', type: 'date', editable: 'never'}
   ]
 
   const invalidDomainColumns = [
     { title: 'Company Domain Name', field: 'name' },
+    { title: 'Crowd Group Name', field: 'crowdGroupName', editable: 'never'},
     { title: 'Validated On', field: 'createdOn', type: 'date'},
     { title: 'Invalidated On', field: 'deletedOn', type: 'date' }
   ]
@@ -129,7 +131,7 @@ function AdminDomains (props) {
                           setSuccess(false)
                           setError("The domain " + newData.name + " already exists in the list of valid domains")
                         } else {
-                          const domain = new Domain(null, newData.name, true)
+                          const domain = new Domain(null, newData.name, "Members", true)
                           domain.validate().then((response) => setValidDomains([response, ...validDomains]))
                           setError(false)
                           setSuccess("The domain " + newData.name + " was successfully VALIDATED on " + domain._createdOn.toLocaleString())

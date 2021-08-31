@@ -10,16 +10,18 @@ export class Domain {
    * Creates a new domain
    * @param {string} id id of domain
    * @param {string} name name of domain
+   * @param {string} crowdGroupName name of crowd group to be added to
    * @param {boolean} valid whether the domain is valid
    * @param {Date} createdOn date domain was validated
    * @param {Date|null} deletedOn date domain was invalidated (null if it is still valid)
    */
-  constructor (id, name, valid, createdOn = new Date(), deletedOn = null) {
+  constructor (id, name, crowdGroupName, valid, createdOn = new Date(), deletedOn = null) {
     this._id = id
     this._name = name
     this._valid = valid
     this._createdOn = createdOn
     this._deletedOn = deletedOn
+    this._crowdGroupName = crowdGroupName
   }
 
   /**
@@ -36,6 +38,14 @@ export class Domain {
    */
   get name () {
     return this._name
+  }
+
+  /**
+   * Returns the crowd group name
+   * @returns {string}
+   */
+  get crowdGroupName () {
+    return this._crowdGroupName
   }
 
   /**
@@ -69,6 +79,7 @@ export class Domain {
   toJson () {
     return {
       name: this.name,
+      crowdGroupName: this.crowdGroupName,
       valid: this.valid,
       createdOn: this.createdOn,
       deletedOn: this.deletedOn
@@ -109,10 +120,11 @@ export class Domain {
     const data = doc.data()
     const id = doc.id
     const name = data.name
+    const crowdGroupName = data.crowdGroupName
     const valid = data.valid
     const deletedOn = data.deletedOn ? data.deletedOn.toDate().toLocaleString() : null
     const createdOn = data.createdOn.toDate().toLocaleString()
-    return new Domain(id, name, valid, createdOn, deletedOn)
+    return new Domain(id, name, crowdGroupName, valid, createdOn, deletedOn)
   }
 
   /**
