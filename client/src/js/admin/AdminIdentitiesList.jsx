@@ -6,6 +6,7 @@ import MaterialTable from 'material-table'
 import { IdentityType } from '../../common/model/identity'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
+import PatchedPagination from '../helpers/Table'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -70,6 +71,9 @@ function AdminIdentitiesList (props) {
             ]}
             data={whitelist}
             title='All existing identities'
+            components={{
+              Pagination: PatchedPagination,
+            }}
           />
         </Grid>
       </Grid>

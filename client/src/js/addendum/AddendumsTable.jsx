@@ -7,7 +7,7 @@ import MailOutlineIcon from '@material-ui/icons/MailOutline'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import { IdentityType } from '../../common/model/identity'
 import { Grid, Typography, CardContent } from '@material-ui/core'
-
+import PatchedPagination from '../helpers/Table'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -116,6 +116,9 @@ function AddendumsTable (props) {
         columns={cols}
         data={props.data}
         title={props.header}
+        components={{
+          Pagination: PatchedPagination,
+        }}
       />
     </div>
   )
