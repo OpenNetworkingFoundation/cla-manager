@@ -75,7 +75,7 @@ function AddendumContainer (props) {
           onClose={confirmLeave}
           aria-labelledby="confirm-leave"
           open={openDialog}>
-          <DialogTitle id="alert-dialog-title">{'Use Google\'s location service?'}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">Unsaved Changes</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
               You have unsaved changes, are you sure you want to leave?
