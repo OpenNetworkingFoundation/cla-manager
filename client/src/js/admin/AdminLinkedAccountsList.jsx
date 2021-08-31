@@ -5,6 +5,7 @@ import { AppUser } from '../../common/model/appUser'
 import MaterialTable from 'material-table'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import MailOutlineIcon from '@material-ui/icons/MailOutline'
+import PatchedPagination from '../helpers/Table'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -55,6 +56,9 @@ function AdminLinkedAccountList (props) {
             ]}
             data={accounts}
             title='All linked accounts'
+            components={{
+              Pagination: PatchedPagination,
+            }}
           />
         </Grid>
       </Grid>
