@@ -268,20 +268,22 @@ class agreement {
    */
   static getCoveredCLAs () {
     const user = AppUser.current()
-    // Initialize to empty strings so we don't get an error when we try to toLowerCase()
-    let githubID = ''
-    let email = ''
 
     return user.listAccounts().then(accounts => {
+      const values = {
+        email: '',
+        githubId: ''
+      }
       accounts.forEach(account => {
         if (account.hostname === 'opennetworking.org') {
-          email = account.email
+          values.email = account.email
         } else if (account.hostname === 'github.com') {
-          githubID = account.username
+          values.githubID = account.username
         }
       })
+      return values
     })
-      .then(() => {
+      .then((values) => {
         // Get a list of all agreements and then iterate through every addendum and
         // check if there exists an identity that matches the current user
         return this.list().then(async (agreements) => {
@@ -289,7 +291,7 @@ class agreement {
           await Promise.all(agreements.map(async (agreement) => {
             await agreement.getWhitelist(AddendumType.CONTRIBUTOR).then(identities => {
               for (const identity of identities) {
-                if (identity.value.toLowerCase() === githubID.toLowerCase() || identity.value.toLowerCase() === email.toLowerCase()) {
+                if (identity.value.toLowerCase() === values.githubID.toLowerCase() || identity.value.toLowerCase() === values.email.toLowerCase()) {
                   covered.push(agreement)
                   break
                 }
