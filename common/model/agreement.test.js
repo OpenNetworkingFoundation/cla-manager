@@ -37,16 +37,6 @@ const account2 = {
   updatedOn: { seconds: toUnixTimestap('2020/03/04') }
 }
 
-// const agreement1 = {
-//   id: '123',
-//   data: () => {
-//     return {
-//       lastUpdated: { seconds: toUnixTimestap('2020/03/05') },
-//       values: ['email:wl1@opennetworking.org', 'email:foo@opennetworking.org', 'github:baz']
-//     }
-//   }
-// }
-
 const addendum1 = new Addendum(AddendumType.CONTRIBUTOR, 'test-id-nitin', signer, [user1, user2], [], new FirestoreDate(new Date())).toJson()
 
 describe('The Agreement model', () => {
