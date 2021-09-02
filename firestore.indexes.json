@@ -1,6 +1,20 @@
 {
   "indexes": [
     {
+      "collectionGroup": "accounts",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "active",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "hostname",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "addendums",
       "queryScope": "COLLECTION",
       "fields": [
@@ -68,6 +82,52 @@
         },
         {
           "fieldPath": "dateSigned",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "domains",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "valid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdOn",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "domains",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "valid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "name",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "domains",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "valid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "name",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdOn",
           "order": "ASCENDING"
         }
       ]
@@ -87,5 +147,28 @@
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "accounts",
+      "fieldPath": "hostname",
+      "indexes": [
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "DESCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "arrayConfig": "CONTAINS",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
+        }
+      ]
+    }
+  ]
 }

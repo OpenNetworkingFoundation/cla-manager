@@ -1,6 +1,7 @@
 // Note: CLAs and Addendums cannot be modified or deleted
-service cloud.firestore {
+rules_version = '2';
 
+service cloud.firestore {
     // Global checks
 
     // checks if a user is signed in
@@ -71,6 +72,20 @@ service cloud.firestore {
                 allow delete: if isSignedIn(request.auth) && isAccountOwner(request.auth, uid);
                 // Only functions can write (verified) accounts
             }
+        }
+				
+        match /domains/{domainID} {
+          allow read: if isSignedIn(request.auth) && isAdmin(request.auth);
+          allow create: if isSignedIn(request.auth) && isAdmin(request.auth);
+          allow update: if isSignedIn(request.auth) && isAdmin(request.auth);
+        }
+        
+        match /{path=**}/accounts/{accountId} {
+        	allow read: if isSignedIn(request.auth) && (isAdmin(request.auth) || isAccountOwner(request.auth, uid));
+        }
+        
+        match /{path=**}/appUsers/{uid} {
+        	allow read: if isSignedIn(request.auth) && (isAdmin(request.auth) || isAccountOwner(request.auth, uid));
         }
     }
 }
