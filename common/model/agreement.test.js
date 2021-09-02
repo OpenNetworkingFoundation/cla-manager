@@ -29,15 +29,15 @@ const account1 = {
 
 const account2 = {
   active: true,
-  username: 'user2',
-  email: 'user2@opennetworking.org',
+  username: 'Felix',
+  email: 'felix@onf.dev',
   hostname: 'opennetworking.org',
   key: '2222:test',
-  name: 'User2',
+  name: 'Felix',
   updatedOn: { seconds: toUnixTimestap('2020/03/04') }
 }
 
-const addendum1 = new Addendum(AddendumType.CONTRIBUTOR, 'test-id-nitin', signer, [user1, user2], [], new FirestoreDate(new Date())).toJson()
+const addendum1 = new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], [], new FirestoreDate(new Date())).toJson()
 
 describe('The Agreement model', () => {
   let individualAgreement, institutionalAgreement, user
@@ -295,6 +295,12 @@ describe('The Agreement model', () => {
         .then(res => {
           expect(DB.connection).toHaveBeenCalledTimes(1)
           expect(firestoreMock.mockCollection).toBeCalledWith('agreements')
+          expect(res[0].type).toEqual(AgreementType.INDIVIDUAL)
+          expect(res[0].signer).toEqual(signer)
+          expect(res[1].type).toEqual(AgreementType.INSTITUTIONAL)
+          expect(res[1].signer).toEqual(signer)
+          expect(res[1].organization).toEqual('ONF')
+          expect(res[1].organizationAddress).toEqual('1234 El Camino Real, 94025 Menlo Park (CA)')
           done()
         })
         .catch(done)
