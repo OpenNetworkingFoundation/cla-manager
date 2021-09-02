@@ -154,7 +154,7 @@ class addendum {
     const dateSigned = data.dateSigned.toDate().toLocaleString()
     // Older addendums were stored in the DB without a type. Assume CONTRIBUTOR
     // as the default one.
-    const type = data.type || AddendumType.CONTRIBUTOR
+    const type = data.type || AddendumType.CONTRIBUTOR || IdentityType.EMAIL
     return new Addendum(type, data.agreementId, signer, added, removed, dateSigned)
   }
 

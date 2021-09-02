@@ -2,6 +2,8 @@ import DB from '../db/db'
 
 import { Agreement, AgreementType } from './agreement'
 import { Addendum, AddendumType } from './addendum'
+import { AppUser } from './appUser'
+
 import { Identity, IdentityType } from './identity'
 import { FirestoreDate, FirestoreMock } from '../test_helpers/firestore.mock'
 import { Firebase } from '../app/app'
@@ -16,46 +18,58 @@ const toUnixTimestap = (date) => {
 }
 
 const account1 = {
-  id: '123',
-  data: () => {
-    return {
-      active: true,
-      username: 'user1',
-      email: null,
-      hostname: 'github.com',
-      key: 123,
-      name: 'User1',
-      updatedOn: { seconds: toUnixTimestap('2020/03/03') }
-    }
-  }
+  active: true,
+  username: 'user1',
+  email: null,
+  hostname: 'github.com',
+  key: 123,
+  name: 'User1',
+  updatedOn: { seconds: toUnixTimestap('2020/03/03') }
 }
 
 const account2 = {
-  id: '456',
-  data: () => {
-    return {
-      active: true,
-      username: 'user2',
-      email: 'user2@opennetworking.org',
-      hostname: 'opennetworking.org',
-      key: '2222:test',
-      name: 'User2',
-      updatedOn: { seconds: toUnixTimestap('2020/03/04') }
-    }
-  }
+  active: true,
+  username: 'user2',
+  email: 'user2@opennetworking.org',
+  hostname: 'opennetworking.org',
+  key: '2222:test',
+  name: 'User2',
+  updatedOn: { seconds: toUnixTimestap('2020/03/04') }
 }
 
+// const agreement1 = {
+//   id: '123',
+//   data: () => {
+//     return {
+//       lastUpdated: { seconds: toUnixTimestap('2020/03/05') },
+//       values: ['email:wl1@opennetworking.org', 'email:foo@opennetworking.org', 'github:baz']
+//     }
+//   }
+// }
+
+const addendum1 = new Addendum(AddendumType.CONTRIBUTOR, 'test-id-nitin', signer, [user1, user2], [], new FirestoreDate(new Date())).toJson()
+
 describe('The Agreement model', () => {
-  let individualAgreement, institutionalAgreement
+  let individualAgreement, institutionalAgreement, user
   const firestoreMock = new FirestoreMock()
 
   beforeEach(() => {
+    user = new AppUser('uid')
     const DBSpy = jest.spyOn(DB, 'connection').mockImplementation(() => firestoreMock)
     const authSpy = jest.spyOn(Firebase, 'auth').mockImplementation(() => {
       return { currentUser: { uid: 'uid' } }
     })
+    const userSpy = jest.spyOn(AppUser, 'current').mockImplementation(() => {
+      return user
+    })
+    const accountSpy = jest.spyOn(user, 'listAccounts').mockImplementation(() => {
+      return Promise.resolve([account1, account2])
+    })
+
     DBSpy.mockClear()
     authSpy.mockClear()
+    accountSpy.mockClear()
+    userSpy.mockClear()
     firestoreMock.reset()
 
     individualAgreement = new Agreement(
@@ -251,7 +265,7 @@ describe('The Agreement model', () => {
     })
   })
 
-  describe('the listAllAccounts method', () => {
+  describe('the list method', () => {
     it('should return all the agreements in the DB', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
@@ -279,17 +293,18 @@ describe('The Agreement model', () => {
     it('should return all the agreements in the DB that cover the current user', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
-          [account1, account2]
+          { data: () => new Agreement(AgreementType.INDIVIDUAL, 'TODO, add agreement body', signer) },
+          { data: () => new Agreement(AgreementType.INSTITUTIONAL, 'TODO, add agreement body', signer, 'ONF', '1234 El Camino Real, 94025 Menlo Park (CA)') }
         ]
       }
-
+      const addendumSpy = jest.spyOn(Addendum, 'get').mockImplementation(() => {
+        return Promise.resolve([addendum1])
+      })
+      addendumSpy.mockClear()
       Agreement.getCoveredCLAs()
         .then(res => {
-          expect(DB.connection).toHaveBeenCalledTimes(3)
-          expect(firestoreMock.mockCollectionGroup).toBeCalledWith('accounts')
+          expect(DB.connection).toHaveBeenCalledTimes(1)
           expect(firestoreMock.mockCollection).toBeCalledWith('agreements')
-          expect(firestoreMock.mockCollection).toBeCalledWith('addendums')
-          expect(firestoreMock.mockOrderBy).toBeCalledWith('dateSigned')
           done()
         })
         .catch(done)
