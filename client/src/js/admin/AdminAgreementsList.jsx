@@ -80,7 +80,7 @@ function AdminAgreementsList (props) {
         <Grid item xs={12}>
           <AgreementsTable
             header='All Agreements'
-            type={AgreementType.INSTITUTIONAL}
+            extra_cols={[{ title: 'Organization', field: 'organization' }]}
             data={agreements}
           />
         </Grid>

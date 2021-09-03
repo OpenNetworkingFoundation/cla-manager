@@ -51,11 +51,6 @@ function AgreementsTable (props) {
     }
   ]
 
-  if (props.type === AgreementType.INDIVIDUAL) {
-    // remove the org name if we're printing individual CLAs
-    cols.shift()
-  }
-
   // If there are extra columns, append them to the table, before the actions column
   if (props.extra_cols) {
     const element = cols[2]
