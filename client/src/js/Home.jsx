@@ -119,7 +119,7 @@ export default class Home extends React.Component {
           <Grid item xs={12} md={12}>
             <AgreementsTable
               header='Covered by:'
-              extra_cols={[{ title: 'Organization', field: 'organization' }, { title: 'Signer', field: 'signer.name'}]}
+              extra_cols={[{ title: 'Organization', field: 'organization' }]}
               data={this.state.coveredCLA}
             />
           </Grid>

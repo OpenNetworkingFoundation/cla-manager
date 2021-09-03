@@ -24,10 +24,7 @@ function AgreementsTable (props) {
     return null
   }
 
-  let cols = [
-    // { title: 'Organization', field: 'organization' },
-    // { title: 'Signatory Name', field: 'signer.name' },
-    // { title: 'Signatory Email', field: 'signer.value' },
+  let base_cols = [
     {
       title: 'Signatory',
       sorting: false,
@@ -39,6 +36,9 @@ function AgreementsTable (props) {
       }
     },
     { title: 'Date Signed', field: 'dateSigned', type: 'date'},
+  ]
+
+  const action_cols = [
     {
       title: 'Actions',
       sorting: false,
@@ -51,12 +51,10 @@ function AgreementsTable (props) {
     }
   ]
 
-  // If there are extra columns, append them to the table, before the actions column
-  if (props.extra_cols) {
-    const element = cols[2]
-    cols = [...cols, ...props.extra_cols]
-    cols.push(cols.splice(cols.indexOf(element), 1)[0]);
+  if (props.extra_cols && props.extra_cols.length > 0) {
+    base_cols = [...base_cols, ...props.extra_cols] 
   }
+  const cols = [...base_cols, ...action_cols]
 
   return (
     <div className={classes.root}>
