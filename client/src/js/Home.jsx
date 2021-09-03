@@ -104,14 +104,13 @@ export default class Home extends React.Component {
           <Grid item xs={12} md={6}>
             <AgreementsTable
               header='Individual Agreements'
-              type={AgreementType.INDIVIDUAL}
               data={this.state.individualCLATable}
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <AgreementsTable
               header='Institutional Agreements'
-              type={AgreementType.INSTITUTIONAL}
+              extra_cols={[{ title: 'Organization', field: 'organization' }]}
               data={this.state.institutionCLATable}
             />
           </Grid>
@@ -120,7 +119,7 @@ export default class Home extends React.Component {
           <Grid item xs={12} md={12}>
             <AgreementsTable
               header='Covered by:'
-              type={AgreementType.INDIVIDUAL}
+              extra_cols={[{ title: 'Organization', field: 'organization' }, { title: 'Signer', field: 'signer.name'}]}
               data={this.state.coveredCLA}
             />
           </Grid>

@@ -24,8 +24,8 @@ function AgreementsTable (props) {
     return null
   }
 
-  const cols = [
-    { title: 'Organization', field: 'organization' },
+  let cols = [
+    // { title: 'Organization', field: 'organization' },
     // { title: 'Signatory Name', field: 'signer.name' },
     // { title: 'Signatory Email', field: 'signer.value' },
     {
@@ -54,6 +54,13 @@ function AgreementsTable (props) {
   if (props.type === AgreementType.INDIVIDUAL) {
     // remove the org name if we're printing individual CLAs
     cols.shift()
+  }
+
+  // If there are extra columns, append them to the table, before the actions column
+  if (props.extra_cols) {
+    const element = cols[2]
+    cols = [...cols, ...props.extra_cols]
+    cols.push(cols.splice(cols.indexOf(element), 1)[0]);
   }
 
   return (
