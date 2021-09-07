@@ -1,4 +1,6 @@
 const Crowd = require('./crowd.js')
+const functions = require('firebase-functions')
+const logger = functions.logger
 
 module.exports = CrowdToGitHub
 /**
@@ -16,25 +18,25 @@ function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
     for (const [crowdGroup, value] of Object.entries(groupMappings)) {
       // Get all valid Users from Crowd serer (valid means the user has Github_id attribute)
       const crowdUsers = await crowd.getUsersWithGithubID(crowdGroup)
-      console.info(`Crowd Users: ${JSON.stringify(crowdUsers)}`)
+      logger.info(`Crowd Users: ${JSON.stringify(crowdUsers)}`)
       // Iterate all github organization,
       for (const github of value) {
-        console.info(`mapping from Crowd ${crowdGroup} to ${github.githubOrg}/${github.team}`)
+        logger.info(`mapping from Crowd ${crowdGroup} to ${github.githubOrg}/${github.team}`)
         // Create the Team if necessary
         await githubObj.createTeam(github.githubOrg, github.team)
 
         // Get all users under github team
         const githubUsers = await githubObj.getUsers(github.githubOrg, github.team)
-        console.info(`GitHub Users: ${JSON.stringify(githubUsers)}`)
+        logger.info(`GitHub Users: ${JSON.stringify(githubUsers)}`)
         // For All Crowd Users
         for (const [key] of Object.entries(crowdUsers)) {
           // Add to Github if user is not in Github
           if (!(key in githubUsers)) {
             try {
-              console.debug(`Adding ${key} to ${github.githubOrg}:${github.team}`)
+              logger.debug(`Adding ${key} to ${github.githubOrg}:${github.team}`)
               await githubObj.addUser(key, github.githubOrg, github.team)
             } catch (e) {
-              console.error(`Adding ${key} to ${github.githubOrg}:${github.team} failed:` + e)
+              logger.error(`Adding ${key} to ${github.githubOrg}:${github.team} failed:` + e)
             }
           }
         }
@@ -43,10 +45,10 @@ function CrowdToGitHub (groupMappings, crowdApp, crowdPassword, githubObj) {
           // Remove from Github if user is not in Crowd
           if (!(key in crowdUsers)) {
             try {
-              console.debug(`Removing ${key} from ${github.githubOrg}:${github.team}`)
+              logger.debug(`Removing ${key} from ${github.githubOrg}:${github.team}`)
               await githubObj.deleteUser(key, github.githubOrg, github.team)
             } catch (e) {
-              console.error(`Removing ${key} from ${github.githubOrg}:${github.team} failed:` + e)
+              logger.error(`Removing ${key} from ${github.githubOrg}:${github.team} failed:` + e)
             }
           }
         }

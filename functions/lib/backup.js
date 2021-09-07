@@ -1,4 +1,5 @@
 const functions = require('firebase-functions')
+const logger = functions.logger
 const firestore = require('@google-cloud/firestore')
 const client = new firestore.v1.FirestoreAdminClient()
 
@@ -25,11 +26,11 @@ function Backup (bucketName) {
     })
       .then(responses => {
         const response = responses[0]
-        console.info(`Operation Name: ${response.name}`)
+        logger.info(`Operation Name: ${response.name}`)
         return response
       })
       .catch(err => {
-        console.error(err)
+        logger.error(err)
         throw new Error('Export operation failed')
       })
   })

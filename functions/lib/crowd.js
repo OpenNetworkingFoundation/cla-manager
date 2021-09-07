@@ -1,5 +1,6 @@
 const rp = require('request-promise')
 const functions = require('firebase-functions')
+const logger = functions.logger
 const sha1 = require('sha1')
 const admin = require('firebase-admin')
 
@@ -41,6 +42,7 @@ function Crowd (db, appName, appPassword) {
    * @return {string} account document ID
    */
   async function setAppUserAccount (data, context) {
+    logger.info(`Setting App user account for ${data.username}`)
     // Checking that the Firebase user is authenticated.
     if (!context.auth) {
       // Throwing an HttpsError so that the client gets the error details.
@@ -64,6 +66,7 @@ function Crowd (db, appName, appPassword) {
     try {
       // Authenticated! Get user info.
       const crowdUser = await getUser(crowdUsername)
+      logger.debug(`got user ${data.username}`, crowdUser)
       const result = {
         hostname: onfHostname,
         key: crowdUser.key,
@@ -75,7 +78,7 @@ function Crowd (db, appName, appPassword) {
         updatedOn: new Date()
       }
       // We got what we needed. User logout.
-      invalidateSession(crowdSession.token).catch(console.error)
+      invalidateSession(crowdSession.token).catch(logger.error)
       // Update db.
       const accountDocId = sha1(`${onfHostname}${result.key}`)
       await db.collection('appUsers')
@@ -85,7 +88,7 @@ function Crowd (db, appName, appPassword) {
         .set(result)
       return accountDocId
     } catch (e) {
-      console.error(e)
+      logger.error(e)
       throw new functions.https.HttpsError('internal',
         'An internal error occurred while evaluating the request')
     }
@@ -105,7 +108,7 @@ function Crowd (db, appName, appPassword) {
     //  should be resetting all attributes (e.g., remove the github_id), but for
     //  this we need the removed crowd username. This can be found in the
     //  Firestore document change snapshot (old value).
-    console.info(`updating-crowd-user-with-id: ${uid}`)
+    logger.info(`updating-crowd-user-with-id: ${uid}`)
     const attributeMap = {
       // A set because a Crowd attribute can hold many values, but in reality we
       // support binding to only one github ID.
@@ -159,10 +162,10 @@ function Crowd (db, appName, appPassword) {
             values: Array.from(attributeMap[name])
           })
         })
-        console.info(`Pushing attribute for crowd user ${crowdUsername}`, attributes)
+        logger.info(`Pushing attribute for crowd user ${crowdUsername}`, attributes)
         return setUserAttribute(crowdUsername, attributes)
       })
-      .catch(console.error)
+      .catch(logger.error)
   }
 
   async function createSession (username, password) {
