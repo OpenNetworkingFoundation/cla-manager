@@ -59,6 +59,7 @@ function Crowd (db, appName, appPassword) {
     try {
       crowdSession = await createSession(crowdUsername, crowdPassword)
     } catch (e) {
+      logger.error(e)
       throw new functions.https.HttpsError('failed-precondition',
         `Authentication failed with ${onfHostname}`)
     }
@@ -66,7 +67,7 @@ function Crowd (db, appName, appPassword) {
     try {
       // Authenticated! Get user info.
       const crowdUser = await getUser(crowdUsername)
-      logger.debug(`got user ${data.username}`, crowdUser)
+      logger.debug(`got user ${crowdUsername}`, crowdUser)
       const result = {
         hostname: onfHostname,
         key: crowdUser.key,
@@ -78,9 +79,10 @@ function Crowd (db, appName, appPassword) {
         updatedOn: new Date()
       }
       // We got what we needed. User logout.
-      invalidateSession(crowdSession.token).catch(logger.error)
+      await invalidateSession(crowdSession.token)
       // Update db.
       const accountDocId = sha1(`${onfHostname}${result.key}`)
+      logger.debug(`updating appUsers account ${accountDocId} for user ${crowdUsername}`, result)
       await db.collection('appUsers')
         .doc(firebaseUid)
         .collection('accounts')
