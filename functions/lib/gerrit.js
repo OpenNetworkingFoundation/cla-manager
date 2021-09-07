@@ -2,6 +2,8 @@ const express = require('express')
 const basicAuth = require('express-basic-auth')
 const Cla = require('./cla')
 const util = require('./util')
+const functions = require('firebase-functions')
+const logger = functions.logger
 
 module.exports = Gerrit
 
@@ -29,7 +31,7 @@ function Gerrit (db, user, password) {
     return verifyEmail(req.query.email)
       .then(status => res.json(status))
       .catch(error => {
-        console.error(error)
+        logger.error(error)
         return res.json({
           status: 'error',
           message: 'Internal error, unable to verify CLA. ' +

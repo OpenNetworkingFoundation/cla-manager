@@ -7,6 +7,7 @@ const { request } = require('@octokit/request')
 // const { createTokenAuth } = require('@octokit/auth-token')
 const sha1 = require('sha1')
 const functions = require('firebase-functions')
+const logger = functions.logger
 
 module.exports = Github
 
@@ -44,7 +45,7 @@ function Github (appId, privateKey, secret, db) {
       const contributionRef = db.collection('contributions').doc(contributionId)
       const action = context.payload.action
 
-      console.info(`contributionKey=${contributionKey}, event=pull_request.${action}, sha=${pr.head.sha}, contributionId=${contributionId}`)
+      logger.info(`contributionKey=${contributionKey}, event=pull_request.${action}, sha=${pr.head.sha}, contributionId=${contributionId}`)
 
       let contribPromise
       if (action === 'opened' || action === 'reopened') {
@@ -71,13 +72,13 @@ function Github (appId, privateKey, secret, db) {
             createdOn: new Date()
           }))
           .then(result => {
-            console.info(`created event eventId=${result.id}`)
+            logger.info(`created event eventId=${result.id}`)
           })
-          .catch(console.error)
+          .catch(logger.error)
       } else {
         // Delete contribution doc.
         return contributionRef.delete()
-          .catch(console.error)
+          .catch(logger.error)
       }
     })
 
@@ -89,7 +90,7 @@ function Github (appId, privateKey, secret, db) {
   async function processEvent (eventSnapshot) {
     const event = eventSnapshot.data()
 
-    console.info(`eventId=${eventSnapshot.id}, contributionKey=${event.contributionKey}, event=${event.type}`)
+    logger.info(`eventId=${eventSnapshot.id}, contributionKey=${event.contributionKey}, event=${event.type}`)
 
     const pr = event.payload.pull_request
     const installationId = event.payload.installation.id
@@ -127,7 +128,7 @@ function Github (appId, privateKey, secret, db) {
           'https://wiki.opennetworking.org/x/BgCUI'
       }
     } catch (error) {
-      console.error(error)
+      logger.error(error)
       status.state = 'error'
       status.description = 'cannot check whitelist'
     }
@@ -162,7 +163,7 @@ function Github (appId, privateKey, secret, db) {
         event.status = status
         return eventSnapshot.ref.update(event)
       })
-      .catch(console.error)
+      .catch(logger.error)
 
     const contribRef = db.collection('contributions')
       .doc(event.contributionId)
@@ -170,7 +171,7 @@ function Github (appId, privateKey, secret, db) {
       .then(snapshot => {
         // Retrieve existing comment_id (if any)
         if (!snapshot.exists) {
-          console.warn(`Missing contribution ${event.contributionId} in DB`)
+          logger.warn(`Missing contribution ${event.contributionId} in DB`)
           return null
         } else {
           return snapshot.data().githubCommentId
@@ -221,10 +222,10 @@ function Github (appId, privateKey, secret, db) {
           githubCommentId: commentId
         })
       })
-      .catch(console.error)
+      .catch(logger.error)
 
     return Promise.all([statusPromise, commentPromise])
-      .catch(console.error)
+      .catch(logger.error)
   }
 
   /**
@@ -267,10 +268,10 @@ function Github (appId, privateKey, secret, db) {
         .collection('accounts')
         .doc(accountDocId)
         .set(result)
-      console.info(`Added github_id ${info.data.login} to user ${context.auth.uid} with email ${info.data.email}`)
+      logger.info(`Added github_id ${info.data.login} to user ${context.auth.uid} with email ${info.data.email}`)
       return accountDocId
     } catch (e) {
-      console.error(e)
+      logger.error(e)
       throw new functions.https.HttpsError('internal',
         'An internal error occurred while evaluating the request')
     }

@@ -1,4 +1,6 @@
 const util = require('./util')
+const functions = require('firebase-functions')
+const logger = functions.logger
 const AddendumType = {
   CONTRIBUTOR: 'contributor',
   MANAGER: 'manager'
@@ -77,11 +79,11 @@ function Cla (db) {
           })
       })
       .then(writeResult => {
-        console.debug(`Successfully updated whitelist for agreement ${agreementId} `)
+        logger.debug(`Successfully updated whitelist for agreement ${agreementId} `)
         return writeResult
       })
       .catch(error => {
-        console.debug(`Error while updating whitelist for agreement ${agreementId}`, error)
+        logger.debug(`Error while updating whitelist for agreement ${agreementId}`, error)
         return Promise.reject(error)
       })
   }
@@ -104,7 +106,7 @@ function Cla (db) {
    */
   async function checkIdentities (identities) {
     if (!Array.isArray(identities) || !identities.length) {
-      console.warn('undefined or empty identities')
+      logger.warn('undefined or empty identities')
       return Promise.resolve({
         allWhitelisted: false,
         missingIdentities: []
@@ -115,7 +117,7 @@ function Cla (db) {
     try {
       identityKeys = identities.map(util.identityKey)
     } catch (e) {
-      console.warn(e)
+      logger.warn(e)
       return Promise.resolve({
         allWhitelisted: false,
         missingIdentities: []
