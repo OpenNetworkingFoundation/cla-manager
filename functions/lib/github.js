@@ -227,8 +227,8 @@ function Github (appId, privateKey, secret, db) {
     let labelPromise = () => {}
     // Add CLA labels to PINS PRs.
     if (pr.base.repo.owner.login === 'pins') {
-      const labelToAdd = status.state === 'success' ? 'cla:yes' : 'cla:no'
-      const labelToRemove = status.state !== 'success' ? 'cla:yes' : 'cla:no'
+      const labelToAdd = status.state === 'success' ? 'cla: yes' : 'cla: no'
+      const labelToRemove = status.state !== 'success' ? 'cla: yes' : 'cla: no'
       const promises = []
       if (!pr.labels.includes(labelToAdd)) {
         promises.push(

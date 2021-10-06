@@ -224,7 +224,7 @@ describe('Github lib', () => {
     expect.assertions(7)
   })
 
-  test('PR label cla:no added', async () => {
+  test('PR label cla: no added', async () => {
     nock(githubApi).post(statusUri.replace('bocon13', 'pins'), (body) => {
       expect(body.state).toEqual('failure')
       return true
@@ -234,7 +234,7 @@ describe('Github lib', () => {
       return true
     }).reply(201, { id: 1 })
     nock(githubApi).post(createLabelUri, (body) => {
-      expect(body.labels).toEqual(['cla:no'])
+      expect(body.labels).toEqual(['cla: no'])
       return true
     }).reply(200)
     mockEvent.payload.pull_request.base.repo.owner.login = 'pins'
@@ -246,7 +246,7 @@ describe('Github lib', () => {
     expect.assertions(4)
   })
 
-  test('PR label cla:yes added if identity is whitelisted', async () => {
+  test('PR label cla: yes added if identity is whitelisted', async () => {
     await whitelistsRef.add({
       values: [identity]
     })
@@ -255,7 +255,7 @@ describe('Github lib', () => {
       return true
     }).reply(201)
     nock(githubApi).post(createLabelUri, (body) => {
-      expect(body.labels).toEqual(['cla:yes'])
+      expect(body.labels).toEqual(['cla: yes'])
       return true
     }).reply(200)
     mockEvent.payload.pull_request.base.repo.owner.login = 'pins'
@@ -267,7 +267,7 @@ describe('Github lib', () => {
     expect.assertions(3)
   })
 
-  test('PR label cla:[no,yes] swapped when whitelisted', async () => {
+  test('PR label cla: [no,yes] swapped when whitelisted', async () => {
     await whitelistsRef.add({
       values: [identity]
     })
@@ -275,13 +275,13 @@ describe('Github lib', () => {
       expect(body.state).toEqual('success')
       return true
     }).reply(201)
-    const deleteLabel = nock(githubApi).delete(deleteLabelUri + 'cla:no').reply(204)
+    const deleteLabel = nock(githubApi).delete(deleteLabelUri + encodeURI('cla: no')).reply(204)
     nock(githubApi).post(createLabelUri, (body) => {
-      expect(body.labels).toEqual(['cla:yes'])
+      expect(body.labels).toEqual(['cla: yes'])
       return true
     }).reply(200)
     mockEvent.payload.pull_request.base.repo.owner.login = 'pins'
-    mockEvent.payload.pull_request.labels = ['cla:no']
+    mockEvent.payload.pull_request.labels = ['cla: no']
     await setAndGetSnapshot(contribsRef, mockContribution, contributionId)
     const eventSnapshot = await addAndGetSnapshot(eventsRef, mockEvent)
     await github.processEvent(eventSnapshot)
