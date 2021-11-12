@@ -61,6 +61,11 @@ function CreateAgreementContainer () {
                   <li>I'm making contributions of code I've created in my free time (not under contract),
                     and I hold the copyright on my contributions.
                   </li>
+                  <li>I'm an academic (grad student, postdoc, faculty, etc.) that is authorized by my
+                    university to make contributions to the project. Typically, this authorization
+                    can be granted by your professor, principal investigator (PI), dean, or university
+                    patent office.
+                  </li>
                 </ul>
               </Typography>
             </div>
