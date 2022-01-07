@@ -14,9 +14,8 @@ module.exports = Crowd
  * @return {setAppUserAccount: setAppUserAccount, getUsersWithGithubID: (function(*=): {}), updateCrowdUser: (function(string): Promise<* | void>)}}
  * @constructor
  */
-function Crowd (db, appName, appPassword) {
-  const onfHostname = 'opennetworking.org'
-  const baseUri = `https://crowd.${onfHostname}/crowd/rest/usermanagement/1`
+function Crowd (db, onfHostname, appName, appPassword) {
+  const baseUri = `${onfHostname}/crowd/rest/usermanagement/1`
   const rpConf = {
     json: true,
     auth: {
@@ -249,9 +248,128 @@ function Crowd (db, appName, appPassword) {
     return ''
   }
 
+  /**
+   * This function adds a user to the crowd group if they link their ONF account.
+   * It checks to make sure the their email domain is in the list of valid domains and
+   * then it adds the user to the group.
+   * @param uid {string} Firebase UID, i.e. doc ID of appUsers collections
+   * @param username {string} username of user in crowd
+   * @param email {string} email of the user
+   * @return {Promise<void>}
+   */
+  async function addMemberToGroup (uid, username, email) {
+    // Check if email is being linked
+    return admin.auth().getUser(uid)
+      .catch(error => {
+        console.error('Error fetching Firebase user record:', error)
+      })
+      // Fetch account data from firestore.
+      .then(() => db.collection('appUsers')
+        .doc(uid).collection('accounts').get())
+      .then(query => {
+        const accounts = query.docs.map(d => d.data())
+        let crowdUsername = null
+        accounts.forEach(a => {
+          switch (a.hostname) {
+            case onfHostname:
+              crowdUsername = a.username
+              break
+          }
+        })
+        if (crowdUsername == null) {
+          console.error(`Cannot find Crowd account for uid ${uid}, aborting update`)
+        } else {
+          // Check if domain is in the valid list
+          db.collection('domains')
+            .where('valid', '==', true)
+            .where('name', '==', email.split('@')[1])
+            .get()
+            .then(res => {
+              if (res.docs.length !== 0) {
+                // add user to crowd group
+                return addUserToGroup(username)
+              }
+            })
+        }
+      })
+  }
+
+  /**
+   * This function adds or removes all users in the Crowd member group
+   * that have email domains that match the given domain argument
+   * @param domain {string} name of the domain that is being edited in the main list
+   * @param addDomain {boolean} true if domain is being added, false if it is being removed
+   * @return {Promise<void>}
+   */
+  async function editAllUsersUnderDomain (domain, addDomain) {
+    return db.collectionGroup('accounts')
+      .where('hostname', '==', 'opennetworking.org')
+      .get()
+      .then(query => {
+        const users = query.docs.map(d => d.data())
+        users.forEach(a => {
+          if (a.email.split('@')[1] === domain) {
+            if (addDomain) {
+              addUserToGroup(a.username)
+            } else {
+              removeUserFromGroup(a.username)
+            }
+          }
+        })
+      })
+  }
+
+  async function addUserToGroup (username) {
+    const found = await userExists(username)
+    if (found) return
+    return rp.post({
+      ...rpConf,
+      uri: baseUri + '/group/user/direct?groupname=Members',
+      body: {
+        name: username
+      }
+    })
+  }
+
+  async function removeUserFromGroup (username) {
+    const found = await userExists(username)
+    if (!found) return
+    return rp.delete({
+      ...rpConf,
+      uri: baseUri + `/group/user/direct?groupname=Members&username=${username}`
+    })
+  }
+
+  /**
+   * Checks if the given user is present in the crowd group
+   * @param username username of the crowd user
+   * @return {boolean} whether the username was found in the crowd group
+   */
+  async function userExists (username) {
+    return await rp.get({
+      ...rpConf,
+      uri: baseUri + `/group/user/direct?groupname=Members&username=${username}`
+    })
+      .then(body => {
+        return true
+      })
+      .catch(err => {
+        // handle errors different from 404s
+        if (err.statusCode !== 404) {
+          console.error('Error occured when checking if user exists in crowd. Error code: ', err.statusCode)
+        }
+        return false
+      })
+  }
+
   return {
     setAppUserAccount: setAppUserAccount,
     updateCrowdUser: updateCrowdUser,
-    getUsersWithGithubID: getUsersWithGithubID
+    getUsersWithGithubID: getUsersWithGithubID,
+    addMemberToGroup: addMemberToGroup,
+    addUserToGroup: addUserToGroup,
+    removeUserFromGroup: removeUserFromGroup,
+    editAllUsersUnderDomain: editAllUsersUnderDomain,
+    userExists: userExists
   }
 }

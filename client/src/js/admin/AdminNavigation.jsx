@@ -46,6 +46,7 @@ function AdminNav (props) {
         <MenuItem onClick={handleClose('agreements')}>Agreements</MenuItem>
         <MenuItem onClick={handleClose('identities')}>Identities</MenuItem>
         <MenuItem onClick={handleClose('linked-accounts')}>Linked Accounts</MenuItem>
+        <MenuItem onClick={handleClose('manage-domains')}>Manage Domains</MenuItem>
       </Menu>
     </div>
   )
