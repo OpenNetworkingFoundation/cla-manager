@@ -278,6 +278,7 @@ function Github (appId, privateKey, secret, db) {
       throw new functions.https.HttpsError('permission-denied',
         'The function must be called while authenticated')
     }
+    logger.debug(`Adding github_id to user ${context.auth.uid}`, { uid: context.auth.uid })
     const firebaseUid = context.auth.uid
     const userToken = data.token
     const octokit = new Octokit({ auth: userToken })
@@ -294,6 +295,12 @@ function Github (appId, privateKey, secret, db) {
         email: info.data.email,
         updatedOn: new Date()
       }
+      logger.debug('Received user info from github', {
+        github_id: info.data.login,
+        uid: context.auth.uid,
+        email: info.data.email,
+        result: result
+      })
       // Update db.
       const accountDocId = sha1(`${ghHostname}${result.key}`)
       await db.collection('appUsers')
@@ -301,7 +308,11 @@ function Github (appId, privateKey, secret, db) {
         .collection('accounts')
         .doc(accountDocId)
         .set(result)
-      logger.info(`Added github_id ${info.data.login} to user ${context.auth.uid} with email ${info.data.email}`)
+      logger.info(`Added github_id ${info.data.login} to user ${context.auth.uid} with email ${info.data.email}`, {
+        github_id: info.data.login,
+        uid: context.auth.uid,
+        email: info.data.email
+      })
       return accountDocId
     } catch (e) {
       logger.error(e)
