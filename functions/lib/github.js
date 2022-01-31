@@ -315,7 +315,9 @@ function Github (appId, privateKey, secret, db) {
       })
       return accountDocId
     } catch (e) {
-      logger.error(e)
+      logger.error(e, {
+        uid: context.auth.uid
+      })
       throw new functions.https.HttpsError('internal',
         'An internal error occurred while evaluating the request')
     }
