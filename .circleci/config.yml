@@ -31,7 +31,7 @@ jobs:
       # install the new dependencies for all the packages
       - run:
           name: Install Firebase Tools
-          command: npm install --prefix=./firebase-emulator firebase-tools
+          command: npm install --prefix=./firebase-emulator firebase-tools@9.16.0
       - run: npm install
       - run: npm --prefix ./functions install
       - run: npm --prefix ./client install
@@ -113,7 +113,7 @@ jobs:
           at: ~/repo
       - run:
           name: Install Firebase Tools
-          command: npm install --prefix=./firebase-deploy firebase-tools
+          command: npm install --prefix=./firebase-deploy firebase-tools@9.16.0
       - run:
           name: Deploy Client to Firebase
           command: |
