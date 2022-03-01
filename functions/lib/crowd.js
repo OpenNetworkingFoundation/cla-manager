@@ -111,11 +111,11 @@ function Crowd (db, appName, appPassword) {
     logger.info(`updating-crowd-user-with-id: ${uid}`)
     const attributeMap = {
       // A set because a Crowd attribute can hold many values, but in reality we
-      // support binding to only one github ID.
+      // support binding to only one GitHub username.
       github_id: new Set(),
       // We assume as verified the following email addresses:
       // - The one used to sign up in the Firebase app
-      // - The public one from the Github profile
+      // - The public one from the GitHub profile
       verified_emails: new Set()
     }
     // Fetch firebase user record from the admin SDK.

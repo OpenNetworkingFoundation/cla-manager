@@ -50,7 +50,7 @@ function IdentityForm (props) {
               endIcon={<GitHubIcon/>}
               disabled={!props.githubAllowed}
             >
-              GithubId
+              GitHub
             </Button>
           </ButtonGroup>
           <TextValidator
@@ -85,12 +85,12 @@ function IdentityForm (props) {
             ? <TextValidator
               className={classes.textField}
               fullWidth
-              label='GitHub ID'
+              label='GitHub Username'
               name='githubId'
               value={value}
               onChange={e => setValue(e.target.value)}
               validators={['required']}
-              errorMessages={['Enter the GitHub ID associated to the identity']}
+              errorMessages={['Enter the GitHub username associated to the identity']}
               variant='outlined'
             /> : null
           }

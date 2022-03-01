@@ -55,7 +55,7 @@ function CrowdWebhook (groupMappings, github) {
       if (event.user && event.user.groups) {
         if (event.oldGithubId === event.newGithubId) {
           logger.info(`Received USER_UPDATED_GITHUB for ${event.user.username} ` +
-                      `with same old and new Github IDs: ${event.user.githubId}. ` +
+                      `with same old and new Github usernames: ${event.user.githubId}. ` +
                       'Discarding event...')
           return
         }

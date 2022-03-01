@@ -165,7 +165,7 @@ describe('Cla lib', () => {
       expect(await assertSucceeds(cla.updateWhitelist(addendumSnapshot)))
       // Verify whitelist
       whitelistDoc = (await whitelistRef.get()).data()
-      // We removed all github IDs
+      // We removed all GitHub usernames
       expect(!Array.isArray(whitelistDoc.github) || !whitelistDoc.github.length).toBe(true)
     })
 
