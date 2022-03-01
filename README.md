@@ -14,7 +14,7 @@ There are two supported types of CLAs:
 - Institutional CLAs, which allows a nontechnical manager in another
   organization to approve a CLA for multiple developers
 
-Code submitters are identified by their GitHub ID's or Email Addresses.
+Code submitters are identified by their GitHub usernames or email addresses.
 
 If a user hasn't signed a CLA and submits code, they are directed to the CLAM
 website to sign a CLA. Authentication is handled by single-use links sent out
