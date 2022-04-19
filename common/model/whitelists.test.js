@@ -46,7 +46,7 @@ describe('The Whitelist model', () => {
     DBSpy.mockClear()
     firestoreMock.reset()
   })
-  it('should listAllAccounts all the entries in the DB', (done) => {
+  it('should list all the entries in the DB', (done) => {
     firestoreMock.mockGetReturn = {
       docs: [wl1, wl2, wl3]
     }
@@ -79,7 +79,7 @@ describe('The Whitelist model', () => {
       .catch(done)
   })
 
-  it('should return a listAllAccounts of identities with the associated agreements', (done) => {
+  it('should return a list of identities with the associated agreements', (done) => {
     firestoreMock.mockGetReturn = {
       docs: [wl1, wl2, wl3]
     }

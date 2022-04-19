@@ -358,10 +358,10 @@ function Github (appId, privateKey, secret, db) {
   }
 
   /**
-   * Fetch user listAllAccounts from a GitHub Team
+   * Fetch user list from a GitHub Team
    * @param org {GitHub Organization name}
    * @param team {GitHub Team name}
-   * @return {list} user listAllAccounts
+   * @return {list} user list
    */
   async function getUsers (org, team) {
     const octokit = await getApi(org)
@@ -388,7 +388,7 @@ function Github (appId, privateKey, secret, db) {
         (response) => response.data.map((member) => (validUsers[member.login] = true))
       )
     } catch (e) {
-      throw new Error('Fetching user listAllAccounts failed:' + e)
+      throw new Error('Fetching user list failed:' + e)
     }
     return validUsers
   }

@@ -60,7 +60,7 @@ class AddendumFormCtrl {
 }
 
 /**
- * Component which given an Agreement displays a listAllAccounts of associated addendums
+ * Component which given an Agreement displays a list of associated addendums
  */
 function AddendumForm (props) {
 
@@ -293,7 +293,7 @@ function AddendumForm (props) {
           </div>
         </div>
       </Grid>
-      {/* TODO print a listAllAccounts of all the addendums if it's admin */}
+      {/* TODO print a list of all the addendums if it's admin */}
       {canManage ? updateForm : null}
     </Grid>
   )

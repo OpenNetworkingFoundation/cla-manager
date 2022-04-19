@@ -26,11 +26,11 @@ describe('AdminNav Component Test Suite', () => {
   })
 
   describe('when clicking on a menu item', () => {
-    it('should send me to the agreement listAllAccounts', () => {
+    it('should send me to the agreement list', () => {
       wrapper.find(MenuItem).first().simulate('click')
       expect(historyMock.push).toBeCalledWith('/admin/agreements')
     })
-    it('should send me to the identities listAllAccounts', () => {
+    it('should send me to the identities list', () => {
       wrapper.find(MenuItem).at(1).simulate('click')
       expect(historyMock.push).toBeCalledWith('/admin/identities')
     })
