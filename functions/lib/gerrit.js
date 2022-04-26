@@ -51,10 +51,13 @@ function Gerrit (db, user, password) {
       message: ''
     }
     const identity = `email:${email}`
+    logger.info(`Validating CLA for email: ${email}`)
     if (await Cla(db).isIdentityWhitelisted(util.identityObj(identity))) {
       status.status = 'success'
+      logger.info(`User ${email} is covered by a CLA`)
     } else {
       status.status = 'failure'
+      logger.warn(`User ${email} is not covered by a CLA`)
       // TODO: get name from request and use it in message
       status.message = 'Hi user, ' +
         'this is the ONF bot 🤖 I\'m glad you want to contribute to ' +
