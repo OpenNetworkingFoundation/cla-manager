@@ -146,6 +146,10 @@ function Cla (db) {
           }
           return m
         }, [])
+        logger.info('checkIdentities completed', {
+          allWhitelisted: missing.length === 0,
+          missingIdentities: missing
+        })
         return {
           allWhitelisted: missing.length === 0,
           missingIdentities: missing
