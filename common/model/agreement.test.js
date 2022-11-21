@@ -2,21 +2,64 @@ import DB from '../db/db'
 
 import { Agreement, AgreementType } from './agreement'
 import { Addendum, AddendumType } from './addendum'
+import { AppUser } from './appUser'
+
 import { Identity, IdentityType } from './identity'
 import { FirestoreDate, FirestoreMock } from '../test_helpers/firestore.mock'
+import { Firebase } from '../app/app'
 
 const signer = new Identity(IdentityType.EMAIL, 'John', 'john@onf.dev')
 const user1 = new Identity(IdentityType.EMAIL, 'Felix', 'felix@onf.dev')
 const user2 = new Identity(IdentityType.EMAIL, 'Martha', 'martha@onf.dev')
 const user3 = new Identity(IdentityType.EMAIL, 'Felipe', 'felipe@onf.dev')
 
+const toUnixTimestap = (date) => {
+  return new Date(date).getTime() / 1000
+}
+
+const account1 = {
+  active: true,
+  username: 'user1',
+  email: null,
+  hostname: 'github.com',
+  key: 123,
+  name: 'User1',
+  updatedOn: { seconds: toUnixTimestap('2020/03/03') }
+}
+
+const account2 = {
+  active: true,
+  username: 'Felix',
+  email: 'felix@onf.dev',
+  hostname: 'opennetworking.org',
+  key: '2222:test',
+  name: 'Felix',
+  updatedOn: { seconds: toUnixTimestap('2020/03/04') }
+}
+
+const addendum1 = new Addendum(AddendumType.CONTRIBUTOR, 'test-id', signer, [user1, user2], [], new FirestoreDate(new Date())).toJson()
+
 describe('The Agreement model', () => {
-  let individualAgreement, institutionalAgreement
+  let individualAgreement, institutionalAgreement, user
   const firestoreMock = new FirestoreMock()
 
   beforeEach(() => {
+    user = new AppUser('uid')
     const DBSpy = jest.spyOn(DB, 'connection').mockImplementation(() => firestoreMock)
+    const authSpy = jest.spyOn(Firebase, 'auth').mockImplementation(() => {
+      return { currentUser: { uid: 'uid' } }
+    })
+    const userSpy = jest.spyOn(AppUser, 'current').mockImplementation(() => {
+      return user
+    })
+    const accountSpy = jest.spyOn(user, 'listAccounts').mockImplementation(() => {
+      return Promise.resolve([account1, account2])
+    })
+
     DBSpy.mockClear()
+    authSpy.mockClear()
+    accountSpy.mockClear()
+    userSpy.mockClear()
     firestoreMock.reset()
 
     individualAgreement = new Agreement(
@@ -212,7 +255,7 @@ describe('The Agreement model', () => {
     })
   })
 
-  describe('the listAllAccounts method', () => {
+  describe('the list method', () => {
     it('should return all the agreements in the DB', (done) => {
       firestoreMock.mockGetReturn = {
         docs: [
@@ -230,6 +273,34 @@ describe('The Agreement model', () => {
           expect(res[1].signer).toEqual(signer)
           expect(res[1].organization).toEqual('ONF')
           expect(res[1].organizationAddress).toEqual('1000 El Camino Real, 94025 Menlo Park (CA)')
+          done()
+        })
+        .catch(done)
+    })
+  })
+
+  describe('the getCoveredCLAs method', () => {
+    it('should return all the agreements in the DB that cover the current user', (done) => {
+      firestoreMock.mockGetReturn = {
+        docs: [
+          { data: () => new Agreement(AgreementType.INDIVIDUAL, 'TODO, add agreement body', signer) },
+          { data: () => new Agreement(AgreementType.INSTITUTIONAL, 'TODO, add agreement body', signer, 'ONF', '1234 El Camino Real, 94025 Menlo Park (CA)') }
+        ]
+      }
+      const addendumSpy = jest.spyOn(Addendum, 'get').mockImplementation(() => {
+        return Promise.resolve([addendum1])
+      })
+      addendumSpy.mockClear()
+      Agreement.getCoveredCLAs()
+        .then(res => {
+          expect(DB.connection).toHaveBeenCalledTimes(1)
+          expect(firestoreMock.mockCollection).toBeCalledWith('agreements')
+          expect(res[0].type).toEqual(AgreementType.INDIVIDUAL)
+          expect(res[0].signer).toEqual(signer)
+          expect(res[1].type).toEqual(AgreementType.INSTITUTIONAL)
+          expect(res[1].signer).toEqual(signer)
+          expect(res[1].organization).toEqual('ONF')
+          expect(res[1].organizationAddress).toEqual('1234 El Camino Real, 94025 Menlo Park (CA)')
           done()
         })
         .catch(done)

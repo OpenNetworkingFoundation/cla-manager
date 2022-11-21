@@ -1,12 +1,11 @@
 import React from 'react'
 import { Firebase } from '../common/app/app'
-import Grid from '@material-ui/core/Grid'
 import * as _ from 'lodash'
-
 import AgreementsTable from './agreement/AgreementsTable'
 import CreateAgreementContainer from './agreement/CreateAgreementContainer'
-
 import { Agreement, AgreementType } from '../common/model/agreement'
+import { Card, Grid, Paper, CardContent, Typography } from '@material-ui/core'
+
 
 /**
  * User home screen for this CLA Manager application.
@@ -16,7 +15,8 @@ export default class Home extends React.Component {
     super(props)
     this.state = {
       individualCLATable: [],
-      institutionCLATable: []
+      institutionCLATable: [],
+      coveredCLA: []
     }
   }
 
@@ -29,7 +29,8 @@ export default class Home extends React.Component {
       // Clear all rows from the CLA tables.
       this.setState({
         individualCLATable: [],
-        institutionCLATable: []
+        institutionCLATable: [],
+        coveredCLA: []
       })
       return
     }
@@ -39,7 +40,14 @@ export default class Home extends React.Component {
         // FIXME handle the error
         console.warn(err)
       })
+      //Get CLA's that the user is covered by
+      Agreement.getCoveredCLAs().then(res => {
+        this.setState({coveredCLA: res})
+      })
+
   }
+
+
 
   /**
    * Unsubscribe from CLA DB updates.
@@ -83,6 +91,7 @@ export default class Home extends React.Component {
       marginBottom: '16px',
       marginTop: '50px'
     }
+
     return (
       <main>
         {this.props.user && (
@@ -90,22 +99,31 @@ export default class Home extends React.Component {
             <CreateAgreementContainer/>
           </Grid>
         )}
+
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <AgreementsTable
               header='Individual Agreements'
-              type={AgreementType.INDIVIDUAL}
               data={this.state.individualCLATable}
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <AgreementsTable
               header='Institutional Agreements'
-              type={AgreementType.INSTITUTIONAL}
+              extra_cols={[{ title: 'Organization', field: 'organization' }]}
               data={this.state.institutionCLATable}
             />
           </Grid>
-        </Grid>
+        </Grid> 
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={12}>
+            <AgreementsTable
+              header='Covered by:'
+              extra_cols={[{ title: 'Organization', field: 'organization' }]}
+              data={this.state.coveredCLA}
+            />
+          </Grid>
+        </Grid> 
       </main>
     )
   }

@@ -24,10 +24,7 @@ function AgreementsTable (props) {
     return null
   }
 
-  const cols = [
-    { title: 'Organization', field: 'organization' },
-    // { title: 'Signatory Name', field: 'signer.name' },
-    // { title: 'Signatory Email', field: 'signer.value' },
+  let base_cols = [
     {
       title: 'Signatory',
       sorting: false,
@@ -39,6 +36,9 @@ function AgreementsTable (props) {
       }
     },
     { title: 'Date Signed', field: 'dateSigned', type: 'date'},
+  ]
+
+  const action_cols = [
     {
       title: 'Actions',
       sorting: false,
@@ -51,10 +51,10 @@ function AgreementsTable (props) {
     }
   ]
 
-  if (props.type === AgreementType.INDIVIDUAL) {
-    // remove the org name if we're printing individual CLAs
-    cols.shift()
+  if (props.extra_cols && props.extra_cols.length > 0) {
+    base_cols = [...base_cols, ...props.extra_cols] 
   }
+  const cols = [...base_cols, ...action_cols]
 
   return (
     <div className={classes.root}>
